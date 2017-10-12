@@ -192,7 +192,7 @@ class Houdini(Factory):
             self.logger.info("{0} igloos loaded".format(len(self.igloos)))
 
         if not os.path.exists("crumbs/igloos.json"):
-            self.downloadCrumbs("http://media.localhost/crumbs/igloos.json") \
+            self.downloadCrumbs("http://media.localhost/en/web_service/game_configs/igloos.json") \
                 .addCallback(praseIglooCrumbs)
 
         else:
@@ -213,7 +213,7 @@ class Houdini(Factory):
             self.logger.info("{0} igloo floors loaded".format(len(self.floors)))
 
         if not os.path.exists("crumbs/igloo_floors.json"):
-            self.downloadCrumbs("http://media.localhost/crumbs/igloo_floors.json") \
+            self.downloadCrumbs("http://media.localhost/en/web_service/game_configs/igloo_floors.json") \
                 .addCallback(parseFloorCrumbs)
 
         else:
@@ -234,7 +234,7 @@ class Houdini(Factory):
             self.logger.info("{0} items loaded".format(len(self.items)))
 
         if not os.path.exists("crumbs/paper_items.json"):
-            self.downloadCrumbs("http://media.localhost/crumbs/paper_items.json") \
+            self.downloadCrumbs("http://media.localhost/en/web_service/game_configs/paper_items.json") \
                 .addCallback(parseItemCrumbs)
 
         else:
@@ -260,7 +260,7 @@ class Houdini(Factory):
             self.logger.info("{0} rooms loaded".format(len(self.rooms)))
 
         if not os.path.exists("crumbs/rooms.json"):
-            self.downloadCrumbs("http://media.localhost/crumbs/rooms.json") \
+            self.downloadCrumbs("http://media.localhost/en/web_service/game_configs/rooms.json") \
                 .addCallback(parseRoomCrumbs)
 
         else:
