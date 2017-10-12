@@ -62,5 +62,7 @@ def handleJoinPlayerIgloo(self, data):
     else:
         igloo = self.server.rooms[data.Id]
 
+    self.room.remove(self)
+
     self.sendXt("jp", data.Id)
     igloo.add(self)
