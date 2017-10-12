@@ -9,8 +9,6 @@ def handleSendActivateIgloo(self, data):
         self.igloo.Type = iglooType
         self.igloo.Floor = 0
 
-        self.logger.debug("Igloo activated - type id: %d", iglooType)
-
 @Handlers.Handle(XT.GetIglooDetails)
 def handleGetIglooDetails(self, data):
     igloo = self.session.query(Igloo).filter_by(Owner=data.Id).first()
