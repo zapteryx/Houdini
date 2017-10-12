@@ -120,3 +120,21 @@ def handleBuyFurniture(self, data):
 @Handlers.Handle(XT.SaveIglooFurniture)
 def handleSaveIglooFurniture(self, data):
     self.igloo.Furniture = ",".join(data.FurnitureList)
+
+@Handlers.Handle(XT.LoadPlayerIglooList)
+def handleLoadPlayerIglooList(self, data):
+    if len(self.server.openIgloos) == 0:
+        return self.sendLine("%xt%gr%-1%")
+
+    openIgloos = "%".join("%d|%s" % (playerId, playerName)
+                      for playerId, playerName in self.server.openIgloos.items())
+
+    self.sendXt("gr", openIgloos)
+
+@Handlers.Handle(XT.LockIgloo)
+def handleLockIgloo(self, data):
+    del self.server.openIgloos[self.user.ID]
+
+@Handlers.Handle(XT.UnlockIgloo)
+def handleUnlockIgloo(self, data):
+    self.server.openIgloos[self.user.ID] = self.user.Username
