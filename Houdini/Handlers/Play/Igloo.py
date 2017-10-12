@@ -27,12 +27,11 @@ def handleGetIglooDetails(self, data):
 @Handlers.Handle(XT.GetOwnedIgloos)
 def handleGetOwnedIgloos(self, data):
     if not hasattr(self, "igloos"):
-        igloos = self.user.Igloos.split(",")
+        igloos = self.user.Igloos.split("|")
 
         self.igloos = map(int, igloos)
 
-    ownedIgloosString = self.user.Igloos.replace(",", "|")
-    self.sendXt("go", ownedIgloosString)
+    self.sendXt("go", self.user.Igloos)
 
 @Handlers.Handle(XT.UpdateIglooMusic)
 def handleUpdateIglooMusic(self, data):
@@ -46,13 +45,11 @@ def handleGetFurnitureList(self, data):
     if not hasattr(self, "furniture"):
         self.furniture = {}
 
-    for furnitureDetails in self.user.Furniture.split(","):
+    for furnitureDetails in self.user.Furniture.split("%"):
         furnitureId, furnitureQuantity = furnitureDetails.split("|")
         self.furniture[furnitureId] = furnitureQuantity
 
-    protocolFurnitureString = self.user.Furniture.replace(",", "%")
-
-    self.sendXt("gf", protocolFurnitureString)
+    self.sendXt("gf", self.user.Furniture)
 
 # TODO: Use crumbs to deduct cost and validate id
 @Handlers.Handle(XT.UpdateFloor)
@@ -90,7 +87,7 @@ def handleUpdateIglooType(self, data):
             self.igloos.append(data.IglooId)
 
         iglooIds = (str(iglooId) for iglooId in self.igloos)
-        self.user.Igloos = ",".join(iglooIds)
+        self.user.Igloos = "|".join(iglooIds)
 
         self.sendXt("au", data.IglooId, self.user.Coins)
 
@@ -114,7 +111,7 @@ def handleBuyFurniture(self, data):
 
     self.furniture[data.FurnitureId] = furnitureQuantity
 
-    furnitureString = ",".join("%s|%s" % (furnitureId, furnitureQuantity)
+    furnitureString = "%".join("%s|%s" % (furnitureId, furnitureQuantity)
                                 for furnitureId, furnitureQuantity in self.furniture.items())
 
     self.user.Furniture = furnitureString
