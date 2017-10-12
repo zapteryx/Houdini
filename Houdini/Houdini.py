@@ -83,6 +83,8 @@ class Houdini(Factory):
             self.loadIgloos()
             self.loadFloors()
 
+            self.openIgloos = {}
+
             self.loadHandlerModules()
             self.logger.info("Running world server")
         else:
