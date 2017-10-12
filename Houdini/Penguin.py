@@ -34,8 +34,10 @@ class Penguin(Spheniscidae):
 
 	# TODO: Puffle values
 	def getPlayerString(self):
+		"""TODO: Make this work properly
 		if self.playerString is not None:
 			return self.playerString
+		"""
 
 		playerArray = (
 			self.user.ID,
