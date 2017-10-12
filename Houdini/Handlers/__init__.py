@@ -257,6 +257,21 @@ class XT:
         "Data": [XTData("TypeId", int)]
     }
 
+    LoadPlayerIglooList = {
+        "Handler": "g#gr",
+        "Data": []
+    }
+
+    UnlockIgloo = {
+        "Handler": "g#or",
+        "Data": []
+    }
+
+    LockIgloo = {
+        "Handler": "g#cr",
+        "Data": []
+    }
+
 # TODO implement PossibleXTData/PossibleXMLData?
 class Handlers:
     XTHandlers = {}
