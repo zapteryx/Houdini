@@ -3,7 +3,7 @@ A Club Penguin private server written in Python for the AS2 protocol.
 
 ### Not ready for production.
 
-## Perquisites
+## Prerequisites
 * Python 2.7+
 * Twisted
 * SQLAlchemy
