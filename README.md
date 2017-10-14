@@ -9,6 +9,7 @@ A Club Penguin private server written in Python for the AS2 protocol.
 * SQLAlchemy
 * MySQL driver
 * Redis
+* Watchdog
 
 ## Configuration
 All configuration settings are located in Houdini.conf.
