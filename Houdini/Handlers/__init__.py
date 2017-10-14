@@ -285,6 +285,36 @@ class XT:
         "Data": []
     }
 
+    StartMailEngine = {
+        "Handler": "l#mst",
+        "Data": []
+    }
+
+    GetMail = {
+        "Handler": "l#mg",
+        "Data": []
+    }
+
+    SendMail = {
+        "Handler": "l#ms",
+        "Data": [XTData("RecipientId", int), XTData("PostcardId", int)]
+    }
+
+    MailChecked = {
+        "Handler": "l#mc",
+        "Data": []
+    }
+
+    DeleteMail = {
+        "Handler": "l#md",
+        "Data": [XTData("PostcardId", int)]
+    }
+
+    DeleteMailFromUser = {
+        "Handler": "l#mdp",
+        "Data": [XTData("SenderId", int)]
+    }
+
 # TODO implement PossibleXTData/PossibleXMLData?
 class Handlers:
     XTHandlers = {}
