@@ -1,3 +1,6 @@
+import inspect
+import os
+
 class Data:
     pass
 
@@ -24,11 +27,19 @@ class XML:
                  XMLData("Password", str, lambda xmlData: xmlData[0][1].text)]
     }
 
+def getRelativeFunctionPath(functionObj):
+    absFunctionFile = inspect.getfile(functionObj)
+    relFunctionFile = os.path.relpath(absFunctionFile)
+
+    return relFunctionFile
+
 class XMLListener(object):
 
     def __init__(self, xmlHandler, xmlFunction):
         self.handler = xmlHandler
         self.function = xmlFunction
+
+        self.functionFile = getRelativeFunctionPath(self.function)
 
     def __call__(self, *args, **kwargs):
         self.function(*args, **kwargs)
@@ -38,6 +49,8 @@ class XTListener(object):
     def __init__(self, xtHandler, xtFunction):
         self.handler = xtHandler
         self.function = xtFunction
+
+        self.functionFile = getRelativeFunctionPath(self.function)
 
     def __call__(self, *args, **kwargs):
         self.function(*args, **kwargs)

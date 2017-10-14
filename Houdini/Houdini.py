@@ -6,6 +6,7 @@ import sys
 import importlib
 
 from types import FunctionType
+from watchdog.observers import Observer
 from logging.handlers import RotatingFileHandler
 
 import redis
@@ -18,6 +19,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 import Handlers
+from HandlerFileEventHandler import HandlerFileEventHandler
 from Spheniscidae import Spheniscidae
 from Penguin import Penguin
 from Room import Room
@@ -273,11 +275,14 @@ class Houdini(Factory):
 
         return player
 
-
     def start(self):
         self.logger.info("Starting server..")
 
         port = self.server["Port"]
+
+        handlerEventObserver = Observer()
+        handlerEventObserver.schedule(HandlerFileEventHandler(), "./Houdini/Handlers", recursive=True)
+        handlerEventObserver.start()
 
         self.logger.info("Listening on port {0}".format(port))
 
