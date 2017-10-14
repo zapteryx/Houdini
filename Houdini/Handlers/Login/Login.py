@@ -2,6 +2,8 @@ from Houdini.Handlers import Handlers, XML
 from Houdini.Data.Penguin import Penguin
 from Houdini.Crypto import Crypto
 
+import bcrypt
+
 @Handlers.Handle(XML.VersionCheck)
 def handleVersionCheck(self, data):
     if not data.Version == 153:
@@ -12,7 +14,7 @@ def handleVersionCheck(self, data):
 
 @Handlers.Handle(XML.RandomKey)
 def handleRandomKey(self, data):
-    self.randomKey = Crypto.generateRandomKey()
+    self.randomKey = "houdini"
     self.sendXml({"body": {"action": "rndK", "r": "-1"}, "k": self.randomKey})
 
 # TODO Implement ban-checking and login attempt throttling
@@ -31,9 +33,7 @@ def handleLogin(self, data):
     if user is None:
         return self.sendErrorAndDisconnect(100)
 
-    loginHash = Crypto.getLoginHash(user.Password, self.randomKey)
-
-    if password != loginHash:
+    if not bcrypt.checkpw(password, user.Password):
         self.logger.debug("{} failed to login.".format(username))
 
         return self.sendErrorAndDisconnect(101)
