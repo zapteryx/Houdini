@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.6.35)
 # Database: houdini
-# Generation Time: 2017-10-12 04:01:38 +0000
+# Generation Time: 2017-10-14 10:55:49 +0000
 # ************************************************************
 
 
@@ -22,8 +22,6 @@
 
 # Dump of table bans
 # ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `bans`;
 
 CREATE TABLE `bans` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -41,8 +39,6 @@ CREATE TABLE `bans` (
 
 # Dump of table igloos
 # ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `igloos`;
 
 CREATE TABLE `igloos` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -69,8 +65,6 @@ UNLOCK TABLES;
 
 # Dump of table penguins
 # ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `penguins`;
 
 CREATE TABLE `penguins` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -113,8 +107,8 @@ LOCK TABLES `penguins` WRITE;
 
 INSERT INTO `penguins` (`ID`, `Username`, `Nickname`, `Password`, `LoginKey`, `Avatar`, `AvatarAttributes`, `Email`, `RegistrationDate`, `Moderator`, `Inventory`, `Coins`, `Igloo`, `Igloos`, `Floors`, `Furniture`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Walking`, `Banned`, `Stamps`, `StampBook`, `EPF`, `Buddies`)
 VALUES
-	(101,'Basil','Basil','5F4DCC3B5AA765D61D8327DEB882CF99','f953e2af3ad57c6af108d850794d3ec8',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','basil@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904%1',198470,1,'1|18|30|13|33','','377|1%450|1%452|1%454|1%486|2',4,1099,0,0,225,323,352,904,0,0,'0','','1%1%1%1','0,0,0','102|Feels'),
-	(102,'Feels','Feels','5F4DCC3B5AA765D61D8327DEB882CF99','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','feels@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904',198490,1,'1','','',4,1099,0,0,229,323,352,904,0,0,'0','','1%1%1%1','0,0,0','101|Basil');
+	(101,'Basil','Basil','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','basil@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904%1%172%3038%169%3035%3%12%15%6%9%10%5',197705,1,'1|18|30|13|33','','377|1%450|1%452|1%454|1%486|2',4,1099,0,172,225,323,352,904,0,0,'0','','1%1%1%1','0,0,0','102|Feels'),
+	(102,'Feels','Feels','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','feels@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904',198490,1,'1','','',4,1099,0,0,229,323,352,904,0,0,'0','','1%1%1%1','0,0,0','101|Basil');
 
 /*!40000 ALTER TABLE `penguins` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -122,8 +116,6 @@ UNLOCK TABLES;
 
 # Dump of table postcards
 # ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `postcards`;
 
 CREATE TABLE `postcards` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -141,8 +133,6 @@ CREATE TABLE `postcards` (
 
 # Dump of table puffles
 # ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `puffles`;
 
 CREATE TABLE `puffles` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
