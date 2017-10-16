@@ -95,7 +95,7 @@ CREATE TABLE `penguins` (
   `Walking` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Puffle ID',
   `Banned` varchar(20) NOT NULL DEFAULT '0' COMMENT 'Timestamp of ban',
   `Stamps` text NOT NULL,
-  `StampBook` varchar(150) NOT NULL DEFAULT '1%1%1%1',
+  `StampBook` varchar(150) NOT NULL DEFAULT '1%1%0%1',
   `EPF` varchar(9) NOT NULL DEFAULT '0,0,0',
   `Buddies` text NOT NULL,
   PRIMARY KEY (`ID`),
