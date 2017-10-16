@@ -24,6 +24,8 @@ def handleJoinWorld(self, data):
     self.sendXt("lp", self.getPlayerString(), self.user.Coins, 0, 1440,
                 penguinStandardTime, self.age, 0, self.age, None, serverTimeOffset)
 
+    self.sendXt("gps", self.user.ID, self.user.Stamps)
+
     self.user.LoginKey = ""
     self.user.LastLogin = currentTime
 

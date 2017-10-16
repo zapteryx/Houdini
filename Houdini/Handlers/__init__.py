@@ -90,6 +90,16 @@ class XT:
         "Data": [XTData("ItemId", int)]
     }
 
+    GetPlayerPins = {
+        "Handler": "i#qpp",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    GetPlayerAwards = {
+        "Handler": "i#qpa",
+        "Data": [XTData("PlayerId", int)]
+    }
+
     UpdateColor = {
         "Handler": "s#upc",
         "Data": [XTData("ItemId", int)]
@@ -313,6 +323,31 @@ class XT:
     DeleteMailFromUser = {
         "Handler": "l#mdp",
         "Data": [XTData("SenderId", int)]
+    }
+
+    StampAdd = {
+        "Handler": "st#sse",
+        "Data": [XTData("StampId", int)]
+    }
+
+    GetBookCover = {
+        "Handler": "st#gsbcd",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    GetStamps = {
+        "Handler": "st#gps",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    GetRecentStamps = {
+        "Handler": "st#gmres",
+        "Data": []
+    }
+
+    UpdateBookCover = {
+        "Handler": "st#ssbcd",
+        "Data": [VariableXTData("StampCover")]
     }
 
 # TODO implement PossibleXTData/PossibleXMLData?

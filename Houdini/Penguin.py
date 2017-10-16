@@ -32,6 +32,26 @@ class Penguin(Spheniscidae):
 
 		self.sendXt("ai", itemId, self.user.Coins)
 
+	""" TODO: Ensure valid stamp ID's (probably do this
+	when we implement the mini-game end screen stamp 
+	overviews
+	"""
+	def addStamp(self, stampId, sendXt=False):
+		stamps = self.user.Stamps.split("|")
+		if stampId in stamps:
+			return False
+
+		recentStamps = self.user.RecentStamps.split("|")
+		stamps.append(stampId)
+		recentStamps.append(stampId)
+		stringifiedStamps = map(str, stamps)
+		stringifiedRecentStamps = map(str, recentStamps)
+		self.user.Stamps = "|".join(stringifiedStamps)
+		self.user.RecentStamps = "|".join(stringifiedRecentStamps)
+		self.session.commit()
+		if sendXt:
+			self.sendXt("aabs", stampId)
+
 	# TODO: Puffle values
 	def getPlayerString(self):
 		"""TODO: Make this work properly
