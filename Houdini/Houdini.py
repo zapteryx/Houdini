@@ -231,7 +231,7 @@ class Houdini(Factory):
 
                 for item in items:
                     itemId = int(item["paper_item_id"])
-                    self.items[itemId] = int(item["cost"])
+                    self.items[itemId] = item
 
             self.logger.info("{0} items loaded".format(len(self.items)))
 
