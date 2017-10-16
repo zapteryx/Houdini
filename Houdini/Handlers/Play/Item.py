@@ -8,7 +8,7 @@ def handleBuyInventory(self, data):
     elif data.ItemId in self.inventory:
         return self.sendError(400)
 
-    itemCost = self.server.items[data.ItemId]
+    itemCost = int(self.server.items[data.ItemId]["cost"])
 
     if self.user.Coins < itemCost:
         return self.sendError(401)
