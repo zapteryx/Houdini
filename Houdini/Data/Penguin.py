@@ -37,5 +37,6 @@ class Penguin(Base):
     Walking = Column(Integer, nullable=False, server_default=text("'0'"))
     Banned = Column(String(20), nullable=False, server_default=text("'0'"))
     Stamps = Column(Text, nullable=False)
-    StampBook = Column(String(150), nullable=False, server_default=text("'1%1%1%1'"))
+    RecentStamps = Column(Text, nullable=False)
+    StampBook = Column(Text, nullable=False, server_default=text("'1%1%0%1'"))
     EPF = Column(String(9), nullable=False, server_default=text("'0,0,0'"))
