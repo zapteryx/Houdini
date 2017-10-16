@@ -84,6 +84,7 @@ class Houdini(Factory):
             self.loadItems()
             self.loadIgloos()
             self.loadFloors()
+            self.loadPins()
 
             self.openIgloos = {}
 
@@ -241,6 +242,26 @@ class Houdini(Factory):
 
         else:
             parseItemCrumbs()
+
+    def loadPins(self):
+        if not hasattr(self, "pins"):
+            self.pins = {}
+
+        def parsePinCrumbs():
+            with open("crumbs/pins.json", "r") as fileHandle:
+                pins = json.load(fileHandle)
+
+                for pin in pins:
+                    pinId = int(pin["paper_item_id"])
+                    self.pins[pinId] = pin
+
+            self.logger.info("{0} pins loaded".format(len(self.pins)))
+
+        if not os.path.exists("crumbs/pins.json"):
+            self.logger.warn("Unable to read pins.json")
+        else:
+            parsePinCrumbs()
+
 
     def loadRooms(self):
         if not hasattr(self, "rooms"):
