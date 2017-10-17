@@ -16,7 +16,7 @@ def getPuffles(session, playerId):
 
 @Handlers.Handle(XT.GetPlayerPuffles)
 def handleGetPuffles(self, data):
-    pufflesString = getPuffles(self.session, self.user.ID)
+    pufflesString = getPuffles(self.session, data.Id)
     self.sendXt("pg", pufflesString)
 
 @Handlers.Handle(XT.GetMyPlayerPuffles)
