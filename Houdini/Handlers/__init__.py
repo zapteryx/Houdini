@@ -347,7 +347,7 @@ class XT:
 
     GetPlayerPuffles = {
         "Handler": "p#pg",
-        "Data": [XTData("Id", int)]
+        "Data": [XTData("PlayerId", int)]
     }
 
     AdoptPuffle = {
@@ -358,6 +358,26 @@ class XT:
     GetMyPlayerPuffles = {
         "Handler": "p#pgu",
         "Data": []
+    }
+
+    MovePuffle = {
+        "Handler": "p#pm",
+        "Data": [XTData("PuffleId", int), XTData("X", int), XTData("Y", int)]
+    }
+
+    WalkPuffle = {
+        "Handler": "p#pw",
+        "Data": [XTData("PuffleId", int), XTData("Walking", int)]
+    }
+
+    PlayPuffle = {
+        "Handler": "p#pp",
+        "Data": [XTData("PuffleId", int)]
+    }
+
+    PuffleFrame = {
+        "Handler": "p#ps",
+        "Data": [XTData("PuffleId", int), XTData("FrameId", int)]
     }
 
 # TODO implement PossibleXTData/PossibleXMLData?
