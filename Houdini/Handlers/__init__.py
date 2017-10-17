@@ -230,11 +230,6 @@ class XT:
         "Data": [XTData("Id", int)]
     }
 
-    GetPuffles = {
-        "Handler":  "p#pg",
-        "Data": [XTData("Id", int)]
-    }
-
     JoinPlayerIgloo = {
         "Handler": "j#jp",
         "Data": [XTData("Id", int)]
@@ -348,6 +343,21 @@ class XT:
     UpdateBookCover = {
         "Handler": "st#ssbcd",
         "Data": [VariableXTData("StampCover")]
+    }
+
+    GetPlayerPuffles = {
+        "Handler": "p#pg",
+        "Data": [XTData("Id", int)]
+    }
+
+    AdoptPuffle = {
+        "Handler": "p#pn",
+        "Data": [XTData("TypeId", int), XTData("Name", str)]
+    }
+
+    GetMyPlayerPuffles = {
+        "Handler": "p#pgu",
+        "Data": []
     }
 
 # TODO implement PossibleXTData/PossibleXMLData?
