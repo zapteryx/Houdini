@@ -16,6 +16,7 @@ class Penguin(Spheniscidae):
 
 		self.playerString = None
 		self.buddies = {}
+		self.puffles = {}
 
 		self.logger.info("Penguin class instantiated")
 
