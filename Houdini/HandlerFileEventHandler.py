@@ -1,7 +1,6 @@
 import logging
 import sys
 from watchdog.events import FileSystemEventHandler
-
 import twisted.python.rebuild as rebuild
 
 from Handlers import Handlers
@@ -25,11 +24,19 @@ class HandlerFileEventHandler(FileSystemEventHandler):
         for handlerId, handlerListeners in handlerItems:
             for handlerListener in handlerListeners:
                 # Look through the list of listeners to determine which need to be removed
-                self.logger.debug("Comparing %s to %s", handlerListener.functionFile, handlerModulePath)
+                # self.logger.debug("Comparing %s to %s", handlerListener.functionFile, handlerModulePath)
 
                 if handlerListener.functionFile == handlerModulePath:
                     self.logger.debug("Removing a %s listener", handlerId)
                     handlerListeners.remove(handlerListener)
 
-        handlerModuleObject = sys.modules[handlerModule]
-        rebuild.rebuild(handlerModuleObject)
+        try:
+            handlerModuleObject = sys.modules[handlerModule]
+            rebuild.rebuild(handlerModuleObject)
+
+        except KeyError:
+            self.logger.warn("Attempted to reload a module outside of the server's scope. This is currently normal.")
+        except (IndentationError, SyntaxError):
+            self.logger.error("Syntax/indentation error detected in %s, not reloading.", handlerModule)
+        except:
+            self.logger.error("Unable to reload %s due to an unknown reason!", handlerModule)
