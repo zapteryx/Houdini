@@ -141,18 +141,13 @@ CREATE TABLE `puffles` (
   `Name` char(12) NOT NULL,
   `AdoptionDate` int(8) NOT NULL,
   `Type` tinyint(3) unsigned NOT NULL,
-  `Subtype` smallint(5) unsigned NOT NULL,
-  `Hat` smallint(5) unsigned NOT NULL,
   `Food` tinyint(3) unsigned NOT NULL DEFAULT '100',
   `Play` tinyint(3) unsigned NOT NULL DEFAULT '100',
   `Rest` tinyint(3) unsigned NOT NULL DEFAULT '100',
   `Clean` tinyint(3) unsigned NOT NULL DEFAULT '100',
-  `Backyard` tinyint(1) NOT NULL DEFAULT '0',
+  `Walking` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-
-
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
