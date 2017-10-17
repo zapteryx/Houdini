@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.6.35)
 # Database: houdini
-# Generation Time: 2017-10-14 10:55:49 +0000
+# Generation Time: 2017-10-17 12:37:02 +0000
 # ************************************************************
 
 
@@ -22,6 +22,8 @@
 
 # Dump of table bans
 # ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `bans`;
 
 CREATE TABLE `bans` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -40,6 +42,8 @@ CREATE TABLE `bans` (
 # Dump of table igloos
 # ------------------------------------------------------------
 
+DROP TABLE IF EXISTS `igloos`;
+
 CREATE TABLE `igloos` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `Owner` int(10) unsigned NOT NULL,
@@ -49,7 +53,7 @@ CREATE TABLE `igloos` (
   `Furniture` text NOT NULL,
   `Locked` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 LOCK TABLES `igloos` WRITE;
 /*!40000 ALTER TABLE `igloos` DISABLE KEYS */;
@@ -65,6 +69,8 @@ UNLOCK TABLES;
 
 # Dump of table penguins
 # ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `penguins`;
 
 CREATE TABLE `penguins` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -101,15 +107,15 @@ CREATE TABLE `penguins` (
   `Buddies` text NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Username` (`Username`)
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 LOCK TABLES `penguins` WRITE;
 /*!40000 ALTER TABLE `penguins` DISABLE KEYS */;
 
-INSERT INTO `penguins` (`ID`, `Username`, `Nickname`, `Password`, `LoginKey`, `Avatar`, `AvatarAttributes`, `Email`, `RegistrationDate`, `Moderator`, `Inventory`, `Coins`, `Igloo`, `Igloos`, `Floors`, `Furniture`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Walking`, `Banned`, `Stamps`, `StampBook`, `EPF`, `Buddies`)
+INSERT INTO `penguins` (`ID`, `Username`, `Nickname`, `Password`, `LoginKey`, `Avatar`, `AvatarAttributes`, `Email`, `RegistrationDate`, `Moderator`, `Inventory`, `Coins`, `Igloo`, `Igloos`, `Floors`, `Furniture`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Walking`, `Banned`, `Stamps`, `RecentStamps`, `StampBook`, `EPF`, `Buddies`)
 VALUES
-	(101,'Basil','Basil','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','basil@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904%1%172%3038%169%3035%3%12%15%6%9%10%5',197705,1,'1|18|30|13|33','','377|1%450|1%452|1%454|1%486|2',4,1099,0,172,225,323,352,904,0,0,'0','','1%1%1%1','0,0,0','102|Feels'),
-	(102,'Feels','Feels','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','feels@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904',198490,1,'1','','',4,1099,0,0,229,323,352,904,0,0,'0','','1%1%1%1','0,0,0','101|Basil');
+	(101,'Basil','Basil','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','basil@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904%1%172%3038%169%3035%3%12%15%6%9%10%5',196105,1,'1|18|30|13|33','','377|1%450|1%452|1%454|1%486|2',4,1099,0,172,225,0,352,904,0,0,'0','','','1%1%1%1','0,0,0','102|Feels'),
+	(102,'Feels','Feels','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','feels@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904',198490,1,'1','','',4,1099,0,0,229,323,352,904,0,0,'0','','','1%1%1%1','0,0,0','101|Basil');
 
 /*!40000 ALTER TABLE `penguins` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -117,6 +123,8 @@ UNLOCK TABLES;
 
 # Dump of table postcards
 # ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `postcards`;
 
 CREATE TABLE `postcards` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -135,19 +143,33 @@ CREATE TABLE `postcards` (
 # Dump of table puffles
 # ------------------------------------------------------------
 
+DROP TABLE IF EXISTS `puffles`;
+
 CREATE TABLE `puffles` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `Owner` int(10) unsigned NOT NULL,
   `Name` char(12) NOT NULL,
   `AdoptionDate` int(8) NOT NULL,
   `Type` tinyint(3) unsigned NOT NULL,
-  `Food` tinyint(3) unsigned NOT NULL DEFAULT '100',
-  `Play` tinyint(3) unsigned NOT NULL DEFAULT '100',
+  `Health` tinyint(3) unsigned NOT NULL DEFAULT '100',
+  `Hunger` tinyint(3) unsigned NOT NULL DEFAULT '100',
   `Rest` tinyint(3) unsigned NOT NULL DEFAULT '100',
-  `Clean` tinyint(3) unsigned NOT NULL DEFAULT '100',
   `Walking` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+LOCK TABLES `puffles` WRITE;
+/*!40000 ALTER TABLE `puffles` DISABLE KEYS */;
+
+INSERT INTO `puffles` (`ID`, `Owner`, `Name`, `AdoptionDate`, `Type`, `Health`, `Hunger`, `Rest`, `Walking`)
+VALUES
+	(1,101,'Sweet',1508206792,1,100,100,100,0),
+	(2,101,'Ying',1508240196,2,100,100,100,0);
+
+/*!40000 ALTER TABLE `puffles` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
