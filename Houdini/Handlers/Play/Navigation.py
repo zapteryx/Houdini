@@ -14,7 +14,10 @@ def handleJoinWorld(self, data):
         self.user.LoginKey = ""
         return self.sendErrorAndDisconnect(101)
 
-    self.sendXt("js", 1, 1, self.user.Moderator, 1)
+    self.agentStatus, self.fieldOpStatus, \
+        self.careerPoints, self.agentPoints = map(int, self.user.EPF.split(","))
+
+    self.sendXt("js", 1, self.agentStatus, self.user.Moderator, 1)
 
     # Casting to integer floor's and removes the decimal
     currentTime = int(time.time())
