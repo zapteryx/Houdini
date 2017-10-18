@@ -380,6 +380,36 @@ class XT:
         "Data": [XTData("PuffleId", int), XTData("FrameId", int)]
     }
 
+    GetAgentStatus = {
+        "Handler": "f#epfga",
+        "Data": []
+    }
+
+    SetAgentStatus = {
+        "Handler": "f#epfsa",
+        "Data": []
+    }
+
+    GetFieldOpStatus = {
+        "Handler": "f#epfgf",
+        "Data": []
+    }
+
+    SetFieldOpStatus = {
+        "Handler": "f#epfsf",
+        "Data": [XTData("FieldOpStatus", int)]
+    }
+
+    GetEpfPoints = {
+        "Handler": "f#epfgr",
+        "Data": []
+    }
+
+    BuyEpfItem = {
+        "Handler": "f#epfai",
+        "Data": [XTData("ItemId", int)]
+    }
+
 # TODO implement PossibleXTData/PossibleXMLData?
 class Handlers:
     XTHandlers = {}
