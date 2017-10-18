@@ -103,7 +103,7 @@ CREATE TABLE `penguins` (
   `Stamps` text NOT NULL,
   `RecentStamps` text NOT NULL,
   `StampBook` varchar(150) NOT NULL DEFAULT '1%1%0%1',
-  `EPF` varchar(9) NOT NULL DEFAULT '0,0,0',
+  `EPF` varchar(9) NOT NULL DEFAULT '0,0,0,0',
   `Buddies` text NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Username` (`Username`)
@@ -114,8 +114,8 @@ LOCK TABLES `penguins` WRITE;
 
 INSERT INTO `penguins` (`ID`, `Username`, `Nickname`, `Password`, `LoginKey`, `Avatar`, `AvatarAttributes`, `Email`, `RegistrationDate`, `Moderator`, `Inventory`, `Coins`, `Igloo`, `Igloos`, `Floors`, `Furniture`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Walking`, `Banned`, `Stamps`, `RecentStamps`, `StampBook`, `EPF`, `Buddies`)
 VALUES
-	(101,'Basil','Basil','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','basil@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904%1%172%3038%169%3035%3%12%15%6%9%10%5',196105,1,'1|18|30|13|33','','377|1%450|1%452|1%454|1%486|2',4,1099,0,172,225,0,352,904,0,0,'0','','','1%1%1%1','0,0,0','102|Feels'),
-	(102,'Feels','Feels','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','feels@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904',198490,1,'1','','',4,1099,0,0,229,323,352,904,0,0,'0','','','1%1%1%1','0,0,0','101|Basil');
+	(101,'Basil','Basil','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','basil@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904%1%172%3038%169%3035%3%12%15%6%9%10%5',196105,1,'1|18|30|13|33','','377|1%450|1%452|1%454|1%486|2',4,1099,0,172,225,0,352,904,0,0,'0','','','1%1%1%1','0,0,0,0','102|Feels'),
+	(102,'Feels','Feels','$2b$12$CCYijGFRZyymIJWWNpkmP.pysAEN5E1mRwPtrjIDmTR3LnhKdJeBK','',0,'{\"spriteScale\":100,\"spriteSpeed\":100,\"ignoresBlockLayer\":false,\"invisible\":false,\"floating\":false}','feels@basil.me',1505088789,1,'4%7%352%225%323%229%1099%904',198490,1,'1','','',4,1099,0,0,229,323,352,904,0,0,'0','','','1%1%1%1','0,0,0,0','101|Basil');
 
 /*!40000 ALTER TABLE `penguins` ENABLE KEYS */;
 UNLOCK TABLES;
