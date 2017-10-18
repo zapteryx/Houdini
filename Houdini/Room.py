@@ -22,7 +22,11 @@ class Room(object):
 		self.players.append(player)
 		player.room = self
 
-		player.sendXt("jr", self.externalId, self.generateRoomString())
+		if 900 <= self.externalId <= 1000:
+			player.sendXt("jg", self.externalId)
+		else:
+			player.sendXt("jr", self.externalId, self.generateRoomString())
+
 		self.sendXt("ap", player.getPlayerString())
 
 	def refresh(self, player):
