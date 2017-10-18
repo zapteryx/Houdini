@@ -52,6 +52,10 @@ def handleJoinRoom(self, data):
         self.room.remove(self)
         self.server.rooms[data.RoomId].add(self)
 
+@Handlers.Handle(XT.RefreshRoom)
+def handleRefreshRoom(self, data):
+    self.room.refresh(self)
+
 # TODO: Check if igloo is open or belongs to a buddy
 @Handlers.Handle(XT.JoinPlayerIgloo)
 def handleJoinPlayerIgloo(self, data):
