@@ -28,6 +28,9 @@ def handleLogin(self, data):
 
         return self.sendErrorAndDisconnect(101)
 
+    if user.ID in self.server.players:
+        self.server.players[user.ID].transport.loseConnection()
+
     self.logger.info("{} logged in successfully".format(username))
 
     self.session.add(user)
