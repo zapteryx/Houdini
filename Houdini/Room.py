@@ -25,6 +25,9 @@ class Room(object):
 		player.sendXt("jr", self.externalId, self.generateRoomString())
 		self.sendXt("ap", player.getPlayerString())
 
+	def refresh(self, player):
+		player.sendXt("grs", self.externalId, self.generateRoomString())
+
 	def remove(self, player):
 		self.players.remove(player)
 
