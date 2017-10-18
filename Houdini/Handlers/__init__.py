@@ -415,6 +415,11 @@ class XT:
         "Data": [XTData("ItemId", int)]
     }
 
+    GameOver = {
+        "Handler": "zo",
+        "Data": [XTData("Score", int)]
+    }
+
 # TODO implement PossibleXTData/PossibleXMLData?
 class Handlers:
     XTHandlers = {}
@@ -490,7 +495,8 @@ class Handlers:
                 return function
 
             handlerId = handler["Handler"]
-            XT = True if "#" in handlerId else False
+            handlerData = handler["Data"]
+            XT = True if "#" in handlerId else False or (handlerData and isinstance(handlerData[0], XTData))
 
             if XT:
                 if handlerId not in Handlers.XTHandlers:
