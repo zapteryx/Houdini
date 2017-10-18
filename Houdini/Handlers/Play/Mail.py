@@ -1,4 +1,5 @@
 import time
+import random
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Mail import Mail
 from Houdini.Data.Penguin import Penguin
@@ -10,6 +11,23 @@ def handleStartMailEngine(self, data):
     unreadMail = self.session.query(Mail).\
         filter(Mail.Recipient == self.user.ID).\
         filter(Mail.HasRead == False).count()
+
+    """
+    In AS2 EPF you were'nt automatically invited to EPF,
+    you had to have the postcard (either randomly from
+    system or from another player) so lets send EPF invites
+    randomly (40% probability)
+    """
+    if random.random() < 0.4:
+        q = self.session.query(Mail).filter(Mail.Recipient == self.user.ID).\
+            filter((Mail.Type == '112') | (Mail.Type == '47'))
+        epfInvited = self.session.query(q.exists()).scalar()
+        if not epfInvited:
+            postcard = Mail(Recipient=self.user.ID, SenderName="sys",
+                            SenderID=0, Details="", Date=int(time.time()),
+                            Type=112)
+            self.session.add(postcard)
+            self.session.commit()
 
     self.sendXt("mst", unreadMail, totalMail)
 
