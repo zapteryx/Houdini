@@ -75,6 +75,11 @@ class XT:
         "Data": [XTData("RoomId", int), XTData("X", int), XTData("Y", int)]
     }
 
+    RefreshRoom = {
+        "Handler": "j#grs",
+        "Data": []
+    }
+
     GetInventory = {
         "Handler": "i#gi",
         "Data": []
