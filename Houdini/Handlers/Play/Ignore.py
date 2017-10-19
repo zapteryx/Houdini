@@ -6,8 +6,12 @@ def handleGetIgnoreList(self, data):
     ignoreArray = self.user.Ignore.split("%")
 
     for ignoreUser in ignoreArray:
-        ignoreId, ignoreName = ignoreUser.split("|")
-        self.ignore[int(ignoreId)] = ignoreName
+        try:
+            ignoreId, ignoreName = ignoreUser.split("|")
+            self.ignore[int(ignoreId)] = ignoreName
+        except ValueError as valueError:
+            self.logger.debug('handleGetIgnoreList: %s', valueError.message)
+            break  # No buddies
 
     self.sendXt("gn", self.user.Ignore)
 
