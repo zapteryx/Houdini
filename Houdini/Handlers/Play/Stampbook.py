@@ -1,6 +1,5 @@
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
-from sqlalchemy.orm import load_only
 
 @Handlers.Handle(XT.StampAdd)
 def handleStampAdd(self, data):
@@ -11,9 +10,8 @@ def handleGetBookCover(self, data):
     if data.PlayerId == self.user.ID:
         self.sendXt("gsbcd", self.user.StampBook)
     else:
-        player = self.session.query(Penguin).\
-            filter(Penguin.ID == data.PlayerId).\
-            option(load_only("StampBook")).first()
+        player = self.session.query(Penguin.StampBook).\
+            filter(Penguin.ID == data.PlayerId).first()
 
         if player is None:
             return self.transport.loseConnection()
@@ -25,9 +23,8 @@ def handleGetStamps(self, data):
     if data.PlayerId == self.user.ID:
         self.sendXt("gps", data.PlayerId, self.user.Stamps)
     else:
-        player = self.session.query(Penguin).\
-            filter(Penguin.ID == data.PlayerId).\
-            option(load_only("Stamps")).first()
+        player = self.session.query(Penguin.Stamps).\
+            filter(Penguin.ID == data.PlayerId).first()
 
         if player is None:
             return self.transport.loseConnection()
