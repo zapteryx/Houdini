@@ -24,10 +24,8 @@ from Spheniscidae import Spheniscidae
 from Penguin import Penguin
 from Room import Room
 
-""" For debugging
 from twisted.python import log
 log.startLogging(sys.stdout)
-"""
 
 class Houdini(Factory):
 
@@ -85,6 +83,8 @@ class Houdini(Factory):
             self.loadIgloos()
             self.loadFloors()
             self.loadPins()
+            self.loadGames()
+            self.loadGameStamps()
 
             self.openIgloos = {}
 
@@ -288,6 +288,56 @@ class Houdini(Factory):
 
         else:
             parseRoomCrumbs()
+
+    def loadGames(self):
+        if not hasattr(self, "rooms"):
+            self.rooms = {}
+
+        def parseRoomCrumbs(downloadResult=None):
+            with open("crumbs/games.json", "r") as fileHandle:
+                games = json.load(fileHandle).values()
+
+                internalId = -1
+
+                for game in games:
+                    externalId = game["room_id"]
+
+                    if not externalId in self.rooms:
+                        self.rooms[externalId] = Room(externalId, internalId)
+
+            self.logger.info("{0} games loaded".format(len(games)))
+
+        if not os.path.exists("crumbs/games.json"):
+            self.logger.warn("Unable to load crumbs/games.json")
+        else:
+            parseRoomCrumbs()
+
+    def loadGameStamps(self):
+        if not hasattr(self, "stamps"):
+            self.stamps = {}
+
+        def parseStampCrumbs(downloadResult=None):
+            with open("crumbs/stamps.json", "r") as stampFileHandle:
+                stampCollection = json.load(stampFileHandle)
+
+                with open("crumbs/rooms.json", "r") as roomFileHandle:
+                    roomsCollection = json.load(roomFileHandle).values()
+
+                    for stampCategory in stampCollection:
+                        if stampCategory["parent_group_id"] == 8:
+                            for roomObject in roomsCollection:
+                                if stampCategory["display"].replace("Games : ", "") == roomObject["display_name"]:
+                                    roomId = roomObject["room_id"]
+                                    self.stamps[roomId] = []
+                                    break
+
+                            for stampObject in stampCategory["stamps"]:
+                                self.stamps[roomId].append(stampObject["stamp_id"])
+
+        if not os.path.exists("crumbs/stamps.json"):
+            self.logger.warn("Unable to load crumbs/stamps.json")
+        else:
+            parseStampCrumbs()
 
     def buildProtocol(self, addr):
         session = self.createSession()
