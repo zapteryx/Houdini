@@ -42,6 +42,10 @@ class Penguin(Spheniscidae):
 		if stampId in stamps:
 			return False
 
+		# Check if the first element is an empty string, if so remove
+		if not stamps[0]:
+			del stamps[0]
+
 		recentStamps = self.user.RecentStamps.split("|")
 		stamps.append(stampId)
 		recentStamps.append(stampId)
