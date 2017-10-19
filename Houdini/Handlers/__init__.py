@@ -415,6 +415,11 @@ class XT:
         "Data": [XTData("ItemId", int)]
     }
 
+    GetCoinReward = {
+        "Handler": "r#cdu",
+        "Data": []
+    }
+
     GameOver = {
         "Handler": "zo",
         "Data": [XTData("Score", int)]
