@@ -82,6 +82,7 @@ CREATE TABLE `penguins` (
   `AvatarAttributes` char(98) NOT NULL DEFAULT '{"spriteScale":100,"spriteSpeed":100,"ignoresBlockLayer":false,"invisible":false,"floating":false}',
   `Email` char(254) NOT NULL,
   `RegistrationDate` int(8) NOT NULL,
+  `LastPaycheck` int(8) NOT NULL,
   `Moderator` tinyint(1) NOT NULL DEFAULT '0',
   `Inventory` text NOT NULL,
   `Coins` mediumint(7) unsigned NOT NULL DEFAULT '200000',

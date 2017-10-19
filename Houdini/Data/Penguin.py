@@ -17,6 +17,7 @@ class Penguin(Base):
     AvatarAttributes = Column(String(98), nullable=False, server_default=text(""'{"spriteScale":100,"spriteSpeed":100,"ignoresBlockLayer":false,"invisible":false,"floating":false}'""))
     Email = Column(String(254), nullable=False)
     RegistrationDate = Column(Integer, nullable=False)
+    LastPaycheck = Column(Integer, nullable=False)
     Moderator = Column(Integer, nullable=False, server_default=text("'0'"))
     Inventory = Column(Text, nullable=False)
     Coins = Column(Integer, nullable=False, server_default=text("'200000'"))
