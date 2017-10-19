@@ -1,6 +1,5 @@
 import random
 from Houdini.Handlers import Handlers, XT
-from Houdini.Data.Penguin import Penguin
 
 @Handlers.Handle(XT.GetCoinReward)
 def handleGetCoinRewards(self, data):
