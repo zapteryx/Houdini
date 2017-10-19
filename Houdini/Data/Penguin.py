@@ -26,6 +26,7 @@ class Penguin(Base):
     Floors = Column(Text, nullable=False)
     Furniture = Column(Text, nullable=False)
     Buddies = Column(Text, nullable=False)
+    Ignore = Column(Text, nullable=False)
     Color = Column(Integer, nullable=False, server_default=text("'1'"))
     Head = Column(SmallInteger, nullable=False, server_default=text("'0'"))
     Face = Column(SmallInteger, nullable=False, server_default=text("'0'"))

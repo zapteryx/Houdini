@@ -225,6 +225,21 @@ class XT:
         "Data": [XTData("Id", int)]
     }
 
+    GetIgnoreList = {
+        "Handler": "n#gn",
+        "Data": []
+    }
+
+    AddIgnore = {
+        "Handler": "n#an",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    RemoveIgnore = {
+        "Handler": "n#rn",
+        "Data": [XTData("PlayerId", int)]
+    }
+
     GetPlayer = {
         "Handler": "u#gp",
         "Data": [XTData("Id", int)]
