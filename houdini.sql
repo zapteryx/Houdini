@@ -106,6 +106,7 @@ CREATE TABLE `penguins` (
   `StampBook` varchar(150) NOT NULL DEFAULT '1%1%0%1',
   `EPF` varchar(9) NOT NULL DEFAULT '0,0,0,0',
   `Buddies` text NOT NULL,
+  `Ignore` text NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Username` (`Username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
