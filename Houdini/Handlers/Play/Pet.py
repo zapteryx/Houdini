@@ -2,6 +2,7 @@ import time, random
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Puffle import Puffle
+from Houdini.Data.Mail import Mail
 
 puffleStatistics = {
     0: (100, 100, 100),
@@ -54,7 +55,9 @@ def handleSendAdoptPuffle(self, data):
 
     maxHealth, maxHunger, maxRest = puffleStatistics[data.TypeId]
 
-    puffle = Puffle(Owner=self.user.ID, Name=data.Name, AdoptionDate=time.time(), Type=data.TypeId,
+    adoptionDate = time.time()
+
+    puffle = Puffle(Owner=self.user.ID, Name=data.Name, AdoptionDate=adoptionDate, Type=data.TypeId,
                     Health=maxHunger, Hunger=maxHunger, Rest=maxRest)
     self.session.add(puffle)
     self.session.commit()
@@ -62,22 +65,16 @@ def handleSendAdoptPuffle(self, data):
     puffleString = "%d|%s|%d|100|100|100|100|100|100" % (puffle.ID, data.Name, data.TypeId)
     self.sendXt("pn", self.user.Coins, puffleString)
 
-    """
-    The code below is a copy of handleGetMyPlayerPuffles.
-    Might want to make a reusable function for this later?
-    """
-    ownedPuffles = self.session.query(Puffle).filter(Puffle.Owner == self.user.ID)
+    postcard = Mail(Recipient=self.user.ID, SenderName=data.Name,
+                    SenderID=0, Details="", Date=adoptionDate,
+                    Type=111)
+    self.session.add(postcard)
+    self.session.commit()
 
-    for ownedPuffle in ownedPuffles:
-        self.puffles[ownedPuffle.ID] = ownedPuffle
+    self.sendXt("mr", "sys", 0, 111, data.Name, adoptionDate, postcard.ID)
 
-    playerPuffles = ["%d|%s|%d|%d|%d|%d|100|100|100" % (puffle.ID, puffle.Name, puffle.Type, puffle.Health,
-                                                        puffle.Hunger, puffle.Rest)
-                     for puffle in ownedPuffles]
-
-    myPufflesString = "%".join(playerPuffles)
-
-    self.sendXt("pgu", myPufflesString)
+    # Refresh my player puffles
+    handleGetMyPlayerPuffles(self, [])
 
 @Handlers.Handle(XT.MovePuffle)
 def handleSendPuffleMove(self, data):
