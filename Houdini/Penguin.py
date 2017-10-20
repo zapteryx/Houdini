@@ -1,4 +1,5 @@
 from Spheniscidae import Spheniscidae
+from Data.Puffle import Puffle
 
 class Penguin(Spheniscidae):
 
@@ -94,6 +95,14 @@ class Penguin(Spheniscidae):
 		# and joined the server w/ all their stuff loaded
 		if hasattr(self, "room") and self.room is not None:
 			self.room.remove(self)
+
+			# Stop walking any puffles
+			puffleId = self.session.query(Puffle.ID) \
+				.filter(Puffle.Owner == self.user.ID, Puffle.Walking == 1)
+
+			if puffleId is not None:
+				self.user.Hand = 0
+				self.session.query(Puffle.ID == puffleId).update({"Walking": 0})
 
 			# Let buddies know that they've logged off
 			for buddyId in self.buddies.keys():
