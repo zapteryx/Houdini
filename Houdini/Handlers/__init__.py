@@ -485,6 +485,16 @@ class XT:
         "Data": [XTData("PuffleId", int), XTData("X", int), XTData("Y", int)]
     }
 
+    OpenBook = {
+        "Handler": "t#at",
+        "Data": [VariableXTData("Discard")]
+    }
+
+    CloseBook = {
+        "Handler": "t#rt",
+        "Data": [VariableXTData("Discard")]
+    }
+
 # TODO implement PossibleXTData/PossibleXMLData?
 class Handlers:
     XTHandlers = {}
