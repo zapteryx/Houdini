@@ -3,9 +3,6 @@ from Data.Puffle import Puffle
 
 class Penguin(Spheniscidae):
 
-	# TODO: Calculate actual age
-	age = 45
-
 	def __init__(self, session, spirit):
 		super(Penguin, self).__init__(session, spirit)
 
