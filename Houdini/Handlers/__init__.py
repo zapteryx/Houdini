@@ -425,6 +425,51 @@ class XT:
         "Data": [XTData("Score", int)]
     }
 
+    RestPuffle = {
+        "Handler": "p#pr",
+        "Data": [XTData("PuffleId", int)]
+    }
+
+    TreatPuffle = {
+        "Handler": "p#pt",
+        "Data": [XTData("PuffleId", int), XTData("TreatId", int)]
+    }
+
+    FeedPuffle = {
+        "Handler": "p#pf",
+        "Data": [XTData("PuffleId", int)]
+    }
+
+    BathPuffle = {
+        "Handler": "p#pb",
+        "Data": [XTData("PuffleId", int)]
+    }
+
+    PuffleInitInteractionPlay = {
+        "Handler": "p#pip",
+        "Data": [XTData("PuffleId", int), XTData("X", int), XTData("Y", int)]
+    }
+
+    PuffleInitInteractionRest = {
+        "Handler": "p#pir",
+        "Data": [XTData("PuffleId", int), XTData("X", int), XTData("Y", int)]
+    }
+
+    InteractionPlay = {
+        "Handler": "p#ip",
+        "Data": [XTData("PuffleId", int), XTData("X", int), XTData("Y", int)]
+    }
+
+    InteractionRest = {
+        "Handler": "p#ir",
+        "Data": [XTData("PuffleId", int), XTData("X", int), XTData("Y", int)]
+    }
+
+    InteractionFeed = {
+        "Handler": "p#if",
+        "Data": [XTData("PuffleId", int), XTData("X", int), XTData("Y", int)]
+    }
+
 # TODO implement PossibleXTData/PossibleXMLData?
 class Handlers:
     XTHandlers = {}
