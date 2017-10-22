@@ -16,10 +16,11 @@ class HandlerFileEventHandler(FileSystemEventHandler):
         if event.is_directory:
             return
 
-        self.logger.debug("%s triggered this event", event.src_path)
-
         handlerModulePath = event.src_path[2:]
         handlerModule = handlerModulePath.replace("/", ".")[:-3]
+
+        if handlerModule not in sys.modules:
+            return
 
         self.logger.debug("Reloading %s", handlerModule)
 
@@ -40,12 +41,11 @@ class HandlerFileEventHandler(FileSystemEventHandler):
                     self.logger.debug("Removing a %s listener", handlerId)
                     handlerListeners.remove(handlerListener)
 
+        handlerModuleObject = sys.modules[handlerModule]
+
         try:
-            handlerModuleObject = sys.modules[handlerModule]
             rebuild.rebuild(handlerModuleObject)
 
-        except KeyError:
-            self.logger.warn("Attempted to reload a module outside of the server's scope. This is currently normal.")
         except (IndentationError, SyntaxError) as rebuildError:
             self.logger.error("%s detected in %s, not reloading.", rebuildError.__class__.__name__, handlerModule)
             self.logger.info("Restoring handler references...")
