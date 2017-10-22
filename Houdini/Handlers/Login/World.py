@@ -36,6 +36,9 @@ def handleLogin(self, data):
     self.session.add(user)
     self.user = user
 
+    self.agentStatus, self.fieldOpStatus, \
+        self.careerPoints, self.agentPoints = map(int, self.user.EPF.split(","))
+
     # Add them to the Redis set
     self.server.redis.sadd("%s.players" % self.server.serverName, self.user.ID)
     self.server.redis.incr("%s.population" % self.server.serverName)
