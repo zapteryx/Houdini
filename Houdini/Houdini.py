@@ -24,8 +24,10 @@ from Spheniscidae import Spheniscidae
 from Penguin import Penguin
 from Room import Room
 
+"""Deep debug
 from twisted.python import log
 log.startLogging(sys.stdout)
+"""
 
 class Houdini(Factory):
 

@@ -9,6 +9,7 @@ A Club Penguin private server written in Python for the AS2 protocol.
 * SQLAlchemy
 * MySQL driver
 * Redis
+	* If you're on Windows, you can download the Redis installer [here](https://github.com/MicrosoftArchive/redis/releases).
 * Watchdog
 * bcrypt
 

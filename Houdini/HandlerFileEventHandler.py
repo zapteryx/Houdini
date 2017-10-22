@@ -1,5 +1,6 @@
 import logging
 import sys
+import copy
 from watchdog.events import FileSystemEventHandler
 import twisted.python.rebuild as rebuild
 
@@ -11,15 +12,24 @@ class HandlerFileEventHandler(FileSystemEventHandler):
         self.logger = logging.getLogger("Houdini")
 
     def on_modified(self, event):
+        # Ignore all directory events
+        if event.is_directory:
+            return
+
         self.logger.debug("%s triggered this event", event.src_path)
 
         handlerModulePath = event.src_path[2:]
-        handlerModule = handlerModulePath.replace("/", ".").replace(".py", "")
+        handlerModule = handlerModulePath.replace("/", ".")[:-3]
 
-        self.logger.debug("Reloading %s~", handlerModule)
+        self.logger.debug("Reloading %s", handlerModule)
 
-        handlerItems = Handlers.XTHandlers.items() \
-            if "Houdini.Handlers.Play" in handlerModule else Handlers.XMLHandlers.items()
+        if "Houdini.Handlers.Play" in handlerModule:
+            handlerItems = Handlers.XTHandlers.items()
+            handlerCollection = copy.deepcopy(Handlers.XTHandlers)
+
+        else:
+            handlerItems = Handlers.XMLHandlers.items()
+            handlerCollection = copy.deepcopy(Handlers.XMLHandlers)
 
         for handlerId, handlerListeners in handlerItems:
             for handlerListener in handlerListeners:
@@ -36,7 +46,15 @@ class HandlerFileEventHandler(FileSystemEventHandler):
 
         except KeyError:
             self.logger.warn("Attempted to reload a module outside of the server's scope. This is currently normal.")
-        except (IndentationError, SyntaxError):
-            self.logger.error("Syntax/indentation error detected in %s, not reloading.", handlerModule)
+        except (IndentationError, SyntaxError) as rebuildError:
+            self.logger.error("%s detected in %s, not reloading.", rebuildError.__class__.__name__, handlerModule)
+            self.logger.info("Restoring handler references...")
+
+            if "Houdini.Handlers.Play" in handlerModule:
+                Handlers.XTHandlers = handlerCollection
+            else:
+                Handlers.XMLHandlers = handlerCollection
+
+            self.logger.info("Handler references restored. Phew!")
         except:
             self.logger.error("Unable to reload %s due to an unknown reason!", handlerModule)

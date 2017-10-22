@@ -1,4 +1,6 @@
 import time, random
+from datetime import date
+
 from Houdini.Handlers import Handlers, XT
 from Houdini.Room import Room
 
@@ -23,6 +25,11 @@ def handleJoinWorld(self, data):
     currentTime = int(time.time())
     penguinStandardTime = currentTime * 1000
     serverTimeOffset = 7
+
+    registrationDate = date.fromtimestamp(self.user.RegistrationDate)
+    currentDateTime = date.fromtimestamp(currentTime)
+
+    self.age = (currentDateTime - registrationDate).days
 
     self.sendXt("lp", self.getPlayerString(), self.user.Coins, 0, 1440,
                 penguinStandardTime, self.age, 0, self.age, None, serverTimeOffset)
