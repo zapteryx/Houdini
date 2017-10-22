@@ -83,7 +83,7 @@ CREATE TABLE `penguins` (
   `LastPaycheck` int(8) NOT NULL,
   `Moderator` tinyint(1) NOT NULL DEFAULT '0',
   `Inventory` text NOT NULL,
-  `Coins` mediumint(7) unsigned NOT NULL DEFAULT '200000',
+  `Coins` mediumint(7) unsigned NOT NULL DEFAULT '500',
   `Igloo` int(10) unsigned NOT NULL COMMENT 'Current active igloo',
   `Igloos` text NOT NULL COMMENT 'Owned igloo types',
   `Floors` text NOT NULL COMMENT 'Owned floorings',
