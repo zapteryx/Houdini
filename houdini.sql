@@ -78,8 +78,6 @@ CREATE TABLE `penguins` (
   `Nickname` char(16) NOT NULL,
   `Password` char(255) NOT NULL,
   `LoginKey` char(32) NOT NULL,
-  `Avatar` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Don''t think ID will go beyond 255',
-  `AvatarAttributes` char(98) NOT NULL DEFAULT '{"spriteScale":100,"spriteSpeed":100,"ignoresBlockLayer":false,"invisible":false,"floating":false}',
   `Email` char(254) NOT NULL,
   `RegistrationDate` int(8) NOT NULL,
   `LastPaycheck` int(8) NOT NULL,
