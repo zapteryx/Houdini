@@ -116,10 +116,39 @@ def handleBuyFurniture(self, data):
 
     self.sendXt("af", data.FurnitureId, self.user.Coins)
 
-# TODO: Validate furniture items and parameter lengths
 @Handlers.Handle(XT.SaveIglooFurniture)
 def handleSaveIglooFurniture(self, data):
+    """
+    Copied from handleGetFurnitureList, maybe consider
+    making this run at login?
+    """
+    if not hasattr(self, "furniture"):
+        self.furniture = {}
+        for furnitureDetails in self.user.Furniture.split("%"):
+            furnitureId, furnitureQuantity = furnitureDetails.split("|")
+            self.furniture[furnitureId] = furnitureQuantity
+
+    furnitureTracker = {}
+    if len(data.FurnitureList) > 100:
+        return
+    for furnitureItem in data.FurnitureList[0:100]:
+        itemArray = furnitureItem.split("|")
+        if len(itemArray) > 5:
+            return
+        itemId, posX, posY, rotation, frame = itemArray
+        if itemId not in self.furniture:
+            return
+        if itemId not in furnitureTracker:
+            furnitureTracker[itemId] = 1
+        else:
+            furnitureTracker[itemId] += 1
+        if furnitureTracker[itemId] > self.furniture[itemId]:
+            return
+        if not (0 <= int(posX) <= 700 and 0 <= int(posY) <= 700
+                and 1 <= int(rotation) <= 8 and 1 <= int(frame) <= 10):
+            return
     self.igloo.Furniture = ",".join(data.FurnitureList)
+    self.session.commit()
 
 @Handlers.Handle(XT.LoadPlayerIglooList)
 def handleLoadPlayerIglooList(self, data):
