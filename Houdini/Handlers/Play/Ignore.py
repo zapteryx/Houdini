@@ -11,7 +11,7 @@ def handleGetIgnoreList(self, data):
             self.ignore[int(ignoreId)] = ignoreName
         except ValueError as valueError:
             self.logger.debug('handleGetIgnoreList: %s', valueError.message)
-            break  # No buddies
+            break
 
     self.sendXt("gn", self.user.Ignore)
 
