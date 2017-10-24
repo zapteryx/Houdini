@@ -36,7 +36,7 @@ def handleStartMailEngine(self, data):
                             SenderID=0, Details="", Date=paycheckDate,
                             Type=171)
             self.session.add(postcard)
-            self.user.Coins += 250
+            self.user.Coins += 350
 
         lastPaycheck = lastPaycheck.replace(month=(lastPaycheck.month + 1))
         lastPaycheck = lastPaycheck.replace(day=2)
