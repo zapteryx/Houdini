@@ -16,7 +16,8 @@ def handleJoinWorld(self, data):
         self.user.LoginKey = ""
         return self.sendErrorAndDisconnect(101)
 
-    self.sendXt("js", 1, self.agentStatus, self.user.Moderator, 1)
+    hasUpdatedBookCover = int(self.user.StampBook != "1%1%0%1")
+    self.sendXt("js", 1, self.agentStatus, self.user.Moderator, hasUpdatedBookCover)
 
     # Casting to integer floor's and removes the decimal
     currentTime = int(time.time())
