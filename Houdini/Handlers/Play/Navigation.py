@@ -29,6 +29,12 @@ def handleJoinWorld(self, data):
 
     self.age = (currentDateTime - registrationDate).days
 
+    for furnitureDetails in self.user.Furniture.split("%"):
+        if not furnitureDetails:
+            break
+        furnitureId, furnitureQuantity = furnitureDetails.split("|")
+        self.furniture[int(furnitureId)] = int(furnitureQuantity)
+
     self.sendXt("lp", self.getPlayerString(), self.user.Coins, 0, 1440,
                 penguinStandardTime, self.age, 0, self.age, None, serverTimeOffset)
 
