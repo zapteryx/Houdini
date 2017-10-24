@@ -13,6 +13,7 @@ class Penguin(Spheniscidae):
 		self.x, self.y = (0, 0)
 
 		self.playerString = None
+		self.furniture = {}
 		self.buddies = {}
 		self.puffles = {}
 		self.ignore = {}

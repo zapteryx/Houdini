@@ -83,6 +83,7 @@ class Houdini(Factory):
 
             self.loadItems()
             self.loadIgloos()
+            self.loadFurniture()
             self.loadFloors()
             self.loadPins()
             self.loadGames()
@@ -161,32 +162,11 @@ class Houdini(Factory):
 
         return packageModules
 
-    def downloadCrumbs(self, url):
-        deferredDownload = defer.Deferred()
-
-        def handleRequestComplete(resultData):
-            decodedResult = resultData.decode('utf-8')
-            crumbsFilename = os.path.basename(url.decode('utf-8'))
-
-            if not os.path.exists("crumbs"):
-                os.makedirs("crumbs")
-
-            crumbsFile = "crumbs/{0}".format(crumbsFilename)
-
-            with open(crumbsFile, "w") as fileHandler:
-                fileHandler.write(decodedResult)
-
-            deferredDownload.callback(None)
-
-        getPage(url).addCallback(handleRequestComplete)
-
-        return deferredDownload
-
     def loadIgloos(self):
         if not hasattr(self, "igloos"):
             self.igloos = {}
 
-        def praseIglooCrumbs(downloadResult=None):
+        def parseIglooCrumbs():
             with open("crumbs/igloos.json", "r") as fileHandle:
                 igloos = json.load(fileHandle)
 
@@ -197,17 +177,34 @@ class Houdini(Factory):
             self.logger.info("{0} igloos loaded".format(len(self.igloos)))
 
         if not os.path.exists("crumbs/igloos.json"):
-            self.downloadCrumbs("http://media.localhost/en/web_service/game_configs/igloos.json") \
-                .addCallback(praseIglooCrumbs)
-
+            self.logger.warn("Unable to read igloos.json")
         else:
-            praseIglooCrumbs()
+            parseIglooCrumbs()
+
+    def loadFurniture(self):
+        if not hasattr(self, "furniture"):
+            self.furniture = {}
+
+        def parseFurnitureCrumbs():
+            with open("crumbs/furniture_items.json", "r") as fileHandle:
+                furniture = json.load(fileHandle)
+
+                for furnitureItem in furniture:
+                    furnitureId = int(furnitureItem["furniture_item_id"])
+                    self.furniture[furnitureId] = int(furnitureItem["cost"])
+
+            self.logger.info("{0} furniture items loaded".format(len(self.furniture)))
+
+        if not os.path.exists("crumbs/furniture_items.json"):
+            self.logger.warn("Unable to read furniture_items.json")
+        else:
+            parseFurnitureCrumbs()
 
     def loadFloors(self):
         if not hasattr(self, "floors"):
             self.floors = {}
 
-        def parseFloorCrumbs(downloadResult=None):
+        def parseFloorCrumbs():
             with open("crumbs/igloo_floors.json", "r") as fileHandle:
                 floors = json.load(fileHandle)
 
@@ -218,9 +215,7 @@ class Houdini(Factory):
             self.logger.info("{0} igloo floors loaded".format(len(self.floors)))
 
         if not os.path.exists("crumbs/igloo_floors.json"):
-            self.downloadCrumbs("http://media.localhost/en/web_service/game_configs/igloo_floors.json") \
-                .addCallback(parseFloorCrumbs)
-
+            self.logger.warn("Unable to read floors.json")
         else:
             parseFloorCrumbs()
 
@@ -228,7 +223,7 @@ class Houdini(Factory):
         if not hasattr(self, "items"):
             self.items = {}
 
-        def parseItemCrumbs(downloadResult=None):
+        def parseItemCrumbs():
             with open("crumbs/paper_items.json", "r") as fileHandle:
                 items = json.load(fileHandle)
 
@@ -239,9 +234,7 @@ class Houdini(Factory):
             self.logger.info("{0} items loaded".format(len(self.items)))
 
         if not os.path.exists("crumbs/paper_items.json"):
-            self.downloadCrumbs("http://media.localhost/en/web_service/game_configs/paper_items.json") \
-                .addCallback(parseItemCrumbs)
-
+            self.logger.warn("Unable to read items.json")
         else:
             parseItemCrumbs()
 
@@ -269,7 +262,7 @@ class Houdini(Factory):
         if not hasattr(self, "rooms"):
             self.rooms = {}
 
-        def parseRoomCrumbs(downloadResult=None):
+        def parseRoomCrumbs():
             with open("crumbs/rooms.json", "r") as fileHandle:
                 rooms = json.load(fileHandle).values()
 
@@ -285,9 +278,7 @@ class Houdini(Factory):
             self.logger.info("{0} rooms loaded".format(len(self.rooms)))
 
         if not os.path.exists("crumbs/rooms.json"):
-            self.downloadCrumbs("http://media.localhost/en/web_service/game_configs/rooms.json") \
-                .addCallback(parseRoomCrumbs)
-
+            self.logger.warn("Unable to read rooms.json")
         else:
             parseRoomCrumbs()
 
@@ -295,7 +286,7 @@ class Houdini(Factory):
         if not hasattr(self, "rooms"):
             self.rooms = {}
 
-        def parseRoomCrumbs(downloadResult=None):
+        def parseRoomCrumbs():
             with open("crumbs/games.json", "r") as fileHandle:
                 games = json.load(fileHandle).values()
 
@@ -318,7 +309,7 @@ class Houdini(Factory):
         if not hasattr(self, "stamps"):
             self.stamps = {}
 
-        def parseStampCrumbs(downloadResult=None):
+        def parseStampCrumbs():
             with open("crumbs/stamps.json", "r") as stampFileHandle:
                 stampCollection = json.load(stampFileHandle)
 
