@@ -53,4 +53,15 @@ def handleGetPlayerPins(self, data):
 
 @Handlers.Handle(XT.GetPlayerAwards)
 def handleGetPlayerAwards(self, data):
-    self.sendXt("qpa")
+    player = self.session.query(Penguin.Inventory).\
+        filter(Penguin.ID == data.PlayerId).first()
+
+    if player is None:
+        return self.transport.loseConnection()
+
+    inventory = player.Inventory.split("%")
+    awardsArray = []
+    for itemId in inventory:
+        if int(self.server.items[int(itemId)]["type"]) == 10:
+            awardsArray.append(itemId)
+    self.sendXt("qpa", data.PlayerId, "%".join(awardsArray))
