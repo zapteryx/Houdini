@@ -21,6 +21,7 @@ class Room(object):
 	def add(self, player):
 		self.players.append(player)
 		player.room = self
+		player.frame = 1
 
 		if 900 <= self.externalId <= 1000:
 			player.sendXt("jg", self.externalId)
