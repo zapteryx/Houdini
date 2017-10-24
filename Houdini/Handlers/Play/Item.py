@@ -1,6 +1,5 @@
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
-from sqlalchemy.orm import load_only
 
 @Handlers.Handle(XT.BuyInventory)
 def handleBuyInventory(self, data):
@@ -33,10 +32,8 @@ def handleGetInventory(self, data):
 
 @Handlers.Handle(XT.GetPlayerPins)
 def handleGetPlayerPins(self, data):
-    player = self.session.query(Penguin).\
-        filter(Penguin.ID == data.PlayerId).\
-        options(load_only("Inventory")).\
-        first()
+    player = self.session.query(Penguin.Inventory).\
+        filter(Penguin.ID == data.PlayerId).first()
 
     if player is None:
         return self.transport.loseConnection()
