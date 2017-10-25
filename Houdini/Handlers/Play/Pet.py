@@ -65,8 +65,8 @@ def handleSendAdoptPuffle(self, data):
     puffleString = "%d|%s|%d|100|100|100|100|100|100" % (puffle.ID, data.Name, data.TypeId)
     self.sendXt("pn", self.user.Coins, puffleString)
 
-    postcard = Mail(Recipient=self.user.ID, SenderName=data.Name,
-                    SenderID=0, Details="", Date=adoptionDate,
+    postcard = Mail(Recipient=self.user.ID, SenderName="sys",
+                    SenderID=0, Details=data.Name, Date=adoptionDate,
                     Type=111)
     self.session.add(postcard)
     self.session.commit()
