@@ -495,6 +495,21 @@ class XT:
         "Data": [VariableXTData("Discard")]
     }
 
+    BanPlayer = {
+        "Handler": "o#b",
+        "Data": [XTData("PlayerId", int), XTData("Message", str)]
+    }
+
+    MutePlayer = {
+        "Handler": "o#m",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    KickPlayer = {
+        "Handler": "o#k",
+        "Data": [XTData("PlayerId", int)]
+    }
+
 # TODO implement PossibleXTData/PossibleXMLData?
 class Handlers:
     XTHandlers = {}
