@@ -65,12 +65,22 @@ def handleLogin(self, data):
     self.getBuddyList()
 
     buddyWorlds = []
+    worldPopulations = []
 
     serversConfig = self.server.config["Servers"]
 
     for serverName in serversConfig.keys():
         if serversConfig[serverName]["World"]:
+            serverPopulation = self.server.redis.get("%s.population" % serverName)
+
+            if not serverPopulation is None:
+                serverPopulation = int(serverPopulation) / (serversConfig[serverName]["Capacity"] / 6)
+            else:
+                serverPopulation = 0
+
             serverPlayers = self.server.redis.smembers("%s.players" % serverName)
+
+            worldPopulations.append("%s,%s" % (serversConfig[serverName]["Id"], serverPopulation))
 
             if not len(serverPlayers) > 0:
                 self.logger.debug("Skipping buddy iteration for %s " % serverName)
@@ -81,4 +91,4 @@ def handleLogin(self, data):
                     buddyWorlds.append(serversConfig[serverName]["Id"])
                     break
 
-    self.sendXt("l", user.ID, loginKey, "|".join(buddyWorlds), '101,')
+    self.sendXt("l", user.ID, loginKey, "|".join(buddyWorlds), "|".join(worldPopulations))
