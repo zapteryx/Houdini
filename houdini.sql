@@ -32,7 +32,6 @@ CREATE TABLE `bans` (
   `Comment` text NOT NULL,
   `Expiration` int(8) NOT NULL,
   `Time` int(8) NOT NULL,
-  `Type` smallint(3) unsigned NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Time` (`Time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
