@@ -1,4 +1,5 @@
 from Houdini.Handlers import Handlers, XT
+from Houdini.Handlers.Play import Moderation
 from Houdini.Data.Penguin import Penguin
 
 @Handlers.Handle(XT.BuyInventory)
@@ -8,6 +9,9 @@ def handleBuyInventory(self, data):
 
     elif data.ItemId in self.inventory:
         return self.sendError(400)
+
+    if "is_bait" in self.server.items[data.ItemId]:
+        return Moderation.cheatBan(self, self.user.ID, comment="Added bait item")
 
     itemCost = int(self.server.items[data.ItemId]["cost"])
 
