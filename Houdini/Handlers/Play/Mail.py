@@ -54,7 +54,8 @@ def handleStartMailEngine(self, data):
 @Handlers.Handle(XT.GetMail)
 def handleGetMail(self, data):
     mailbox = self.session.query(Mail).\
-        filter(Mail.Recipient == self.user.ID)
+        filter(Mail.Recipient == self.user.ID).\
+        order_by(Mail.Date.desc())
     postcardArray = []
     for postcard in mailbox:
         postcardArray.append("|".join([postcard.SenderName, str(postcard.SenderID),
