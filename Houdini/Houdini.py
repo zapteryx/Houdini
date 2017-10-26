@@ -11,9 +11,8 @@ from logging.handlers import RotatingFileHandler
 
 import redis
 
-from twisted.web.client import getPage
 from twisted.internet.protocol import Factory
-from twisted.internet import reactor, defer
+from twisted.internet import reactor
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -122,7 +121,6 @@ class Houdini(Factory):
                     handlersCopy = self.handlers.copy()
 
                     for handlerId, handlerMethod in handlersCopy.iteritems():
-                        # self.events.off(handlerId, handlerMethod)
                         self.handlers.pop(handlerId, None)
 
                     moduleObject = sys.modules[handlerModule]
