@@ -1,6 +1,7 @@
 import logging
 import sys
 import copy
+import importlib
 from watchdog.events import FileSystemEventHandler
 import twisted.python.rebuild as rebuild
 
@@ -11,50 +12,100 @@ class HandlerFileEventHandler(FileSystemEventHandler):
     def __init__(self):
         self.logger = logging.getLogger("Houdini")
 
-    def on_modified(self, event):
+    def removeHandlersByModule(self, handlerModulePath):
+        def removeHandlers(handlerItems):
+            for handlerId, handlerListeners in handlerItems:
+                for handlerListener in handlerListeners:
+                    if handlerListener.functionFile == handlerModulePath:
+                        handlerListeners.remove(handlerListener)
+                        self.logger.debug("Removed %s", handlerId)
+
+        handlerItems = Handlers.XTHandlers.items()
+        xtHandlerCollection = copy.deepcopy(Handlers.XTHandlers)
+        removeHandlers(handlerItems)
+
+        handlerItems = Handlers.XMLHandlers.items()
+        xmlHandlerCollection = copy.deepcopy(Handlers.XMLHandlers)
+        removeHandlers(handlerItems)
+
+        return xtHandlerCollection, xmlHandlerCollection
+
+    def evaluateHandlerFileEvent(self, handlerFileEvent):
         # Ignore all directory events
-        if event.is_directory:
+        if handlerFileEvent.is_directory:
+            return False
+
+        handlerModulePath = handlerFileEvent.src_path[2:]
+
+        # Ignore non-Python files
+        if handlerModulePath[-3:] != ".py":
+            return False
+
+        handlerModule = handlerModulePath.replace("/", ".")[:-3]
+
+        return handlerModulePath, handlerModule
+
+    def on_created(self, event):
+        handlerModuleDetails = self.evaluateHandlerFileEvent(event)
+
+        if not handlerModuleDetails:
             return
 
-        handlerModulePath = event.src_path[2:]
-        handlerModule = handlerModulePath.replace("/", ".")[:-3]
+        handlerModulePath, handlerModule = handlerModuleDetails
+
+        if "__init__.py" in handlerModulePath:
+            return
+
+        self.logger.debug("New handler module detected %s", handlerModule)
+
+        try:
+            importlib.import_module(handlerModule)
+
+        except Exception as importError:
+            self.logger.error("%s detected in %s, not importing.", importError.__class__.__name__, handlerModule)
+
+    def on_deleted(self, event):
+        handlerModuleDetails = self.evaluateHandlerFileEvent(event)
+
+        if not handlerModuleDetails:
+            return
+
+        handlerModulePath, handlerModule = handlerModuleDetails
 
         if handlerModule not in sys.modules:
             return
 
-        self.logger.debug("Reloading %s", handlerModule)
+        self.logger.debug("Deleting listeners registered by %s..", handlerModule)
 
-        if "Houdini.Handlers.Play" in handlerModule:
-            handlerItems = Handlers.XTHandlers.items()
-            handlerCollection = copy.deepcopy(Handlers.XTHandlers)
+        self.removeHandlersByModule(handlerModulePath)
 
-        else:
-            handlerItems = Handlers.XMLHandlers.items()
-            handlerCollection = copy.deepcopy(Handlers.XMLHandlers)
+    def on_modified(self, event):
+        handlerModuleDetails = self.evaluateHandlerFileEvent(event)
 
-        for handlerId, handlerListeners in handlerItems:
-            for handlerListener in handlerListeners:
-                # Look through the list of listeners to determine which need to be removed
-                # self.logger.debug("Comparing %s to %s", handlerListener.functionFile, handlerModulePath)
+        if not handlerModuleDetails:
+            return
 
-                if handlerListener.functionFile == handlerModulePath:
-                    self.logger.debug("Removing a %s listener", handlerId)
-                    handlerListeners.remove(handlerListener)
+        handlerModulePath, handlerModule = handlerModuleDetails
+
+        if handlerModule not in sys.modules:
+            return False
+
+        self.logger.info("Reloading %s", handlerModule)
+
+        xtHandlersCollection, xmlHandlersCollection = self.removeHandlersByModule(handlerModulePath)
 
         handlerModuleObject = sys.modules[handlerModule]
 
         try:
             rebuild.rebuild(handlerModuleObject)
 
-        except (IndentationError, SyntaxError) as rebuildError:
+            self.logger.info("Successfully reloaded %s!", handlerModule)
+
+        except Exception as rebuildError:
             self.logger.error("%s detected in %s, not reloading.", rebuildError.__class__.__name__, handlerModule)
             self.logger.info("Restoring handler references...")
 
-            if "Houdini.Handlers.Play" in handlerModule:
-                Handlers.XTHandlers = handlerCollection
-            else:
-                Handlers.XMLHandlers = handlerCollection
+            Handlers.XTHandlers = xtHandlersCollection
+            Handlers.XMLHandlers = xmlHandlersCollection
 
             self.logger.info("Handler references restored. Phew!")
-        except:
-            self.logger.error("Unable to reload %s due to an unknown reason!", handlerModule)
