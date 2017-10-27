@@ -34,7 +34,7 @@ def handleStartMailEngine(self, data):
         if self.agentStatus:
             postcard = Mail(Recipient=self.user.ID, SenderName="sys",
                             SenderID=0, Details="", Date=paycheckDate,
-                            Type=171)
+                            Type=184)
             self.session.add(postcard)
             self.user.Coins += 350
 
