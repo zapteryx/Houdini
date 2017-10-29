@@ -12,8 +12,8 @@ class ItemSchema(Schema):
     Name = fields.String(load_from="label")
     Prompt = fields.String(load_from="prompt")
     Layer = fields.Integer(load_from="layer")
-    Bait = fields.String(load_from="is_bait", required=False)
-    EPF = fields.String(load_from="is_epf", required=False)
+    Bait = fields.Boolean(load_from="is_bait", required=False)
+    EPF = fields.Boolean(load_from="is_epf", required=False)
 
     @post_load
     def make_item(self, data):
@@ -29,6 +29,9 @@ class ItemCollection(SchemaObjectCollection):
 
     def isItemAward(self, itemId):
         return self.schemaObjects[int(itemId)].Type == 10
+
+    def isBait(self, itemId):
+        return self.schemaObjects[int(itemId)].Bait
 
     def getCost(self, itemId):
         return self.schemaObjects[int(itemId)].Cost
