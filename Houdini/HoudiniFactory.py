@@ -10,6 +10,8 @@ from watchdog.observers import Observer
 from logging.handlers import RotatingFileHandler
 
 import redis
+import six
+from six.moves import reload_module
 
 from twisted.internet.protocol import Factory
 from twisted.internet import reactor
@@ -17,18 +19,18 @@ from twisted.internet import reactor
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-import Handlers
-from HandlerFileEventHandler import HandlerFileEventHandler
-from Spheniscidae import Spheniscidae
-from Penguin import Penguin
-from Room import Room
+import Houdini.Handlers as Handlers
+from Houdini.HandlerFileEventHandler import HandlerFileEventHandler
+from Houdini.Spheniscidae import Spheniscidae
+from Houdini.Penguin import Penguin
+from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection
 
 """Deep debug
 from twisted.python import log
 log.startLogging(sys.stdout)
 """
 
-class Houdini(Factory):
+class HoudiniFactory(Factory):
 
     def __init__(self, *kw, **kwargs):
         self.logger = logging.getLogger("Houdini")
@@ -77,15 +79,16 @@ class Houdini(Factory):
         if self.server["World"]:
             self.protocol = Penguin
 
-            self.loadRooms()
+            self.rooms = retrieveRoomCollection()
+
             self.spawnRooms = (100, 300, 400, 800, 809, 230, 130)
 
-            self.loadItems()
+            self.items = retrieveItemCollection()
+
             self.loadIgloos()
             self.loadFurniture()
             self.loadFloors()
             self.loadPins()
-            self.loadGames()
             self.loadGameStamps()
 
             self.openIgloos = {}
@@ -120,15 +123,15 @@ class Houdini(Factory):
 
                     handlersCopy = self.handlers.copy()
 
-                    for handlerId, handlerMethod in handlersCopy.iteritems():
+                    for handlerId, handlerMethod in six.iteritems(handlersCopy):
                         self.handlers.pop(handlerId, None)
 
                     moduleObject = sys.modules[handlerModule]
-                    moduleObject = reload(moduleObject)
+                    moduleObject = reload_module(moduleObject)
 
                     populateHandlerMethods(moduleObject)
 
-        for handlerId, listenerList in Handlers.Handlers.XMLHandlers.iteritems():
+        for handlerId, listenerList in six.iteritems(Handlers.Handlers.XMLHandlers):
             for handlerListener in listenerList:
                 handlerMethod = handlerListener.function
 
@@ -217,25 +220,6 @@ class Houdini(Factory):
         else:
             parseFloorCrumbs()
 
-    def loadItems(self):
-        if not hasattr(self, "items"):
-            self.items = {}
-
-        def parseItemCrumbs():
-            with open("crumbs/paper_items.json", "r") as fileHandle:
-                items = json.load(fileHandle)
-
-                for item in items:
-                    itemId = int(item["paper_item_id"])
-                    self.items[itemId] = item
-
-            self.logger.info("{0} items loaded".format(len(self.items)))
-
-        if not os.path.exists("crumbs/paper_items.json"):
-            self.logger.warn("Unable to read items.json")
-        else:
-            parseItemCrumbs()
-
     def loadPins(self):
         if not hasattr(self, "pins"):
             self.pins = {}
@@ -254,54 +238,6 @@ class Houdini(Factory):
             self.logger.warn("Unable to read pins.json")
         else:
             parsePinCrumbs()
-
-
-    def loadRooms(self):
-        if not hasattr(self, "rooms"):
-            self.rooms = {}
-
-        def parseRoomCrumbs():
-            with open("crumbs/rooms.json", "r") as fileHandle:
-                rooms = json.load(fileHandle).values()
-
-                internalId = 0
-
-                for room in rooms:
-                    externalId = room["room_id"]
-                    internalId += 1
-
-                    if not externalId in self.rooms:
-                        self.rooms[externalId] = Room(externalId, internalId)
-
-            self.logger.info("{0} rooms loaded".format(len(self.rooms)))
-
-        if not os.path.exists("crumbs/rooms.json"):
-            self.logger.warn("Unable to read rooms.json")
-        else:
-            parseRoomCrumbs()
-
-    def loadGames(self):
-        if not hasattr(self, "rooms"):
-            self.rooms = {}
-
-        def parseRoomCrumbs():
-            with open("crumbs/games.json", "r") as fileHandle:
-                games = json.load(fileHandle).values()
-
-                internalId = -1
-
-                for game in games:
-                    externalId = game["room_id"]
-
-                    if not externalId in self.rooms:
-                        self.rooms[externalId] = Room(externalId, internalId)
-
-            self.logger.info("{0} games loaded".format(len(games)))
-
-        if not os.path.exists("crumbs/games.json"):
-            self.logger.warn("Unable to load crumbs/games.json")
-        else:
-            parseRoomCrumbs()
 
     def loadGameStamps(self):
         if not hasattr(self, "stamps"):
@@ -324,6 +260,8 @@ class Houdini(Factory):
 
                             for stampObject in stampCategory["stamps"]:
                                 self.stamps[roomId].append(stampObject["stamp_id"])
+
+            # print(json.dumps(self.stamps))
 
         if not os.path.exists("crumbs/stamps.json"):
             self.logger.warn("Unable to load crumbs/stamps.json")
