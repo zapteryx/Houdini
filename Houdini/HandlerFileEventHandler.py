@@ -5,7 +5,7 @@ import importlib
 from watchdog.events import FileSystemEventHandler
 import twisted.python.rebuild as rebuild
 
-from Handlers import Handlers
+from Houdini.Handlers import Handlers
 
 class HandlerFileEventHandler(FileSystemEventHandler):
 

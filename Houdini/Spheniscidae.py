@@ -5,8 +5,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 from sqlalchemy.exc import InvalidRequestError
 from twisted.protocols.basic import LineOnlyReceiver
 
-from Handlers import Handlers
-
+from Houdini.Handlers import Handlers
 
 class Spheniscidae(LineOnlyReceiver, object):
 

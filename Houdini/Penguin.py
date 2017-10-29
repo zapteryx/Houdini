@@ -1,5 +1,5 @@
-from Spheniscidae import Spheniscidae
-from Data.Puffle import Puffle
+from Houdini.Spheniscidae import Spheniscidae
+from Houdini.Data.Puffle import Puffle
 
 class Penguin(Spheniscidae):
 
