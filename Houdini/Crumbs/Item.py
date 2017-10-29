@@ -31,7 +31,7 @@ class ItemCollection(SchemaObjectCollection):
         return self.schemaObjects[int(itemId)].Type == 10
 
     def isBait(self, itemId):
-        return self.schemaObjects[int(itemId)].Bait
+        return hasattr(self.schemaObjects[int(itemId)], "Bait")
 
     def getCost(self, itemId):
         return self.schemaObjects[int(itemId)].Cost
