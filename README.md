@@ -13,6 +13,8 @@ A Club Penguin private server written in Python for the AS2 protocol.
 	* If you're on Windows, you can download the Redis installer [here](https://github.com/MicrosoftArchive/redis/releases).
 * Watchdog
 * bcrypt
+* Marshmallow
+* Six
 
 ## Installation
 After you've installed the latest version of Python 2, navigate to the Houdini directory and run `pip install -r requirements.txt` in your command prompt or terminal.
