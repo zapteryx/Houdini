@@ -22,9 +22,9 @@ def handleStartMailEngine(self, data):
         lastPaycheck = datetime.datetime.fromtimestamp(lastPaycheck)
     today = datetime.datetime.now()
     lastPaycheck = lastPaycheck.replace(month=(lastPaycheck.month + 1))
-    lastPaycheck = lastPaycheck.replace(day=2)
+    lastPaycheck = lastPaycheck.replace(day=1)
     while lastPaycheck < today:
-        paycheckDate = int(time.mktime(lastPaycheck.timetuple()))
+        paycheckDate = int(time.mktime(lastPaycheck.timetuple())) + 43200
         if 428 in self.inventory:
             postcard = Mail(Recipient=self.user.ID, SenderName="sys",
                             SenderID=0, Details="", Date=paycheckDate,
@@ -34,12 +34,12 @@ def handleStartMailEngine(self, data):
         if self.agentStatus:
             postcard = Mail(Recipient=self.user.ID, SenderName="sys",
                             SenderID=0, Details="", Date=paycheckDate,
-                            Type=171)
+                            Type=184)
             self.session.add(postcard)
             self.user.Coins += 350
 
         lastPaycheck = lastPaycheck.replace(month=(lastPaycheck.month + 1))
-        lastPaycheck = lastPaycheck.replace(day=2)
+        lastPaycheck = lastPaycheck.replace(day=1)
     self.user.LastPaycheck = int(time.mktime(today.timetuple()))
     self.session.commit()
 
