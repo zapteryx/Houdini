@@ -13,32 +13,32 @@ def determineCoinsEarned(gameId, gameScore):
 
 @Handlers.Handle(XT.GameOver)
 def handleSendGameOver(self, data):
-    if self.room.externalId in self.server.stamps:
+    if self.room.Id in self.server.stamps:
         myStamps = map(int, self.user.Stamps.split("|")) if self.user.Stamps else []
         collectedStamps = []
         totalGameStamps = 0
 
         for myStamp in myStamps:
-            if myStamp in self.server.stamps[self.room.externalId]:
+            if myStamp in self.server.stamps[self.room.Id]:
                 collectedStamps.append(myStamp)
 
             for roomStamps in self.server.stamps.values():
                 if myStamp in roomStamps:
                     totalGameStamps += 1
 
-        collectedStamps = [str(myStamp) for myStamp in myStamps if myStamp in self.server.stamps[self.room.externalId]]
+        collectedStamps = [str(myStamp) for myStamp in myStamps if myStamp in self.server.stamps[self.room.Id]]
         totalStamps = len(collectedStamps)
-        totalStampsGame = len(self.server.stamps[self.room.externalId])
+        totalStampsGame = len(self.server.stamps[self.room.Id])
         collectedStampsString = "|".join(collectedStamps)
 
         if totalStamps == totalStampsGame:
             data.Score *= 2
 
-        coinsEarned = determineCoinsEarned(self.room.externalId, data.Score)
+        coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
         self.user.Coins += coinsEarned
         self.sendXt("zo", self.user.Coins, collectedStampsString, totalStamps, totalStampsGame, totalGameStamps)
 
     else:
-        coinsEarned = determineCoinsEarned(self.room.externalId, data.Score)
+        coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
         self.user.Coins += coinsEarned
         self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
