@@ -117,7 +117,7 @@ def handleRemoveBuddy(self, data):
 def handleFindBuddy(self, data):
     try:
         buddyObject = self.server.players[data.Id]
-        self.sendXt("bf", buddyObject.room.externalId)
+        self.sendXt("bf", buddyObject.room.Id)
 
     except KeyError:
         self.logger.debug("%s (%d) tried to find a buddy who was offline!", self.user.Username, self.user.ID)

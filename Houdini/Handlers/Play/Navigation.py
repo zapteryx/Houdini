@@ -2,7 +2,23 @@ import time, random
 from datetime import date
 
 from Houdini.Handlers import Handlers, XT
-from Houdini.Room import Room
+from Houdini.Crumbs.Room import Room
+
+RoomFieldKeywords = {
+    "Id": None,
+    "InternalId": None,
+    "Key": "Igloo",
+    "Name": "Igloo",
+    "DisplayName": "Igloo",
+    "MusicId": 0,
+    "Member": 0,
+    "Path": "",
+    "MaxUsers": 100,
+    "JumpEnabled": False,
+    "JumpDisabled": True,
+    "RequiredItem": None,
+    "ShortName": "Igloo"
+}
 
 @Handlers.Handle(XT.JoinWorld)
 def handleJoinWorld(self, data):
@@ -70,15 +86,23 @@ def handleJoinRoom(self, data):
 def handleRefreshRoom(self, data):
     self.room.refresh(self)
 
-# TODO: Check if igloo is open or belongs to a buddy
 @Handlers.Handle(XT.JoinPlayerIgloo)
 def handleJoinPlayerIgloo(self, data):
     if data.Id < 1000:
         return self.transport.loseConnection()
 
+    playerId = data.Id - 1000
+
+    if playerId != self.user.ID and playerId not in self.buddies \
+            and playerId not in self.server.openIgloos:
+        return self.transport.loseConnection()
+
     if data.Id not in self.server.rooms:
-        igloo = self.server.rooms[data.Id] = Room(data.Id, data.Id)
-        igloo.locked = True
+        iglooFieldKeywords = RoomFieldKeywords.copy()
+        iglooFieldKeywords["Id"] = data.Id
+        iglooFieldKeywords["InternalId"] = data.Id
+
+        igloo = self.server.rooms[data.Id] = Room(**iglooFieldKeywords)
     else:
         igloo = self.server.rooms[data.Id]
 
