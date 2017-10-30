@@ -14,7 +14,7 @@ import six
 from six.moves import reload_module
 
 from twisted.internet.protocol import Factory
-from twisted.internet import reactor
+from twisted.internet import reactor, task
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -25,6 +25,7 @@ from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Penguin import Penguin
 from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection,\
     retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection
+from Houdini.Handlers.Play.Pet import decreaseStats
 
 """Deep debug
 from twisted.python import log
@@ -92,6 +93,9 @@ class HoudiniFactory(Factory):
             self.loadGameStamps()
 
             self.openIgloos = {}
+
+            self.puffleKiller = task.LoopingCall(decreaseStats, self)
+            self.puffleKiller.start(1800)
 
             self.loadHandlerModules()
             self.logger.info("Running world server")

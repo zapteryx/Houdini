@@ -16,6 +16,52 @@ puffleStatistics = {
     8: (100, 80, 120)
 }
 
+runPostcards = {
+    0: 100,
+    1: 101,
+    2: 102,
+    3: 103,
+    4: 104,
+    5: 105,
+    6: 106,
+    7: 169,
+    8: 109
+}
+
+def decreaseStats(server):
+    for (playerId, player) in server.players.items():
+        for (puffleId, puffle) in player.puffles.items():
+            maxHealth, maxHunger, maxRest = puffleStatistics[puffle.Type]
+            if int(puffle.Walking):
+                puffle.Hunger = max(10, min(puffle.Hunger - 2, maxHunger))
+                puffle.Rest = max(10, min(puffle.Rest - 2, maxRest))
+            elif player.room.Id != player.user.ID + 1000:
+                puffle.Health = max(0, min(puffle.Health - 2, maxHealth))
+                puffle.Hunger = max(0, min(puffle.Hunger - 2, maxHunger))
+                puffle.Rest = max(0, min(puffle.Rest - 2, maxRest))
+            if puffle.Health == 0 and puffle.Hunger == 0 and puffle.Rest == 0:
+                runPostcard = runPostcards[puffle.Type]
+                postcard = Mail(Recipient=player.user.ID, SenderName="sys",
+                                SenderID=0, Details=puffle.Name, Date=time.time(),
+                                Type=runPostcard)
+                player.session.add(postcard)
+                player.session.query(Puffle).filter(Puffle.ID == puffle.ID).delete()
+                player.sendXt("mr", "sys", 0, runPostcard, puffle.Name, time.time(), postcard.ID)
+                del player.puffles[puffle.ID]
+            elif puffle.Hunger < 10:
+                q = player.session.query(Mail).filter(Mail.Recipient == player.user.ID). \
+                    filter(Mail.Type == 110). \
+                    filter(Mail.Details == Puffle.Name)
+                notificationAware = player.session.query(q.exists()).scalar()
+                if not notificationAware:
+                    postcard = Mail(Recipient=player.user.ID, SenderName="sys",
+                                    SenderID=0, Details=puffle.Name, Date=time.time(),
+                                    Type=110)
+                    player.session.add(postcard)
+                    player.sendXt("mr", "sys", 0, 110, puffle.Name, time.time(), postcard.ID)
+        player.session.commit()
+        handleGetMyPlayerPuffles(player, [])
+
 @Handlers.Handle(XT.GetPlayerPuffles)
 def handleGetPuffles(self, data):
     ownedPuffles = self.session.query(Puffle).filter(Puffle.Owner == data.PlayerId)
