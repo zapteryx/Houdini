@@ -24,14 +24,38 @@ class ItemCollection(SchemaObjectCollection):
     def isItemColor(self, itemId):
         return self.schemaObjects[int(itemId)].Type == 1
 
+    def isItemHead(self, itemId):
+        return self.schemaObjects[int(itemId)].Type == 2
+
+    def isItemFace(self, itemId):
+        return self.schemaObjects[int(itemId)].Type == 3
+
+    def isItemNeck(self, itemId):
+        return self.schemaObjects[int(itemId)].Type == 4
+
+    def isItemBody(self, itemId):
+        return self.schemaObjects[int(itemId)].Type == 5
+
+    def isItemHand(self, itemId):
+        return self.schemaObjects[int(itemId)].Type == 6
+
+    def isItemFeet(self, itemId):
+        return self.schemaObjects[int(itemId)].Type == 7
+
     def isItemPin(self, itemId):
         return self.schemaObjects[int(itemId)].Type == 8
+
+    def isItemPhoto(self, itemId):
+        return self.schemaObjects[int(itemId)].Type == 9
 
     def isItemAward(self, itemId):
         return self.schemaObjects[int(itemId)].Type == 10
 
     def isBait(self, itemId):
         return hasattr(self.schemaObjects[int(itemId)], "Bait")
+
+    def isItemEPF(self, itemId):
+        return hasattr(self.schemaObjects[int(itemId)], "EPF")
 
     def getCost(self, itemId):
         return self.schemaObjects[int(itemId)].Cost
