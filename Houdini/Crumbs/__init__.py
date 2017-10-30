@@ -37,6 +37,9 @@ class SchemaObjectCollection(object):
 
 from Houdini.Crumbs.Item import ItemSchema, ItemCollection
 from Houdini.Crumbs.Room import RoomSchema, RoomCollection
+from Houdini.Crumbs.Furniture import FurnitureSchema, FurnitureCollection
+from Houdini.Crumbs.Floor import FloorSchema, FloorCollection
+from Houdini.Crumbs.Igloo import IglooSchema, IglooCollection
 
 def retrieveItemCollection(crumbsFile="crumbs/paper_items.json"):
     assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
@@ -65,3 +68,48 @@ def retrieveRoomCollection(crumbsFile="crumbs/rooms.json"):
         roomCollection = RoomCollection(result.data)
 
         return roomCollection
+
+def retrieveFurnitureCollection(crumbsFile="crumbs/furniture_items.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as fileHandle:
+        furniture = json.load(fileHandle)
+
+        schema = FurnitureSchema(many=True)
+        result = schema.load(furniture)
+
+        furnitureCollection = FurnitureCollection(result.data)
+
+        logger.info("%d furniture items loaded", len(furnitureCollection))
+
+        return furnitureCollection
+
+def retrieveFloorCollection(crumbsFile="crumbs/igloo_floors.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as fileHandle:
+        flooring = json.load(fileHandle)
+
+        schema = FloorSchema(many=True)
+        result = schema.load(flooring)
+
+        floorCollection = FloorCollection(result.data)
+
+        logger.info("%d floor items loaded", len(floorCollection))
+
+        return floorCollection
+
+def retrieveIglooCollection(crumbsFile="crumbs/igloos.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as fileHandle:
+        igloos = json.load(fileHandle)
+
+        schema = IglooSchema(many=True)
+        result = schema.load(igloos.values())
+
+        iglooCollection = IglooCollection(result.data)
+
+        logger.info("%d igloo items loaded", len(iglooCollection))
+
+        return iglooCollection
