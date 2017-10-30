@@ -36,14 +36,14 @@ def handleGetEpfPoints(self, data):
 
 @Handlers.Handle(XT.BuyEpfItem)
 def handleBuyEpfItem(self, data):
-    if self.server.items[data.ItemId]["is_epf"] == "1":
+    if self.server.items.isItemEPF(data.ItemId):
         if data.ItemId not in self.server.items:
             return self.sendError(402)
 
         elif data.ItemId in self.inventory:
             return self.sendError(400)
 
-        itemCost = int(self.server.items[data.ItemId]["cost"])
+        itemCost = self.server.items.getCost(data.ItemId)
 
         if self.agentPoints < itemCost:
             return self.sendError(401)
