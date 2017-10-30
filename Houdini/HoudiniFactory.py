@@ -23,7 +23,8 @@ import Houdini.Handlers as Handlers
 from Houdini.HandlerFileEventHandler import HandlerFileEventHandler
 from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Penguin import Penguin
-from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection
+from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection,\
+    retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection
 
 """Deep debug
 from twisted.python import log
@@ -79,15 +80,14 @@ class HoudiniFactory(Factory):
         if self.server["World"]:
             self.protocol = Penguin
 
-            self.rooms = retrieveRoomCollection()
-
             self.spawnRooms = (100, 300, 400, 800, 809, 230, 130)
 
+            self.rooms = retrieveRoomCollection()
             self.items = retrieveItemCollection()
+            self.furniture = retrieveFurnitureCollection()
+            self.igloos = retrieveIglooCollection()
+            self.floors = retrieveFloorCollection()
 
-            self.loadIgloos()
-            self.loadFurniture()
-            self.loadFloors()
             self.loadPins()
             self.loadGameStamps()
 
@@ -162,63 +162,6 @@ class HoudiniFactory(Factory):
                 packageModules.append(fullModuleName)
 
         return packageModules
-
-    def loadIgloos(self):
-        if not hasattr(self, "igloos"):
-            self.igloos = {}
-
-        def parseIglooCrumbs():
-            with open("crumbs/igloos.json", "r") as fileHandle:
-                igloos = json.load(fileHandle)
-
-                for iglooId, iglooDetails in igloos.items():
-                    iglooId = int(iglooId)
-                    self.igloos[iglooId] = int(iglooDetails["cost"])
-
-            self.logger.info("{0} igloos loaded".format(len(self.igloos)))
-
-        if not os.path.exists("crumbs/igloos.json"):
-            self.logger.warn("Unable to read igloos.json")
-        else:
-            parseIglooCrumbs()
-
-    def loadFurniture(self):
-        if not hasattr(self, "furniture"):
-            self.furniture = {}
-
-        def parseFurnitureCrumbs():
-            with open("crumbs/furniture_items.json", "r") as fileHandle:
-                furniture = json.load(fileHandle)
-
-                for furnitureItem in furniture:
-                    furnitureId = int(furnitureItem["furniture_item_id"])
-                    self.furniture[furnitureId] = int(furnitureItem["cost"])
-
-            self.logger.info("{0} furniture items loaded".format(len(self.furniture)))
-
-        if not os.path.exists("crumbs/furniture_items.json"):
-            self.logger.warn("Unable to read furniture_items.json")
-        else:
-            parseFurnitureCrumbs()
-
-    def loadFloors(self):
-        if not hasattr(self, "floors"):
-            self.floors = {}
-
-        def parseFloorCrumbs():
-            with open("crumbs/igloo_floors.json", "r") as fileHandle:
-                floors = json.load(fileHandle)
-
-                for floor in floors:
-                    floorId = int(floor["igloo_floor_id"])
-                    self.floors[floorId] = int(floor["cost"])
-
-            self.logger.info("{0} igloo floors loaded".format(len(self.floors)))
-
-        if not os.path.exists("crumbs/igloo_floors.json"):
-            self.logger.warn("Unable to read floors.json")
-        else:
-            parseFloorCrumbs()
 
     def loadPins(self):
         if not hasattr(self, "pins"):
