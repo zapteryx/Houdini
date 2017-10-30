@@ -46,7 +46,7 @@ def handleUpdateFloor(self, data):
     if data.FloorId not in self.server.floors:
         return self.sendError(402)
 
-    floorCost = self.server.floors[data.FloorId]
+    floorCost = self.server.floors.getCost(data.FloorId)
 
     if floorCost > self.user.Coins:
         return self.sendError(401)
@@ -62,7 +62,7 @@ def handleUpdateIglooType(self, data):
     if data.IglooId not in self.server.igloos:
         return self.sendError(402)
 
-    iglooCost = self.server.igloos[data.IglooId]
+    iglooCost = self.server.igloos.getCost(data.IglooId)
 
     if iglooCost > self.user.Coins:
         return self.sendError(401)
@@ -70,8 +70,7 @@ def handleUpdateIglooType(self, data):
     if data.IglooId in self.igloos:
         return self.sendError(500)
 
-    if data.IglooId not in self.igloos:
-        self.igloos.append(data.IglooId)
+    self.igloos.append(data.IglooId)
 
     iglooIds = (str(iglooId) for iglooId in self.igloos)
     self.user.Igloos = "|".join(iglooIds)
@@ -84,7 +83,7 @@ def handleBuyFurniture(self, data):
     if data.FurnitureId not in self.server.furniture:
         return self.sendError(402)
 
-    furnitureCost = self.server.furniture[data.FurnitureId]
+    furnitureCost = self.server.furniture.getCost(data.FurnitureId)
 
     if furnitureCost > self.user.Coins:
         return self.sendError(401)
