@@ -5,13 +5,10 @@ import pkgutil
 import sys
 import importlib
 
-from types import FunctionType
 from watchdog.observers import Observer
 from logging.handlers import RotatingFileHandler
 
 import redis
-import six
-from six.moves import reload_module
 
 from twisted.internet.protocol import Factory
 from twisted.internet import reactor, task
@@ -105,42 +102,11 @@ class HoudiniFactory(Factory):
             self.logger.info("Running login server")
 
     def loadHandlerModules(self, strictLoad=()):
-        handlerMethods = []
-
-        def populateHandlerMethods(moduleObject):
-            moduleMethods = [getattr(moduleObject, attribute) for attribute in dir(moduleObject)
-                             if isinstance(getattr(moduleObject, attribute), FunctionType)]
-
-            for moduleMethod in moduleMethods:
-                handlerMethods.append(moduleMethod)
-
         for handlerModule in self.getPackageModules(Handlers):
             if not strictLoad or strictLoad and handlerModule in strictLoad:
 
                 if handlerModule not in sys.modules.keys():
-                    moduleObject = importlib.import_module(handlerModule)
-
-                    populateHandlerMethods(moduleObject)
-
-                else:
-                    self.logger.info("Reloading module {0}".format(handlerModule))
-
-                    handlersCopy = self.handlers.copy()
-
-                    for handlerId, handlerMethod in six.iteritems(handlersCopy):
-                        self.handlers.pop(handlerId, None)
-
-                    moduleObject = sys.modules[handlerModule]
-                    moduleObject = reload_module(moduleObject)
-
-                    populateHandlerMethods(moduleObject)
-
-        for handlerId, listenerList in six.iteritems(Handlers.Handlers.XMLHandlers):
-            for handlerListener in listenerList:
-                handlerMethod = handlerListener.function
-
-                if handlerMethod in handlerMethods:
-                    self.handlers[handlerId] = handlerMethod
+                    importlib.import_module(handlerModule)
 
         self.logger.info("Handler modules loaded")
 
