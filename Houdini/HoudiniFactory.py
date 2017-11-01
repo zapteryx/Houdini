@@ -21,7 +21,8 @@ from Houdini.HandlerFileEventHandler import HandlerFileEventHandler
 from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Penguin import Penguin
 from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection,\
-    retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection
+    retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection,\
+    retrievePinCollection
 from Houdini.Handlers.Play.Pet import decreaseStats
 
 """Deep debug
@@ -85,8 +86,9 @@ class HoudiniFactory(Factory):
             self.furniture = retrieveFurnitureCollection()
             self.igloos = retrieveIglooCollection()
             self.floors = retrieveFloorCollection()
+            self.pins = retrievePinCollection()
 
-            self.loadPins()
+            #self.loadPins()
             self.loadGameStamps()
 
             self.openIgloos = {}
@@ -132,25 +134,6 @@ class HoudiniFactory(Factory):
                 packageModules.append(fullModuleName)
 
         return packageModules
-
-    def loadPins(self):
-        if not hasattr(self, "pins"):
-            self.pins = {}
-
-        def parsePinCrumbs():
-            with open("crumbs/pins.json", "r") as fileHandle:
-                pins = json.load(fileHandle)
-
-                for pin in pins:
-                    pinId = int(pin["paper_item_id"])
-                    self.pins[pinId] = pin
-
-            self.logger.info("{0} pins loaded".format(len(self.pins)))
-
-        if not os.path.exists("crumbs/pins.json"):
-            self.logger.warn("Unable to read pins.json")
-        else:
-            parsePinCrumbs()
 
     def loadGameStamps(self):
         if not hasattr(self, "stamps"):

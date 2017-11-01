@@ -40,6 +40,7 @@ from Houdini.Crumbs.Room import RoomSchema, RoomCollection
 from Houdini.Crumbs.Furniture import FurnitureSchema, FurnitureCollection
 from Houdini.Crumbs.Floor import FloorSchema, FloorCollection
 from Houdini.Crumbs.Igloo import IglooSchema, IglooCollection
+from Houdini.Crumbs.Pin import PinSchema, PinCollection
 
 def retrieveItemCollection(crumbsFile="crumbs/paper_items.json"):
     assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
@@ -113,3 +114,18 @@ def retrieveIglooCollection(crumbsFile="crumbs/igloos.json"):
         logger.info("%d igloo items loaded", len(iglooCollection))
 
         return iglooCollection
+
+def retrievePinCollection(crumbsFile="crumbs/pins.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as fileHandle:
+        pins = json.load(fileHandle)
+
+        schema = PinSchema(many=True)
+        result = schema.load(pins)
+
+        pinCollection = PinCollection(result.data)
+
+        logger.info("%d pins loaded", len(pinCollection))
+
+        return pinCollection
