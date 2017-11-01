@@ -15,15 +15,17 @@ def handleStartMailEngine(self, data):
                             Type=112)
             self.session.add(postcard)
 
-    lastPaycheck = self.user.LastPaycheck;
+    lastPaycheck = self.user.LastPaycheck
     if lastPaycheck == 0:
         lastPaycheck = datetime.datetime.now()
     else:
-        lastPaycheck = datetime.datetime.fromtimestamp(lastPaycheck)
-    today = datetime.datetime.now()
-    lastPaycheck = lastPaycheck.replace(month=(lastPaycheck.month + 1))
+        lastPaycheck = datetime.date.fromtimestamp(lastPaycheck)
+    today = datetime.date.today()
+    firstDayOfMonth = today.replace(day=1)
     lastPaycheck = lastPaycheck.replace(day=1)
-    while lastPaycheck < today:
+    while lastPaycheck < firstDayOfMonth:
+        lastPaycheck = lastPaycheck.replace(month=(lastPaycheck.month + 1))
+        lastPaycheck = lastPaycheck.replace(day=1)
         paycheckDate = int(time.mktime(lastPaycheck.timetuple())) + 43200
         if 428 in self.inventory:
             postcard = Mail(Recipient=self.user.ID, SenderName="sys",
@@ -37,10 +39,7 @@ def handleStartMailEngine(self, data):
                             Type=184)
             self.session.add(postcard)
             self.user.Coins += 350
-
-        lastPaycheck = lastPaycheck.replace(month=(lastPaycheck.month + 1))
-        lastPaycheck = lastPaycheck.replace(day=1)
-    self.user.LastPaycheck = int(time.mktime(today.timetuple()))
+    self.user.LastPaycheck = int(time.mktime(lastPaycheck.timetuple()))
     self.session.commit()
 
     totalMail = self.session.query(Mail).\
