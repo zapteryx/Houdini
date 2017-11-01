@@ -48,7 +48,7 @@ def handleGetPlayerPins(self, data):
     for itemId in inventory:
         if self.server.items.isItemPin(itemId):
             isMember = int(self.server.items[int(itemId)].Member)
-            timestamp = self.server.pins[int(itemId)]["unix"]
+            timestamp = self.server.pins.getUnixTimestamp(itemId)
             pinString = "|".join([itemId, str(timestamp), str(isMember)])
             pinsArray.append(pinString)
 
