@@ -19,6 +19,9 @@ def handleGetFieldOpStatus(self, data):
 
 @Handlers.Handle(XT.SetFieldOpStatus)
 def handleSetFieldOpStatus(self, data):
+    if data.FieldOpStatus > 2:
+        return
+
     if self.fieldOpStatus + 1 == data.FieldOpStatus:
         self.fieldOpStatus += 1
         if self.fieldOpStatus == 2:
