@@ -57,6 +57,9 @@ class ItemCollection(SchemaObjectCollection):
     def isItemEPF(self, itemId):
         return hasattr(self.schemaObjects[int(itemId)], "EPF")
 
+    def isPuffle(self, itemId):
+        return itemId in range(750, 758)
+
     def getCost(self, itemId):
         return self.schemaObjects[int(itemId)].Cost
 

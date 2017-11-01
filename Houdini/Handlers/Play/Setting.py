@@ -37,7 +37,7 @@ def handleSendUpdatePlayerBody(self, data):
 @Handlers.Handle(XT.UpdateHand)
 def handleSendUpdatePlayerHand(self, data):
     if (data.ItemId in self.inventory and self.server.items.isItemHand(data.ItemId)) \
-            or data.ItemId == 0:
+            or data.ItemId == 0 or self.server.items.isPuffle(data.ItemId):
         self.user.Hand = data.ItemId
         self.room.sendXt("upa", self.user.ID, data.ItemId)
 
