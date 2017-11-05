@@ -22,7 +22,7 @@ from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Penguin import Penguin
 from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection,\
     retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection,\
-    retrievePinCollection
+    retrievePinCollection, retrieveStampsCollection
 from Houdini.Handlers.Play.Pet import decreaseStats
 
 """Deep debug
@@ -87,9 +87,7 @@ class HoudiniFactory(Factory):
             self.igloos = retrieveIglooCollection()
             self.floors = retrieveFloorCollection()
             self.pins = retrievePinCollection()
-
-            #self.loadPins()
-            self.loadGameStamps()
+            self.stampGroups, self.stamps = retrieveStampsCollection()
 
             self.openIgloos = {}
 
@@ -134,35 +132,6 @@ class HoudiniFactory(Factory):
                 packageModules.append(fullModuleName)
 
         return packageModules
-
-    def loadGameStamps(self):
-        if not hasattr(self, "stamps"):
-            self.stamps = {}
-
-        def parseStampCrumbs():
-            with open("crumbs/stamps.json", "r") as stampFileHandle:
-                stampCollection = json.load(stampFileHandle)
-
-                with open("crumbs/rooms.json", "r") as roomFileHandle:
-                    roomsCollection = json.load(roomFileHandle).values()
-
-                    for stampCategory in stampCollection:
-                        if stampCategory["parent_group_id"] == 8:
-                            for roomObject in roomsCollection:
-                                if stampCategory["display"].replace("Games : ", "") == roomObject["display_name"]:
-                                    roomId = roomObject["room_id"]
-                                    self.stamps[roomId] = []
-                                    break
-
-                            for stampObject in stampCategory["stamps"]:
-                                self.stamps[roomId].append(stampObject["stamp_id"])
-
-            # print(json.dumps(self.stamps))
-
-        if not os.path.exists("crumbs/stamps.json"):
-            self.logger.warn("Unable to load crumbs/stamps.json")
-        else:
-            parseStampCrumbs()
 
     def buildProtocol(self, addr):
         session = self.createSession()
