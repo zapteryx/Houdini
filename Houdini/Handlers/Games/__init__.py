@@ -13,22 +13,23 @@ def determineCoinsEarned(gameId, gameScore):
 
 @Handlers.Handle(XT.GameOver)
 def handleSendGameOver(self, data):
-    if self.room.Id in self.server.stamps:
+    if self.server.stampGroups.isStampRoom(self.room.Id):
+        roomStamps = self.server.stampGroups.getStampGroupByRoomId(self.room.Id).StampsById
         myStamps = map(int, self.user.Stamps.split("|")) if self.user.Stamps else []
         collectedStamps = []
         totalGameStamps = 0
 
         for myStamp in myStamps:
-            if myStamp in self.server.stamps[self.room.Id]:
+            if myStamp in roomStamps:
                 collectedStamps.append(myStamp)
 
-            for roomStamps in self.server.stamps.values():
-                if myStamp in roomStamps:
+            for groupId, stampGroup in self.server.stampGroups.schemaObjects.items():
+                if myStamp in stampGroup.StampsById:
                     totalGameStamps += 1
 
-        collectedStamps = [str(myStamp) for myStamp in myStamps if myStamp in self.server.stamps[self.room.Id]]
+        collectedStamps = [str(myStamp) for myStamp in myStamps if myStamp in roomStamps]
         totalStamps = len(collectedStamps)
-        totalStampsGame = len(self.server.stamps[self.room.Id])
+        totalStampsGame = len(roomStamps)
         collectedStampsString = "|".join(collectedStamps)
 
         if totalStamps == totalStampsGame:
