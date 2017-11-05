@@ -41,6 +41,8 @@ from Houdini.Crumbs.Furniture import FurnitureSchema, FurnitureCollection
 from Houdini.Crumbs.Floor import FloorSchema, FloorCollection
 from Houdini.Crumbs.Igloo import IglooSchema, IglooCollection
 from Houdini.Crumbs.Pin import PinSchema, PinCollection
+from Houdini.Crumbs.Stamp import StampSchema, StampGroupSchema,\
+    StampGroupCollection, StampCollection
 
 def retrieveItemCollection(crumbsFile="crumbs/paper_items.json"):
     assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
@@ -129,3 +131,20 @@ def retrievePinCollection(crumbsFile="crumbs/pins.json"):
         logger.info("%d pins loaded", len(pinCollection))
 
         return pinCollection
+
+def retrieveStampsCollection(crumbsFile="crumbs/stamps.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as fileHandle:
+        stamps = json.load(fileHandle)
+
+        schema = StampGroupSchema(many=True)
+        result = schema.load(stamps)
+
+        stampGroupCollection = StampGroupCollection(result.data)
+
+        stampCollection = StampCollection(stampGroupCollection.stampsById.values())
+
+        logger.info("%d stamps loaded", len(stampCollection))
+
+        return stampGroupCollection, stampCollection
