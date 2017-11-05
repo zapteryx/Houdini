@@ -3,6 +3,9 @@ from Houdini.Data.Penguin import Penguin
 
 @Handlers.Handle(XT.StampAdd)
 def handleStampAdd(self, data):
+    if data.StampId not in self.server.stamps:
+        return
+
     self.addStamp(data.StampId)
 
 @Handlers.Handle(XT.GetBookCover)
