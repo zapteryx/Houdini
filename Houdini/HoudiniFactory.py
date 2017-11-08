@@ -11,7 +11,7 @@ from logging.handlers import RotatingFileHandler
 import redis
 
 from twisted.internet.protocol import Factory
-from twisted.internet import reactor, task
+from twisted.internet import reactor, task, threads
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -24,6 +24,8 @@ from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection,\
     retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection,\
     retrievePinCollection, retrieveStampsCollection
 from Houdini.Handlers.Play.Pet import decreaseStats
+import Houdini.Plugins as Plugins
+from Houdini.Events import Events
 
 """Deep debug
 from twisted.python import log
@@ -101,6 +103,26 @@ class HoudiniFactory(Factory):
             self.loadHandlerModules("Houdini.Handlers.Login.Login")
             self.logger.info("Running login server")
 
+        self.plugins = {}
+        self.loadPlugins()
+
+    def loadPlugins(self):
+        for pluginPackage in self.getPackageModules(Plugins):
+            self.loadPlugin(pluginPackage)
+
+    def loadPlugin(self, plugin):
+        pluginModule, pluginClass = plugin
+
+        pluginObject = getattr(pluginModule, pluginClass)(self)
+
+        if Plugins.Plugin.providedBy(pluginObject):
+            self.plugins[pluginClass] = pluginObject
+
+            threads.deferToThread(pluginObject.ready)
+
+        else:
+            self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginClass))
+
     def loadHandlerModules(self, strictLoad=()):
         for handlerModule in self.getPackageModules(Handlers):
             if not strictLoad or strictLoad and handlerModule in strictLoad:
@@ -137,6 +159,8 @@ class HoudiniFactory(Factory):
         session = self.createSession()
 
         player = self.protocol(session, self)
+
+        Events.Fire("Connected", player)
 
         return player
 
