@@ -113,6 +113,9 @@ class HoudiniFactory(Factory):
     def loadPlugin(self, plugin):
         pluginModule, pluginClass = plugin
 
+        if not pluginClass in self.server["Plugins"]:
+            return
+
         pluginObject = getattr(pluginModule, pluginClass)(self)
 
         if Plugins.Plugin.providedBy(pluginObject):
