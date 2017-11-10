@@ -51,11 +51,17 @@ class Penguin(Spheniscidae):
 		recentStamps.append(stampId)
 		stringifiedStamps = map(str, stamps)
 		stringifiedRecentStamps = map(str, recentStamps)
+
 		self.user.Stamps = "|".join(stringifiedStamps)
 		self.user.RecentStamps = "|".join(stringifiedRecentStamps)
 		self.session.commit()
+
 		if sendXt:
 			self.sendXt("aabs", stampId)
+
+	def sendCoins(self, coinAmount):
+		self.user.Coins = coinAmount
+		self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
 
 	# TODO: Puffle values
 	def getPlayerString(self):
