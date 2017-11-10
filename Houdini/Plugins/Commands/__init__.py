@@ -6,7 +6,6 @@ from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
 from Houdini.Handlers.Play.Item import handleBuyInventory
 
-# TODO: Implement thread-safety..? :fear:
 class Commands(object):
     zope.interface.implements(Plugin)
 
@@ -15,11 +14,6 @@ class Commands(object):
     description = "A commands plugin"
 
     commandPrefix = "!"
-
-    # At some point we may make this its own module, but until then \o/
-    botId = 0
-    botName = "Harry"
-    botString = None
 
     coinLimit = 1000000
 
@@ -45,30 +39,27 @@ class Commands(object):
             }
         }
 
+        self.bot = self.server.plugins["Bot"]
+
         Handlers.Message += self.handleMessage
 
-        self.botString = "%d|%s|1|4|1099|0|172|225|0|352|0|904|0|0|1|1|1" % (self.botId, self.botName)
-
-    # Maybe make a method for adding coins in the player class?
     def handleCoinsCommand(self, player, arguments):
         self.logger.debug("%s is trying to add %d coins" % (player.user.Username, arguments.Coins))
 
-        player.user.Coins = max(min(self.coinLimit, player.user.Coins + arguments.Coins), 1)
-        player.sendXt("zo", player.user.Coins, "", 0, 0, 0)
+        newAmount = max(min(self.coinLimit, player.user.Coins + arguments.Coins), 1)
+
+        reactor.callFromThread(player.sendCoins, newAmount)
 
     def handleItemCommand(self, player, arguments):
         self.logger.debug("%s is trying to add an item (id: %d)" % (player.user.Username, arguments.ItemId))
 
         if not self.server.items.isBait(arguments.ItemId):
-            handleBuyInventory(player, arguments)
+            reactor.callFromThread(handleBuyInventory, player, arguments)
 
     def handlePingCommand(self, player, arguments):
         self.logger.debug("Received ping command from %s" % player.user.Username)
 
-        player.sendXt("ap", self.botString)
-        player.sendXt("sm", self.botId, "Pong!")
-
-        reactor.callLater(3, player.sendXt, "rp", self.botId)
+        self.bot.sendMessage(player, "Pong!")
 
     # Do not edit below this line.
     def processCommand(self, messageDetails):
