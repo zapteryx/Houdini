@@ -17,13 +17,10 @@ class Example(object):
 
         Handlers.Login += self.handleLogin
 
-        # An error is thrown when attempting to (un)register in-game handlers on the login server
-        # You *could* check the server's type using self.server instead if you prefer that!
-        try:
+        # Only do this if the server is a world server
+        if self.server.server["World"]:
             Handlers.JoinWorld += self.handleJoinWorld
             Handlers.JoinWorld -= self.handleJoinWorld
-        except TypeError:
-            pass
 
         Events.Connected += self.handleConnection
         Events.Disconnected += self.handleDisconnection
