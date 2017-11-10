@@ -20,6 +20,12 @@ class SchemaObjectCollection(object):
         for deserializedObject in deserializedResults:
             self.schemaObjects[deserializedObject.Id] = deserializedObject
 
+    def __getattr__(self, item):
+        if hasattr(self.schemaObjects, item):
+            return getattr(self.schemaObjects, item)
+
+        raise AttributeError("%s doesn't exist in %s." % self.__class__.__name__)
+
     def __getitem__(self, objectId):
         if objectId not in self.schemaObjects:
             raise KeyError("Object id (%d) not in %s." % (objectId, self.__class__.__name__))
