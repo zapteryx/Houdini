@@ -528,7 +528,8 @@ class HandlerEvent(object):
         if handlerId not in handlersCollection:
             return
 
-        handlersCollection[handlerId].append(handlerListener(self.handlerDetails, handlerMethod))
+        listenerObject = handlerListener(self.handlerDetails, handlerMethod)
+        handlersCollection[handlerId].append(listenerObject)
 
         return self
 
@@ -638,7 +639,8 @@ class Handlers:
             if handlerId not in handlersCollection:
                 handlersCollection[handlerId] = []
 
-            handlersCollection[handlerId].append(handlerListener(handler, function))
+            listenerObject = handlerListener(handler, function)
+            handlersCollection[handlerId].append(listenerObject)
 
             return function
 
