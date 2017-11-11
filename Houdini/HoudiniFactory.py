@@ -121,7 +121,7 @@ class HoudiniFactory(Factory):
         if Plugins.Plugin.providedBy(pluginObject):
             self.plugins[pluginClass] = pluginObject
 
-            threads.deferToThread(pluginObject.ready)
+            reactor.callInThread(pluginObject.ready)
 
         else:
             self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginClass))
@@ -172,8 +172,9 @@ class HoudiniFactory(Factory):
 
         port = self.server["Port"]
 
+        handlersPath = "./Houdini{}Handlers".format(os.path.sep)
         handlerEventObserver = Observer()
-        handlerEventObserver.schedule(HandlerFileEventHandler(), "./Houdini/Handlers", recursive=True)
+        handlerEventObserver.schedule(HandlerFileEventHandler(), handlersPath, recursive=True)
         handlerEventObserver.start()
 
         self.logger.info("Listening on port {0}".format(port))
