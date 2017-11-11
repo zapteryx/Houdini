@@ -1,7 +1,7 @@
 import logging
 import sys
-import copy
 import importlib
+from os.path import sep as pathSeparator
 from watchdog.events import FileSystemEventHandler
 import twisted.python.rebuild as rebuild
 
@@ -12,6 +12,14 @@ class HandlerFileEventHandler(FileSystemEventHandler):
     def __init__(self):
         self.logger = logging.getLogger("Houdini")
 
+    def createDeepCopy(self, collection):
+        newCollection = {}
+
+        for handlerId, listenerArray in collection.items():
+            newCollection[handlerId] = list(listenerArray)
+
+        return newCollection
+
     def removeHandlersByModule(self, handlerModulePath):
         def removeHandlers(handlerItems):
             for handlerId, handlerListeners in handlerItems:
@@ -21,11 +29,11 @@ class HandlerFileEventHandler(FileSystemEventHandler):
                         self.logger.debug("Removed %s", handlerId)
 
         handlerItems = Handlers.XTHandlers.items()
-        xtHandlerCollection = copy.deepcopy(Handlers.XTHandlers)
+        xtHandlerCollection = self.createDeepCopy(Handlers.XTHandlers)
         removeHandlers(handlerItems)
 
         handlerItems = Handlers.XMLHandlers.items()
-        xmlHandlerCollection = copy.deepcopy(Handlers.XMLHandlers)
+        xmlHandlerCollection = self.createDeepCopy(Handlers.XMLHandlers)
         removeHandlers(handlerItems)
 
         return xtHandlerCollection, xmlHandlerCollection
@@ -41,7 +49,7 @@ class HandlerFileEventHandler(FileSystemEventHandler):
         if handlerModulePath[-3:] != ".py":
             return False
 
-        handlerModule = handlerModulePath.replace("/", ".")[:-3]
+        handlerModule = handlerModulePath.replace(pathSeparator, ".")[:-3]
 
         return handlerModulePath, handlerModule
 
