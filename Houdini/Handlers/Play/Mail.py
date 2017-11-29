@@ -18,7 +18,7 @@ def handleStartMailEngine(self, data):
 
     lastPaycheck = self.user.LastPaycheck
     if lastPaycheck == 0:
-        lastPaycheck = datetime.datetime.now()
+        lastPaycheck = datetime.date.today()
     else:
         lastPaycheck = datetime.date.fromtimestamp(lastPaycheck)
     today = datetime.date.today()
