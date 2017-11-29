@@ -2,6 +2,7 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 
 @Handlers.Handle(XT.GetIgnoreList)
+@Handlers.Throttle(-1)
 def handleGetIgnoreList(self, data):
     ignoreArray = self.user.Ignore.split("%")
 

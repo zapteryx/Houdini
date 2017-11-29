@@ -21,6 +21,7 @@ RoomFieldKeywords = {
 }
 
 @Handlers.Handle(XT.JoinWorld)
+@Handlers.Throttle(-1)
 def handleJoinWorld(self, data):
     if int(data.ID) != self.user.ID:
         return self.transport.loseConnection()
@@ -73,6 +74,7 @@ def handleJoinWorld(self, data):
     self.server.rooms[randomRoomId].add(self)
 
 @Handlers.Handle(XT.JoinRoom)
+@Handlers.Throttle(0.2)
 def handleJoinRoom(self, data):
     if data.RoomId in self.server.rooms:
         self.x = data.X

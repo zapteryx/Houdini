@@ -6,6 +6,7 @@ def handleGetAgentStatus(self, data):
     self.sendXt("epfga", self.agentStatus)
 
 @Handlers.Handle(XT.SetAgentStatus)
+@Handlers.Throttle(-1)
 def handleSetAgentStatus(self, data):
     self.agentStatus = 1
     self.user.EPF = ",".join(map(str, [self.agentStatus, self.fieldOpStatus,

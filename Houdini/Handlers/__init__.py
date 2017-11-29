@@ -1,5 +1,4 @@
-import inspect
-import os
+import inspect, os, time
 
 class Data:
     pass
@@ -514,6 +513,7 @@ class XT:
 class Handlers:
     XTHandlers = {}
     XMLHandlers = {}
+    Throttles = {}
 
     @staticmethod
     def HandleXML(clientObject, actionId, bodyTag):
@@ -602,6 +602,30 @@ class Handlers:
 
             return function
 
+        return handlerFunction
+
+    @staticmethod
+    def Throttle(secs=1):
+        def handlerFunction(function):
+            def handler(penguin, data):
+                Handlers.Throttles[function] = secs
+
+                if secs == -1 and function in penguin.throttle:
+                    return function
+
+                if function not in penguin.throttle:
+                    penguin.throttle[function] = time.time() - secs
+
+                lastSent = penguin.throttle[function]
+
+                if time.time() < lastSent + Handlers.Throttles[function]:
+                    return function
+
+                function(penguin, data)
+                penguin.throttle[function] = time.time()
+
+                return function
+            return handler
         return handlerFunction
 
     @staticmethod
