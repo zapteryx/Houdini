@@ -10,7 +10,7 @@ GameGroupIds = {
     28: ("Cart Surfer", 905),
     15: ("Catchin' Waves", 912),
     11: ("Jet Pack Adventure", 906),
-    22: ("Missions", 901, 908, 911, 913, 914, 915, 920, 921, 922, 923, 927)
+    22: ("Missions", 907, 908, 911, 913, 914, 915, 920, 921, 922, 923, 927)
 }
 
 class Stamp(SchemaObject):
