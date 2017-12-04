@@ -1,3 +1,5 @@
+import time
+
 from marshmallow import Schema, fields, post_load
 from Houdini.Crumbs import SchemaObject, SchemaObjectCollection
 
@@ -29,6 +31,7 @@ class Room(SchemaObject):
 
         player.room = self
         player.frame = 1
+        player.lastJoinedRoom = int(time.time())
 
         if 900 <= self.Id <= 1000:
             player.sendXt("jg", self.Id)

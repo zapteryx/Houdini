@@ -1,5 +1,13 @@
-import math
+import math, time
+
 from Houdini.Handlers import Handlers, XT
+from Houdini.Handlers.Play.Moderation import cheatBan
+maxScorePerMinute = {
+    901: 2000,
+    902: 2000,
+    903: 500,
+    905: 2500
+}
 
 def determineCoinsEarned(gameId, gameScore):
     defaultScoreGames = (904, 905, 906, 912, 916, 917, 918, 919, 950)
@@ -11,6 +19,18 @@ def determineCoinsEarned(gameId, gameScore):
 
     return coinsEarned
 
+def determineCoinsOverdose(self, score):
+    maxGameScore = maxScorePerMinute[self.room.Id] if self.room.Id in maxScorePerMinute else 9000
+    minutesSinceJoin = ((int(time.time()) - self.lastJoinedRoom) / 60) + 1
+    maxGameScore = maxGameScore * minutesSinceJoin
+    self.logger.info("%d: User earned %d score in %d minutes, that's %d points per minute", self.room.Id, score,
+                     minutesSinceJoin, score / minutesSinceJoin)
+    if score > maxGameScore:
+        self.logger.info("User tried to get %d score in %d minutes! Max is %d", score, minutesSinceJoin,
+                         maxGameScore)
+        return True
+    return False
+
 @Handlers.Handle(XT.GameOver)
 def handleSendGameOver(self, data):
     if self.server.stampGroups.isStampRoom(self.room.Id):
@@ -18,6 +38,8 @@ def handleSendGameOver(self, data):
         myStamps = map(int, self.user.Stamps.split("|")) if self.user.Stamps else []
         collectedStamps = []
         totalGameStamps = 0
+        if determineCoinsOverdose(self, data.Score):
+            return cheatBan(self, self.user.ID, comment="Coin cheat detected")
 
         for myStamp in myStamps:
             if myStamp in roomStamps:
