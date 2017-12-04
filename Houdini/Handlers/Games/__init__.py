@@ -2,6 +2,9 @@ import math, time
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Handlers.Play.Moderation import cheatBan
+
+maxCoins = 1000000
+
 maxScorePerMinute = {
     901: 2000,
     902: 2000,
@@ -58,10 +61,9 @@ def handleSendGameOver(self, data):
             data.Score *= 2
 
         coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
-        self.user.Coins += coinsEarned
         self.sendXt("zo", self.user.Coins, collectedStampsString, totalStamps, totalStampsGame, totalGameStamps)
 
     else:
         coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
-        self.user.Coins += coinsEarned
-        self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
+        self.sendXt("zo", self.user.Coins, "", 0, 0, 0)            self.user.Coins = max(0, min(self.user.Coins + coinsEarned, maxCoins))
+            self.user.Coins = max(0, min(self.user.Coins + coinsEarned, maxCoins))
