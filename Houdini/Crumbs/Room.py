@@ -9,6 +9,7 @@ class Room(SchemaObject):
         super(Room, self).__init__(**data)
 
         self.players = []
+        self.isGame = 900 <= self.Id <= 1000
 
     def send(self, data):
         for player in self.players:
@@ -33,7 +34,7 @@ class Room(SchemaObject):
         player.frame = 1
         player.lastJoinedRoom = int(time.time())
 
-        if 900 <= self.Id <= 1000:
+        if self.isGame:
             player.sendXt("jg", self.Id)
         else:
             player.sendXt("jr", self.Id, self.generateRoomString())
