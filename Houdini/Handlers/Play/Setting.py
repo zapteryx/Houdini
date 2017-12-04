@@ -60,7 +60,7 @@ def handleSendUpdatePlayerFeet(self, data):
 def handleSendUpdatePlayerFlag(self, data):
     if (data.ItemId in self.inventory and self.server.items.isItemPin(data.ItemId)) \
             or data.ItemId == 0:
-        self.user.Feet = data.ItemId
+        self.user.Flag = data.ItemId
         self.room.sendXt("upl", self.user.ID, data.ItemId)
 
 @Handlers.Handle(XT.UpdatePhoto)
