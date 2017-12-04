@@ -36,34 +36,38 @@ def determineCoinsOverdose(self, score):
 
 @Handlers.Handle(XT.GameOver)
 def handleSendGameOver(self, data):
-    if self.server.stampGroups.isStampRoom(self.room.Id):
-        roomStamps = self.server.stampGroups.getStampGroupByRoomId(self.room.Id).StampsById
-        myStamps = map(int, self.user.Stamps.split("|")) if self.user.Stamps else []
-        collectedStamps = []
-        totalGameStamps = 0
+    if self.room.isGame:
         if determineCoinsOverdose(self, data.Score):
             return cheatBan(self, self.user.ID, comment="Coin cheat detected")
 
-        for myStamp in myStamps:
-            if myStamp in roomStamps:
-                collectedStamps.append(myStamp)
+        if self.server.stampGroups.isStampRoom(self.room.Id):
+            roomStamps = self.server.stampGroups.getStampGroupByRoomId(self.room.Id).StampsById
+            myStamps = map(int, self.user.Stamps.split("|")) if self.user.Stamps else []
+            collectedStamps = []
+            totalGameStamps = 0
 
-            for groupId, stampGroup in self.server.stampGroups.schemaObjects.items():
-                if myStamp in stampGroup.StampsById:
-                    totalGameStamps += 1
+            for myStamp in myStamps:
+                if myStamp in roomStamps:
+                    collectedStamps.append(myStamp)
 
-        collectedStamps = [str(myStamp) for myStamp in myStamps if myStamp in roomStamps]
-        totalStamps = len(collectedStamps)
-        totalStampsGame = len(roomStamps)
-        collectedStampsString = "|".join(collectedStamps)
+                for groupId, stampGroup in self.server.stampGroups.schemaObjects.items():
+                    if myStamp in stampGroup.StampsById:
+                        totalGameStamps += 1
 
-        if totalStamps == totalStampsGame:
-            data.Score *= 2
+            collectedStamps = [str(myStamp) for myStamp in myStamps if myStamp in roomStamps]
+            totalStamps = len(collectedStamps)
+            totalStampsGame = len(roomStamps)
+            collectedStampsString = "|".join(collectedStamps)
 
-        coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
-        self.sendXt("zo", self.user.Coins, collectedStampsString, totalStamps, totalStampsGame, totalGameStamps)
+            if totalStamps == totalStampsGame:
+                data.Score *= 2
 
-    else:
-        coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
-        self.sendXt("zo", self.user.Coins, "", 0, 0, 0)            self.user.Coins = max(0, min(self.user.Coins + coinsEarned, maxCoins))
+            coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
+
             self.user.Coins = max(0, min(self.user.Coins + coinsEarned, maxCoins))
+            self.sendXt("zo", self.user.Coins, collectedStampsString, totalStamps, totalStampsGame, totalGameStamps)
+        else:
+            coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
+
+            self.user.Coins = max(0, min(self.user.Coins + coinsEarned, maxCoins))
+            self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
