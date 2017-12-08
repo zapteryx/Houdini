@@ -1,31 +1,29 @@
-import logging
+import importlib
 import json
+import logging
 import os
 import pkgutil
 import sys
-import importlib
-
-from watchdog.observers import Observer
 from logging.handlers import RotatingFileHandler
 
 import redis
-
-from twisted.internet.protocol import Factory
-from twisted.internet import reactor, task, threads
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from twisted.internet import reactor, task
+from twisted.internet.protocol import Factory
+from watchdog.observers import Observer
 
 import Houdini.Handlers as Handlers
-from Houdini.HandlerFileEventHandler import HandlerFileEventHandler
-from Houdini.Spheniscidae import Spheniscidae
-from Houdini.Penguin import Penguin
-from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection,\
-    retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection,\
-    retrievePinCollection, retrieveStampsCollection
-from Houdini.Handlers.Play.Pet import decreaseStats
 import Houdini.Plugins as Plugins
+from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection, \
+    retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection, \
+    retrievePinCollection, retrieveStampsCollection
 from Houdini.Events import Events
+from Houdini.Events.HandlerFileEvent import HandlerFileEventHandler
+from Houdini.Events.PluginFileEvent import PluginFileEventHandler
+from Houdini.Handlers.Play.Pet import decreaseStats
+from Houdini.Penguin import Penguin
+from Houdini.Spheniscidae import Spheniscidae
 
 """Deep debug
 from twisted.python import log
@@ -167,15 +165,22 @@ class HoudiniFactory(Factory):
 
         return player
 
+    def configureObservers(self, *observerSettings):
+        for observerPath, observerClass in observerSettings:
+            eventObserver = Observer()
+            eventObserver.schedule(observerClass(self), observerPath, recursive=True)
+            eventObserver.start()
+
     def start(self):
         self.logger.info("Starting server..")
 
         port = self.server["Port"]
 
         handlersPath = "./Houdini{}Handlers".format(os.path.sep)
-        handlerEventObserver = Observer()
-        handlerEventObserver.schedule(HandlerFileEventHandler(), handlersPath, recursive=True)
-        handlerEventObserver.start()
+        pluginsPath = "./Houdini{}Plugins".format(os.path.sep)
+
+        self.configureObservers([handlersPath, HandlerFileEventHandler],
+                                [pluginsPath, PluginFileEventHandler])
 
         self.logger.info("Listening on port {0}".format(port))
 
