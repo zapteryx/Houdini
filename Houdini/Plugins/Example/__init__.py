@@ -29,15 +29,7 @@ class Example(object):
         self.logger.info("[Example] Holy smokes!")
 
     def handleLogin(self, player, data):
-        self.logger.warn("[Example] %s is trying to login" % data.Username)
-
-    @Events.Register("Connected")
-    def handleConnected(player):
-        print("[Example] Woohoo~!")
-
-    @Events.Register("Disconnected")
-    def handleDisconnected(player):
-        print("[Example] Poo..~")
+        self.logger.info("[Example] %s is trying to login" % data.Username)
 
     def handleConnection(self, player):
         self.logger.info("[Example] New player connected, woohoo!")
