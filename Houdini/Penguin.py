@@ -17,6 +17,7 @@ class Penguin(Spheniscidae):
 		self.buddies = {}
 		self.puffles = {}
 		self.ignore = {}
+		self.throttle = {}
 
 		self.logger.info("Penguin class instantiated")
 

@@ -4,6 +4,7 @@ from Houdini.Data.Mail import Mail
 from Houdini.Data.Penguin import Penguin
 
 @Handlers.Handle(XT.StartMailEngine)
+@Handlers.Throttle(-1)
 def handleStartMailEngine(self, data):
     if not self.agentStatus and random.random() < 0.4:
         q = self.session.query(Mail).filter(Mail.Recipient == self.user.ID).\
@@ -17,7 +18,7 @@ def handleStartMailEngine(self, data):
 
     lastPaycheck = self.user.LastPaycheck
     if lastPaycheck == 0:
-        lastPaycheck = datetime.datetime.now()
+        lastPaycheck = datetime.date.today()
     else:
         lastPaycheck = datetime.date.fromtimestamp(lastPaycheck)
     today = datetime.date.today()
@@ -51,6 +52,7 @@ def handleStartMailEngine(self, data):
     self.sendXt("mst", unreadMail, totalMail)
 
 @Handlers.Handle(XT.GetMail)
+@Handlers.Throttle(-1)
 def handleGetMail(self, data):
     mailbox = self.session.query(Mail).\
         filter(Mail.Recipient == self.user.ID).\
@@ -64,6 +66,7 @@ def handleGetMail(self, data):
     self.sendXt("mg", postcardString)
 
 @Handlers.Handle(XT.SendMail)
+@Handlers.Throttle(1)
 def handleSendMail(self, data):
     q = self.session.query(Penguin).filter(Penguin.ID == data.RecipientId)
     recipientExists = self.session.query(q.exists()).scalar()

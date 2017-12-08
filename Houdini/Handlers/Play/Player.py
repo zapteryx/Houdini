@@ -2,10 +2,12 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 
 @Handlers.Handle(XT.Heartbeat)
+@Handlers.Throttle(60)
 def handleSendHeartbeat(self, data):
     self.sendXt("h")
 
 @Handlers.Handle(XT.ThrowBall)
+@Handlers.Throttle(1)
 def handlePlayerThrowBall(self, data):
     self.room.sendXt("sb", self.user.ID, data.X, data.Y)
 
@@ -17,31 +19,38 @@ def handleSendPlayerMove(self, data):
     self.room.sendXt("sp", self.user.ID, data.X, data.Y)
 
 @Handlers.Handle(XT.PlayerAction)
+@Handlers.Throttle(1)
 def handleUpdatePlayerAction(self, data):
     self.room.sendXt("sa", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendEmote)
+@Handlers.Throttle(1)
 def handleSendEmote(self, data):
     self.room.sendXt("se", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.PlayerFrame)
+@Handlers.Throttle(1)
 def handleSendPlayerFrame(self, data):
     self.frame = data.Id
     self.room.sendXt("sf", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendJoke)
+@Handlers.Throttle(1)
 def handleSendJoke(self, data):
     self.room.sendXt("sj", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendSafe)
+@Handlers.Throttle(1)
 def handleSafeMessage(self, data):
     self.room.sendXt("ss", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendTourGuide)
+@Handlers.Throttle(1)
 def handleSendTourGuide(self, data):
     self.room.sendXt("sg", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.GetLatestRevision)
+@Handlers.Throttle(-1)
 def handleGetLatestRevision(self, data):
     self.room.sendXt("glr", "0")
 

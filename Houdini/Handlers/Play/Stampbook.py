@@ -2,6 +2,7 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 
 @Handlers.Handle(XT.StampAdd)
+@Handlers.Throttle(1)
 def handleStampAdd(self, data):
     if data.StampId not in self.server.stamps:
         return

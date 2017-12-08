@@ -21,6 +21,7 @@ def handleBuyInventory(self, data):
     self.addItem(data.ItemId, itemCost)
 
 @Handlers.Handle(XT.GetInventory)
+@Handlers.Throttle(-1)
 def handleGetInventory(self, data):
     inventoryArray = self.user.Inventory.split("%")
 

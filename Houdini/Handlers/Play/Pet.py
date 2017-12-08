@@ -101,8 +101,14 @@ def handleSendAdoptPuffle(self, data):
     if not data.TypeId in puffleStatistics:
         return self.transport.loseConnection()
 
+    if not 16 > len(data.Name) > 4:
+        return self.sendError(441)
+
     if self.user.Coins < 800:
         return self.sendError(401)
+
+    if len(self.puffles) >= 19:
+        return self.sendError(440)
 
     self.user.Coins -= 800
 

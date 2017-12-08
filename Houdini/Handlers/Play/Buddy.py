@@ -2,6 +2,7 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 
 @Handlers.Handle(XT.GetBuddyList)
+@Handlers.Throttle(-1)
 def handleGetBuddyList(self, data):
     buddiesArray = []
 
