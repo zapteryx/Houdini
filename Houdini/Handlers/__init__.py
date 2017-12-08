@@ -510,8 +510,56 @@ class XT:
         "Data": [XTData("PlayerId", int)]
     }
 
+class HandlerEvent(object):
+
+    def __init__(self, handlerDetails):
+        self.handlerDetails = handlerDetails
+
+    def __add__(self, handlerMethod):
+        handlerId = self.handlerDetails["Handler"]
+        handlerData = self.handlerDetails["Data"]
+
+        XT = "#" in handlerId or handlerData and isinstance(handlerData[0], XTData)
+        handlersCollection = Handlers.XTHandlers if XT else Handlers.XMLHandlers
+        handlerListener = XTListener if XT else XMLListener
+
+        # User tried to register a handler for a packet that does that pertain to this server.
+        # e.g. trying to register a j#js handler on the login server
+        if handlerId not in handlersCollection:
+            return
+
+        listenerObject = handlerListener(self.handlerDetails, handlerMethod)
+        handlersCollection[handlerId].append(listenerObject)
+
+        return self
+
+    def __sub__(self, handlerMethod):
+        handlerId = self.handlerDetails["Handler"]
+        handlerData = self.handlerDetails["Data"]
+
+        XT = "#" in handlerId or handlerData and isinstance(handlerData[0], XTData)
+        handlersCollection = Handlers.XTHandlers if XT else Handlers.XMLHandlers
+
+        for handlerListener in handlersCollection[handlerId]:
+            if handlerListener.function == handlerMethod:
+                handlersCollection[handlerId].remove(handlerListener)
+
+        return self
+
+class HandlersMeta(type):
+    def __getattr__(self, handlerAttribute):
+        if hasattr(XML, handlerAttribute):
+            handlerDetails = getattr(XML, handlerAttribute)
+        elif hasattr(XT, handlerAttribute):
+            handlerDetails = getattr(XT, handlerAttribute)
+        else:
+            raise AttributeError("%r is not a valid handler." % handlerAttribute)
+
+        return HandlerEvent(handlerDetails)
+
 # TODO implement PossibleXTData/PossibleXMLData?
 class Handlers:
+    __metaclass__ = HandlersMeta
     XTHandlers = {}
     XMLHandlers = {}
 
@@ -581,24 +629,18 @@ class Handlers:
     @staticmethod
     def Handle(handler):
         def handlerFunction(function):
-            if not hasattr(function, "__call__"):
-                return function
-
             handlerId = handler["Handler"]
             handlerData = handler["Data"]
-            XT = True if "#" in handlerId else False or (handlerData and isinstance(handlerData[0], XTData))
 
-            if XT:
-                if handlerId not in Handlers.XTHandlers:
-                    Handlers.XTHandlers[handlerId] = []
+            XT = "#" in handlerId or handlerData and isinstance(handlerData[0], XTData)
+            handlersCollection = Handlers.XTHandlers if XT else Handlers.XMLHandlers
+            handlerListener = XTListener if XT else XMLListener
 
-                Handlers.XTHandlers[handlerId].append(XTListener(handler, function))
+            if handlerId not in handlersCollection:
+                handlersCollection[handlerId] = []
 
-            else:
-                if handlerId not in Handlers.XMLHandlers:
-                    Handlers.XMLHandlers[handlerId] = []
-
-                Handlers.XMLHandlers[handlerId].append(XMLListener(handler, function))
+            listenerObject = handlerListener(handler, function)
+            handlersCollection[handlerId].append(listenerObject)
 
             return function
 

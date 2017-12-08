@@ -1,29 +1,29 @@
-import logging
+import importlib
 import json
+import logging
 import os
 import pkgutil
 import sys
-import importlib
-
-from watchdog.observers import Observer
 from logging.handlers import RotatingFileHandler
 
 import redis
-
-from twisted.internet.protocol import Factory
-from twisted.internet import reactor, task
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from twisted.internet import reactor, task
+from twisted.internet.protocol import Factory
+from watchdog.observers import Observer
 
 import Houdini.Handlers as Handlers
-from Houdini.HandlerFileEventHandler import HandlerFileEventHandler
-from Houdini.Spheniscidae import Spheniscidae
-from Houdini.Penguin import Penguin
-from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection,\
-    retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection,\
+import Houdini.Plugins as Plugins
+from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection, \
+    retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection, \
     retrievePinCollection, retrieveStampsCollection
+from Houdini.Events import Events
+from Houdini.Events.HandlerFileEvent import HandlerFileEventHandler
+from Houdini.Events.PluginFileEvent import PluginFileEventHandler
 from Houdini.Handlers.Play.Pet import decreaseStats
+from Houdini.Penguin import Penguin
+from Houdini.Spheniscidae import Spheniscidae
 
 """Deep debug
 from twisted.python import log
@@ -101,6 +101,29 @@ class HoudiniFactory(Factory):
             self.loadHandlerModules("Houdini.Handlers.Login.Login")
             self.logger.info("Running login server")
 
+        self.plugins = {}
+        self.loadPlugins()
+
+    def loadPlugins(self):
+        for pluginPackage in self.getPackageModules(Plugins):
+            self.loadPlugin(pluginPackage)
+
+    def loadPlugin(self, plugin):
+        pluginModule, pluginClass = plugin
+
+        if not pluginClass in self.server["Plugins"]:
+            return
+
+        pluginObject = getattr(pluginModule, pluginClass)(self)
+
+        if Plugins.Plugin.providedBy(pluginObject):
+            self.plugins[pluginClass] = pluginObject
+
+            reactor.callInThread(pluginObject.ready)
+
+        else:
+            self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginClass))
+
     def loadHandlerModules(self, strictLoad=()):
         for handlerModule in self.getPackageModules(Handlers):
             if not strictLoad or strictLoad and handlerModule in strictLoad:
@@ -138,16 +161,26 @@ class HoudiniFactory(Factory):
 
         player = self.protocol(session, self)
 
+        Events.Fire("Connected", player)
+
         return player
+
+    def configureObservers(self, *observerSettings):
+        for observerPath, observerClass in observerSettings:
+            eventObserver = Observer()
+            eventObserver.schedule(observerClass(self), observerPath, recursive=True)
+            eventObserver.start()
 
     def start(self):
         self.logger.info("Starting server..")
 
         port = self.server["Port"]
 
-        handlerEventObserver = Observer()
-        handlerEventObserver.schedule(HandlerFileEventHandler(), "./Houdini/Handlers", recursive=True)
-        handlerEventObserver.start()
+        handlersPath = "./Houdini{}Handlers".format(os.path.sep)
+        pluginsPath = "./Houdini{}Plugins".format(os.path.sep)
+
+        self.configureObservers([handlersPath, HandlerFileEventHandler],
+                                [pluginsPath, PluginFileEventHandler])
 
         self.logger.info("Listening on port {0}".format(port))
 

@@ -6,6 +6,7 @@ from sqlalchemy.exc import InvalidRequestError
 from twisted.protocols.basic import LineOnlyReceiver
 
 from Houdini.Handlers import Handlers
+from Houdini.Events import Events
 
 class Spheniscidae(LineOnlyReceiver, object):
 
@@ -147,6 +148,8 @@ class Spheniscidae(LineOnlyReceiver, object):
 
     def connectionLost(self, reason):
         self.logger.info("Client disconnected")
+
+        Events.Fire("Disconnected", self)
 
         try:
             self.session.commit()

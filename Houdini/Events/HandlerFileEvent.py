@@ -1,52 +1,20 @@
 import logging
 import sys
-import copy
 import importlib
 from watchdog.events import FileSystemEventHandler
 import twisted.python.rebuild as rebuild
 
 from Houdini.Handlers import Handlers
+from Houdini.Events import evaluateHandlerFileEvent, removeHandlersByModule
 
 class HandlerFileEventHandler(FileSystemEventHandler):
 
-    def __init__(self):
+    def __init__(self, server):
         self.logger = logging.getLogger("Houdini")
-
-    def removeHandlersByModule(self, handlerModulePath):
-        def removeHandlers(handlerItems):
-            for handlerId, handlerListeners in handlerItems:
-                for handlerListener in handlerListeners:
-                    if handlerListener.functionFile == handlerModulePath:
-                        handlerListeners.remove(handlerListener)
-                        self.logger.debug("Removed %s", handlerId)
-
-        handlerItems = Handlers.XTHandlers.items()
-        xtHandlerCollection = copy.deepcopy(Handlers.XTHandlers)
-        removeHandlers(handlerItems)
-
-        handlerItems = Handlers.XMLHandlers.items()
-        xmlHandlerCollection = copy.deepcopy(Handlers.XMLHandlers)
-        removeHandlers(handlerItems)
-
-        return xtHandlerCollection, xmlHandlerCollection
-
-    def evaluateHandlerFileEvent(self, handlerFileEvent):
-        # Ignore all directory events
-        if handlerFileEvent.is_directory:
-            return False
-
-        handlerModulePath = handlerFileEvent.src_path[2:]
-
-        # Ignore non-Python files
-        if handlerModulePath[-3:] != ".py":
-            return False
-
-        handlerModule = handlerModulePath.replace("/", ".")[:-3]
-
-        return handlerModulePath, handlerModule
+        self.server = server
 
     def on_created(self, event):
-        handlerModuleDetails = self.evaluateHandlerFileEvent(event)
+        handlerModuleDetails = evaluateHandlerFileEvent(event)
 
         if not handlerModuleDetails:
             return
@@ -65,7 +33,7 @@ class HandlerFileEventHandler(FileSystemEventHandler):
             self.logger.error("%s detected in %s, not importing.", importError.__class__.__name__, handlerModule)
 
     def on_deleted(self, event):
-        handlerModuleDetails = self.evaluateHandlerFileEvent(event)
+        handlerModuleDetails = evaluateHandlerFileEvent(event)
 
         if not handlerModuleDetails:
             return
@@ -77,10 +45,10 @@ class HandlerFileEventHandler(FileSystemEventHandler):
 
         self.logger.debug("Deleting listeners registered by %s..", handlerModule)
 
-        self.removeHandlersByModule(handlerModulePath)
+        removeHandlersByModule(handlerModulePath)
 
     def on_modified(self, event):
-        handlerModuleDetails = self.evaluateHandlerFileEvent(event)
+        handlerModuleDetails = evaluateHandlerFileEvent(event)
 
         if not handlerModuleDetails:
             return
@@ -92,7 +60,7 @@ class HandlerFileEventHandler(FileSystemEventHandler):
 
         self.logger.info("Reloading %s", handlerModule)
 
-        xtHandlersCollection, xmlHandlersCollection = self.removeHandlersByModule(handlerModulePath)
+        xtHandlersCollection, xmlHandlersCollection = removeHandlersByModule(handlerModulePath)
 
         handlerModuleObject = sys.modules[handlerModule]
 
