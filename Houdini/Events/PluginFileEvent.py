@@ -17,17 +17,17 @@ class PluginFileEventHandler(FileSystemEventHandler):
         self.server = server
 
     def on_created(self, event):
-        handlerModuleDetails = evaluateHandlerFileEvent(event)
+        pluginModuleDetails = evaluateHandlerFileEvent(event)
 
-        if not handlerModuleDetails:
+        if not pluginModuleDetails:
             return
 
-        handlerModulePath, handlerModule = handlerModuleDetails
+        pluginModulePath, pluginModule = pluginModuleDetails
 
-        self.logger.debug("New handler module detected %s", handlerModule)
+        self.logger.debug("New handler module detected %s", pluginModule)
 
         try:
-            pluginModuleObject = importlib.import_module(handlerModule)
+            pluginModuleObject = importlib.import_module(pluginModule)
             pluginClass = pluginModuleObject.__name__.split(".")[2]
 
             pluginObject = getattr(pluginModuleObject, pluginClass)(self.server)
@@ -36,7 +36,7 @@ class PluginFileEventHandler(FileSystemEventHandler):
             self.logger.info("New plugin '%s' has been loaded." % pluginClass)
 
         except Exception as importError:
-            self.logger.error("%s detected in %s, not importing.", importError.__class__.__name__, handlerModule)
+            self.logger.error("%s detected in %s, not importing.", importError.__class__.__name__, pluginModule)
 
     def on_deleted(self, event):
         pluginModulePath = event.src_path[2:]
