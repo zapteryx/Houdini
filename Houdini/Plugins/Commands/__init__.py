@@ -1,10 +1,12 @@
 import zope.interface, logging
 from twisted.internet import reactor
-from twisted.internet.threads import deferToThread
+from twisted.internet.threads import blockingCallFromThread, deferToThread
 
 from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
+from Houdini.Data.Penguin import Penguin
 from Houdini.Handlers.Play.Item import handleBuyInventory
+from Houdini.Handlers.Play.Moderation import moderatorBan, moderatorKick
 
 class Commands(object):
     zope.interface.implements(Plugin)
@@ -41,12 +43,55 @@ class Commands(object):
             "JR": {
                 "Handler": self.handleJoinRoomCommand,
                 "Arguments": [CommandArgument("RoomId", int)]
+            },
+
+            "BAN": {
+                "Handler": self.handleBanCommand,
+                "Arguments": [CommandArgument("Username", str), CommandArgument("Duration", int),
+                              VariableCommandArgument("Reason")]
+            },
+
+            "KICK": {
+                "Handler": self.handleKickCommand,
+                "Arguments": [CommandArgument("Username", str)]
             }
         }
 
         self.bot = self.server.plugins["Bot"]
 
         Handlers.Message += self.handleMessage
+
+    @staticmethod
+    def getPlayer(sessionObject, playerUsername, specificQuery=Penguin):
+        player = sessionObject.query(specificQuery). \
+            filter_by(Username=playerUsername).scalar()
+
+        return player
+
+    def handleKickCommand(self, player, arguments):
+        if player.user.Moderator:
+            playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
+                                              arguments.Username, Penguin.ID)
+
+            if playerId is not None and playerId in self.server.players:
+                if not self.server.players[playerId].user.Moderator:
+                    reactor.callFromThread(moderatorKick, player, playerId)
+
+                    self.logger.info("%s has kicked %s" % (player.user.Username, arguments.Username))
+
+    def handleBanCommand(self, player, arguments):
+        if player.user.Moderator:
+            banReason = " ".join(arguments.Reason)
+
+            playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
+                                              arguments.Username, Penguin.ID)
+
+            if playerId is not None:
+                reactor.callFromThread(moderatorBan, player, playerId,
+                                       arguments.Duration, banReason)
+
+                self.logger.info("%s has banned %s using the !BAN command." %
+                                 (player.user.Username, arguments.Username))
 
     def handleJoinRoomCommand(self, player, arguments):
         if arguments.RoomId in self.server.rooms:
@@ -96,19 +141,26 @@ class Commands(object):
         for commandToken in commandTokens:
             commandArgument = commandArguments[tokenIndex]
 
-            if commandArgument.argumentType is int:
-                if not commandToken.isdigit():
-                    raise Exception("%r had an invalid argument" % commandString)
+            if not isinstance(commandArgument, VariableCommandArgument):
+                if commandArgument.argumentType is int:
+                    if not commandToken.isdigit():
+                        raise Exception("%r had an invalid argument" % commandString)
 
-                setattr(commandData, commandArguments[tokenIndex].arbitraryName, int(commandTokens[tokenIndex]))
+                    setattr(commandData, commandArgument.arbitraryName, int(commandTokens[tokenIndex]))
 
+                else:
+                    if commandArgument.argumentType is not str:
+                        raise Exception("%r had an invalid argument" % commandString)
+
+                    setattr(commandData, commandArgument.arbitraryName, str(commandTokens[tokenIndex]))
             else:
-                if not isinstance(commandArgument, basestring):
-                    raise Exception("%r had an invalid argument" % commandString)
-
-                setattr(commandData, commandArguments[tokenIndex].arbitraryName, str(commandTokens[tokenIndex]))
+                setattr(commandData, commandArgument.arbitraryName, commandTokens[tokenIndex:])
+                break
 
             tokenIndex += 1
+
+            if tokenIndex > len(commandArguments) - 1:
+                break
 
         return commandHandler(playerObject, commandData)
 
@@ -135,3 +187,8 @@ class CommandArgument(object):
     def __init__(self, arbitraryName, argumentType):
         self.arbitraryName = arbitraryName
         self.argumentType = argumentType
+
+class VariableCommandArgument(object):
+
+    def __init__(self, arbitraryName):
+        self.arbitraryName = arbitraryName
