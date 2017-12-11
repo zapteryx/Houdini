@@ -36,12 +36,26 @@ class Commands(object):
             "PING": {
                 "Handler": self.handlePingCommand,
                 "Arguments": []
+            },
+
+            "JR": {
+                "Handler": self.handleJoinRoomCommand,
+                "Arguments": [CommandArgument("RoomId", int)]
             }
         }
 
         self.bot = self.server.plugins["Bot"]
 
         Handlers.Message += self.handleMessage
+
+    def handleJoinRoomCommand(self, player, arguments):
+        if arguments.RoomId in self.server.rooms:
+            player.x = 0
+            player.y = 0
+            player.frame = 1
+
+            reactor.callFromThread(player.room.remove, player)
+            reactor.callFromThread(self.server.rooms[arguments.RoomId].add, player)
 
     def handleCoinsCommand(self, player, arguments):
         self.logger.debug("%s is trying to add %d coins" % (player.user.Username, arguments.Coins))
