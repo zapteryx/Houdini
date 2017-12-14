@@ -1,10 +1,6 @@
 from Houdini.Handlers import Handlers, XML
 from Houdini.Data.Penguin import Penguin
 from Houdini.Crypto import Crypto
-from Houdini.Handlers.Login import Login
-
-# Important!
-Handlers.Remove(XML.Login, Login.handleLogin)
 
 @Handlers.Handle(XML.Login)
 def handleLogin(self, data):
