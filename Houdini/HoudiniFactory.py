@@ -94,7 +94,7 @@ class HoudiniFactory(Factory):
             self.puffleKiller = task.LoopingCall(decreaseStats, self)
             self.puffleKiller.start(1800)
 
-            self.loadHandlerModules()
+            self.loadHandlerModules(excludeLoad="Houdini.Handlers.Login.Login")
             self.logger.info("Running world server")
         else:
             self.protocol = Spheniscidae
@@ -124,10 +124,9 @@ class HoudiniFactory(Factory):
         else:
             self.logger.warn("{0} plugin object doesn't provide the plugin interface".format(pluginClass))
 
-    def loadHandlerModules(self, strictLoad=()):
+    def loadHandlerModules(self, strictLoad=None, excludeLoad=None):
         for handlerModule in self.getPackageModules(Handlers):
-            if not strictLoad or strictLoad and handlerModule in strictLoad:
-
+            if not (strictLoad and handlerModule not in strictLoad or excludeLoad and handlerModule in excludeLoad):
                 if handlerModule not in sys.modules.keys():
                     importlib.import_module(handlerModule)
 
