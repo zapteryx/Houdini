@@ -4,25 +4,15 @@ from Houdini.Crypto import Crypto
 
 import bcrypt, time
 
-@Handlers.Handle(XML.VersionCheck)
-def handleVersionCheck(self, data):
-    if not data.Version == 153:
-        self.sendXml({"body": {"action": "apiKO", "r": "0"}})
-        self.transport.loseConnection()
-    else:
-        self.sendXml({"body": {"action": "apiOK", "r": "0"}})
-
-@Handlers.Handle(XML.RandomKey)
-def handleRandomKey(self, data):
-    self.randomKey = "houdini"
-    self.sendXml({"body": {"action": "rndK", "r": "-1"}, "k": self.randomKey})
-
-# TODO Implement login attempt throttling
 @Handlers.Handle(XML.Login)
 def handleLogin(self, data):
     if self.randomKey is None:
         return self.transport.loseConnection()
 
+    if not hasattr(self.server, "loginAttempts"):
+        self.server.loginAttempts = {}
+
+    loginTimestamp = time.time()
     username = data.Username
     password = data.Password
 
@@ -33,18 +23,42 @@ def handleLogin(self, data):
     if user is None:
         return self.sendErrorAndDisconnect(100)
 
+    ipAddr = self.transport.getPeer().host
+
     if not bcrypt.checkpw(password, user.Password):
-        self.logger.debug("{} failed to login.".format(username))
+        self.logger.info("{} failed to login.".format(username))
+
+        if ipAddr in self.server.loginAttempts:
+            lastFailedAttempt, failureCount = self.server.loginAttempts[ipAddr]
+
+            failureCount = 1 if loginTimestamp - lastFailedAttempt >= self.server.server["LoginFailureTimer"] \
+                else failureCount + 1
+
+            self.server.loginAttempts[ipAddr] = [loginTimestamp, failureCount]
+
+            if failureCount >= self.server.server["LoginFailureLimit"]:
+                return self.sendErrorAndDisconnect(150)
+
+        else:
+            self.server.loginAttempts[ipAddr] = [loginTimestamp, 1]
 
         return self.sendErrorAndDisconnect(101)
+
+    if ipAddr in self.server.loginAttempts:
+        previousAttempt = self.server.loginAttempts[ipAddr][0]
+
+        if (loginTimestamp - previousAttempt) <= self.server.server["LoginFailureTimer"]:
+            return self.sendErrorAndDisconnect(150)
+        else:
+            del self.server.loginAttempts[ipAddr]
 
     if user.Banned == "perm":
         return self.sendErrorAndDisconnect(603)
 
     banExpiry = int(user.Banned)
 
-    if banExpiry > time.time():
-        hoursLeft = int(banExpiry - time.time()) / 60 / 60
+    if banExpiry > loginTimestamp:
+        hoursLeft = int(banExpiry - loginTimestamp) / 60 / 60
 
         if hoursLeft == 0:
             return self.sendErrorAndDisconnect(602)
