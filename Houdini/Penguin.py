@@ -1,3 +1,5 @@
+import time, math
+
 from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Data.Puffle import Puffle
 
@@ -18,6 +20,8 @@ class Penguin(Spheniscidae):
 		self.puffles = {}
 		self.ignore = {}
 		self.throttle = {}
+
+		self.membershipDays = None
 
 		self.logger.info("Penguin class instantiated")
 
@@ -64,12 +68,10 @@ class Penguin(Spheniscidae):
 		self.user.Coins = coinAmount
 		self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
 
-	# TODO: Puffle values
+	# TODO: Puffle values?
 	def getPlayerString(self):
-		"""TODO: Make this work properly
-		if self.playerString is not None:
-			return self.playerString
-		"""
+		if self.membershipDays is None:
+			self.membershipDays = math.floor((time.time() - self.user.RegistrationDate) / 86400)
 
 		playerArray = (
 			self.user.ID,
@@ -88,7 +90,7 @@ class Penguin(Spheniscidae):
 			self.y,
 			self.frame,
 			1,
-			1, # Membership days
+			self.membershipDays,
 		)
 
 		playerStringArray = map(str, playerArray)
