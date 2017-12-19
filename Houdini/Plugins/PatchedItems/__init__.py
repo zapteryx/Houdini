@@ -36,7 +36,7 @@ class PatchedItems(object):
 
         self.server = server
 
-        configFile = os.path.dirname(os.path.realpath(__file__)) + "\\patched.conf"
+        configFile = os.path.dirname(os.path.realpath(__file__)) + "/patched.conf"
         with open(configFile, "r") as fileHandle:
             self.config = json.load(fileHandle)
 
@@ -183,8 +183,8 @@ class PatchedItems(object):
     @staticmethod
     def getFlasmBin():
         if platform == "linux" or platform == "linux2":
-            return '\/flasm\/linux\/flasm'
+            return '/flasm/linux/flasm'
         elif platform == "darwin":
-            return '\/flasm\/mac\/flasm'
+            return '/flasm/mac/flasm'
         elif platform == "win32":
-            return '\/flasm\/win\/flasm.exe'
+            return '/flasm/win/flasm.exe'
