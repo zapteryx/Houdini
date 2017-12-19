@@ -11,6 +11,7 @@ def handleSendActivateIgloo(self, data):
 
 @Handlers.Handle(XT.GetIglooDetails)
 def handleGetIglooDetails(self, data):
+    self.session.commit()
     igloo = self.session.query(Igloo).filter_by(Owner=data.Id).first()
 
     if igloo is None:
