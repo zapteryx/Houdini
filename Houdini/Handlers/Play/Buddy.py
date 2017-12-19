@@ -12,10 +12,8 @@ def handleGetBuddyList(self, data):
 
     self.sendXt("gb", "%".join(buddiesArray))
 
-# TODO check if the user is ignored
 @Handlers.Handle(XT.BuddyRequest)
 def handleBuddyRequest(self, data):
-    # Maybe use the or keyword?
     if len(self.buddies) >= 100:
         return
 
@@ -26,6 +24,9 @@ def handleBuddyRequest(self, data):
         return
 
     buddyObject = self.server.players[data.Id]
+
+    if self.user.ID in buddyObject.ignore:
+        return
 
     if not hasattr(buddyObject, "buddyRequests"):
         buddyObject.buddyRequests = {}
