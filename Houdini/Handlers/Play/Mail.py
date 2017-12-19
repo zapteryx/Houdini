@@ -68,10 +68,17 @@ def handleGetMail(self, data):
 @Handlers.Handle(XT.SendMail)
 @Handlers.Throttle(1)
 def handleSendMail(self, data):
-    q = self.session.query(Penguin).filter(Penguin.ID == data.RecipientId)
-    recipientExists = self.session.query(q.exists()).scalar()
-    if not recipientExists:
+    self.session.commit()
+    recipient = self.session.query(Penguin.Ignore).filter_by(ID=data.RecipientId).first()
+    if recipient is None:
         return
+    recipientIgnore = recipient.Ignore.split("%")
+    for ignoredPlayer in recipientIgnore:
+        if "|" in ignoredPlayer:
+            ignoreId, ignoreUsername = ignoredPlayer.split("|")
+            if int(ignoreId) == self.user.ID:
+                self.sendXt("ms", self.user.Coins, 1)
+                return
     if self.user.Coins < 10:
         self.sendXt("ms", self.user.Coins, 2)
         self.logger.debug("%d tried to send postcard with insufficient funds.", self.user.ID)
