@@ -71,3 +71,16 @@ def handleSendGameOver(self, data):
 
             self.user.Coins = max(0, min(self.user.Coins + coinsEarned, maxCoins))
             self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
+
+@Handlers.Handle(XT.MovePuck)
+def handleMovePuck(self, data):
+    if self.room.Id == 802: # Or disconnect if it isn't the ice rink :shrug:
+        self.server.rinkPuck = (data.X, data.Y)
+
+        self.room.sendXt("zm", self.user.ID, data.X, data.Y, data.SpeedX, data.SpeedY)
+
+@Handlers.Handle(XT.GetGame)
+def handleGetGame(self, data):
+    if self.room.Id == 802:
+        puckX, puckY = self.server.rinkPuck if hasattr(self.server, "rinkPuck") else (0, 0)
+        self.sendXt("gz", puckX, puckY)
