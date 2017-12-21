@@ -509,6 +509,17 @@ class XT:
         "Data": [XTData("PlayerId", int)]
     }
 
+    MovePuck = {
+        "Handler": "m",
+        "Data": [XTData("PlayerId", int), XTData("X", int), XTData("Y", int),
+                 XTData("SpeedX", int), XTData("SpeedY", int)]
+    }
+
+    GetGame = {
+        "Handler": "gz",
+        "Data": [VariableXTData("Null")]
+    }
+
 class HandlerEvent(object):
 
     def __init__(self, handlerDetails):
@@ -603,7 +614,7 @@ class Handlers:
                     xtHandlerDataObjectValue = packetData[dataIndex]
 
                     if xtHandlerDataObject.type is int:
-                        if not xtHandlerDataObjectValue.isdigit():
+                        if not xtHandlerDataObjectValue.lstrip("-").isdigit():
                             return False
 
                         setattr(xtData, xtHandlerDataObject.name, int(xtHandlerDataObjectValue))
@@ -632,7 +643,9 @@ class Handlers:
             handlerId = handler["Handler"]
             handlerData = handler["Data"]
 
-            XT = "#" in handlerId or handlerData and isinstance(handlerData[0], XTData)
+            XT = "#" in handlerId or handlerData and (isinstance(handlerData[0], XTData)
+                                                      or isinstance(handlerData[0], VariableXTData))
+
             handlersCollection = Handlers.XTHandlers if XT else Handlers.XMLHandlers
             handlerListener = XTListener if XT else XMLListener
 
