@@ -70,6 +70,7 @@ class HoudiniFactory(Factory):
         self.session = self.createSession()
 
         self.redis = redis.StrictRedis()
+        self.redis.flushdb()
 
         self.players = {}
 
