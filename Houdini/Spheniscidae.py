@@ -162,6 +162,3 @@ class Spheniscidae(LineOnlyReceiver, object):
 
         except InvalidRequestError:
             self.logger.info("There aren't any transactions in progress")
-
-        finally:
-            self.session.close()

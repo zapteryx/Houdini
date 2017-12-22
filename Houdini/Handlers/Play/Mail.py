@@ -68,7 +68,6 @@ def handleGetMail(self, data):
 @Handlers.Handle(XT.SendMail)
 @Handlers.Throttle(1)
 def handleSendMail(self, data):
-    self.session.commit()
     recipient = self.session.query(Penguin.Ignore).filter_by(ID=data.RecipientId).first()
     if recipient is None:
         return

@@ -67,6 +67,7 @@ class HoudiniFactory(Factory):
 
         self.databaseEngine = create_engine(engineString, pool_recycle=3600)
         self.createSession = sessionmaker(bind=self.databaseEngine)
+        self.session = self.createSession()
 
         self.redis = redis.StrictRedis()
 
@@ -156,9 +157,7 @@ class HoudiniFactory(Factory):
         return packageModules
 
     def buildProtocol(self, addr):
-        session = self.createSession()
-
-        player = self.protocol(session, self)
+        player = self.protocol(self.session, self)
 
         Events.Fire("Connected", player)
 
