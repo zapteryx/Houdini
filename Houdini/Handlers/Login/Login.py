@@ -18,6 +18,7 @@ def handleLogin(self, data):
 
     self.logger.info("{0} is attempting to login..".format(username))
 
+    self.session.commit()
     user = self.session.query(Penguin).filter_by(Username=username).first()
 
     if user is None:
