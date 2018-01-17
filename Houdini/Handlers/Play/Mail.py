@@ -25,7 +25,7 @@ def handleStartMailEngine(self, data):
     firstDayOfMonth = today.replace(day=1)
     lastPaycheck = lastPaycheck.replace(day=1)
     while lastPaycheck < firstDayOfMonth:
-        lastPaycheck = lastPaycheck.replace(month=(lastPaycheck.month + 1))
+        lastPaycheck = lastPaycheck + datetime.timedelta(days=32)
         lastPaycheck = lastPaycheck.replace(day=1)
         paycheckDate = int(time.mktime(lastPaycheck.timetuple())) + 43200
         if 428 in self.inventory:
