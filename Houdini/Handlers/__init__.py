@@ -434,11 +434,6 @@ class XT:
         "Data": []
     }
 
-    GameOver = {
-        "Handler": "zo",
-        "Data": [XTData("Score", int)]
-    }
-
     RestPuffle = {
         "Handler": "p#pr",
         "Data": [XTData("PuffleId", int)]
@@ -544,6 +539,12 @@ class XT:
         "Handler": "zm",
         "Data": [VariableXTData("Move")]
     }
+
+    GameOver = {
+        "Handler": "zo",
+        "Data": [XTData("Score", int)]
+    }
+
 
 class HandlerEvent(object):
 
