@@ -73,7 +73,6 @@ class Penguin(Spheniscidae):
 		self.user.Coins = coinAmount
 		self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
 
-	# TODO: Puffle values?
 	def getPlayerString(self):
 		if self.membershipDays is None:
 			self.membershipDays = math.floor((time.time() - self.user.RegistrationDate) / 86400)
