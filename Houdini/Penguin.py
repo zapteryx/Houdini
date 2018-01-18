@@ -23,6 +23,8 @@ class Penguin(Spheniscidae):
 
 		self.membershipDays = None
 
+		self.table = None
+
 		self.logger.info("Penguin class instantiated")
 
 	def addItem(self, itemId, itemCost=0):
