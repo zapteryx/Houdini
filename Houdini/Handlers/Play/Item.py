@@ -13,6 +13,9 @@ def handleBuyInventory(self, data):
     if self.server.items.isBait(data.ItemId):
         return cheatBan(self, self.user.ID, comment="Added bait item")
 
+    if self.server.items.isTourGuide(data.ItemId):
+        self.receiveSystemPostcard(126)
+
     itemCost = self.server.items.getCost(data.ItemId)
 
     if self.user.Coins < itemCost:
