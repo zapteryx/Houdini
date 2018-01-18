@@ -38,10 +38,6 @@ class Penguin(Spheniscidae):
 
 		self.sendXt("ai", itemId, self.user.Coins)
 
-	""" TODO: Ensure valid stamp ID's (probably do this
-	when we implement the mini-game end screen stamp 
-	overviews
-	"""
 	def addStamp(self, stampId, sendXt=False):
 		stamps = self.user.Stamps.split("|")
 		if stampId in stamps:
