@@ -46,9 +46,12 @@ def handleLogin(self, data):
         return self.sendErrorAndDisconnect(101)
 
     if ipAddr in self.server.loginAttempts:
-        previousAttempt = self.server.loginAttempts[ipAddr][0]
+        previousAttempt, failureCount = self.server.loginAttempts[ipAddr]
 
-        if (loginTimestamp - previousAttempt) <= self.server.server["LoginFailureTimer"]:
+        maxAttemptsExceeded = failureCount >= self.server.server["LoginFailureLimit"]
+        timerSurpassed = (loginTimestamp - previousAttempt) > self.server.server["LoginFailureTimer"]
+
+        if maxAttemptsExceeded and not timerSurpassed:
             return self.sendErrorAndDisconnect(150)
         else:
             del self.server.loginAttempts[ipAddr]
