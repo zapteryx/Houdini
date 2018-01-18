@@ -76,6 +76,10 @@ def handleJoinWorld(self, data):
 @Handlers.Handle(XT.JoinRoom)
 @Handlers.Throttle(0.2)
 def handleJoinRoom(self, data):
+    tableRooms = (111, 220, 221, 422)
+    if data.RoomId in tableRooms:
+        self.sendXt("jr", data.RoomId)
+
     if data.RoomId in self.server.rooms:
         self.x = data.X
         self.y = data.Y
