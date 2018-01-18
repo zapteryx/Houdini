@@ -2,6 +2,7 @@ import time
 
 from marshmallow import Schema, fields, post_load
 from Houdini.Crumbs import SchemaObject, SchemaObjectCollection
+from Houdini.Handlers.Games.Table import leaveTable
 
 class Room(SchemaObject):
 
@@ -27,6 +28,8 @@ class Room(SchemaObject):
     def add(self, player):
         if len(self.players) > self.MaxUsers:
             return player.sendError(210)
+
+        leaveTable(player)
 
         self.players.append(player)
 
