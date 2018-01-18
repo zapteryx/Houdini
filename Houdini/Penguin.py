@@ -60,6 +60,15 @@ class Penguin(Spheniscidae):
 		if sendXt:
 			self.sendXt("aabs", stampId)
 
+	def receiveSystemPostcard(self, postcardId):
+		currentTimestamp = int(time.time())
+		postcard = Mail(Recipient=self.user.ID, SenderName="sys",
+						SenderID=0, Details="", Date=currentTimestamp,
+						Type=postcardId)
+		self.session.add(postcard)
+		self.sendXt("mr", self.user.Username, self.user.ID, postcardId,
+					"", currentTimestamp, postcard.ID)
+
 	def sendCoins(self, coinAmount):
 		self.user.Coins = coinAmount
 		self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
