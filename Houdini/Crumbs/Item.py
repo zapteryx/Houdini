@@ -14,6 +14,7 @@ class ItemSchema(Schema):
     Layer = fields.Integer(load_from="layer")
     Bait = fields.Boolean(load_from="is_bait", required=False)
     EPF = fields.Boolean(load_from="is_epf", required=False)
+    Tour = fields.Boolean(load_from="make_tour_guide", required=False)
 
     @post_load
     def make_item(self, data):
