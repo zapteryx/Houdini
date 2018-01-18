@@ -509,6 +509,21 @@ class XT:
         "Data": [XTData("PlayerId", int)]
     }
 
+    GetTablePopulation = {
+        "Handler": "a#gt",
+        "Data": [VariableXTData("Tables")]
+    }
+
+    JoinTable = {
+        "Handler": "a#jt",
+        "Data": [XTData("TableId", int)]
+    }
+
+    LeaveTable = {
+        "Handler": "a#lt",
+        "Data": []
+    }
+
     MovePuck = {
         "Handler": "m",
         "Data": [XTData("PlayerId", int), XTData("X", int), XTData("Y", int),
