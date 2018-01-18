@@ -58,6 +58,9 @@ class ItemCollection(SchemaObjectCollection):
     def isItemEPF(self, itemId):
         return hasattr(self.schemaObjects[int(itemId)], "EPF")
 
+    def isTourGuide(self, itemId):
+        return hasattr(self.schemaObjects[int(itemId)], "Tour")
+
     def isPuffle(self, itemId):
         return itemId in range(750, 758)
 
