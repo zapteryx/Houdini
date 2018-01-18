@@ -22,6 +22,7 @@ from Houdini.Events import Events
 from Houdini.Events.HandlerFileEvent import HandlerFileEventHandler
 from Houdini.Events.PluginFileEvent import PluginFileEventHandler
 from Houdini.Handlers.Play.Pet import decreaseStats
+from Houdini.Handlers.Games.Table import Table, FindFour
 from Houdini.Penguin import Penguin
 from Houdini.Spheniscidae import Spheniscidae
 
@@ -92,6 +93,17 @@ class HoudiniFactory(Factory):
             self.stampGroups, self.stamps = retrieveStampsCollection()
 
             self.openIgloos = {}
+
+            self.tables = {}
+
+            tablesConfig = self.config["Tables"]
+            fourRooms = tablesConfig["Four"]
+            for room in fourRooms:
+                tableIds = room["Tables"]
+                for tableId in tableIds:
+                    tableObject = Table(tableId, FindFour())
+
+                    self.tables[tableId] = tableObject
 
             self.puffleKiller = task.LoopingCall(decreaseStats, self)
             self.puffleKiller.start(1800)
