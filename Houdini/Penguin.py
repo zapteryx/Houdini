@@ -102,6 +102,7 @@ class Penguin(Spheniscidae):
 		# This indicates that the client was successfully authorized
 		# and joined the server w/ all their stuff loaded
 		if hasattr(self, "room") and self.room is not None:
+			leaveTable(self)
 			self.room.remove(self)
 
 			# Stop walking any puffles
