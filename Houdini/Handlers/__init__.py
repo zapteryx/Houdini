@@ -535,6 +535,16 @@ class XT:
         "Data": [VariableXTData("Null")]
     }
 
+    JoinGame = {
+        "Handler": "jz",
+        "Data": []
+    }
+
+    SendMove = {
+        "Handler": "zm",
+        "Data": [VariableXTData("Move")]
+    }
+
 class HandlerEvent(object):
 
     def __init__(self, handlerDetails):
