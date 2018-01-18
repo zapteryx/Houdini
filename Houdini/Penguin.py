@@ -2,6 +2,8 @@ import time, math
 
 from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Data.Puffle import Puffle
+from Houdini.Data.Mail import Mail
+from Houdini.Handlers.Games.Table import leaveTable
 
 class Penguin(Spheniscidae):
 
