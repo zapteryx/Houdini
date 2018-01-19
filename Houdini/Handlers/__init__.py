@@ -532,7 +532,7 @@ class XT:
 
     JoinGame = {
         "Handler": "jz",
-        "Data": []
+        "Data": [VariableXTData("Null")]
     }
 
     SendMove = {
