@@ -30,9 +30,8 @@ class FindFour(object):
         return False
 
     def isValidMove(self, column, row):
-        positionEmpty = self.board[column][row] == 0
-        positionBelowFilled = bool(self.board[column][row + 1])
-        if row <= 5 and (row == 5 or (positionEmpty and positionBelowFilled)):
+        if row <= 5 and (row == 5 or (self.board[column][row] == 0
+                                      and self.board[column][row + 1])):
             return True
         return False
 
