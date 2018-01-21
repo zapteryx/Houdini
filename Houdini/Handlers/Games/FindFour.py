@@ -35,6 +35,12 @@ class FindFour(object):
             return True
         return False
 
+    def isBoardFull(self):
+        for column in self.board:
+            if not column[0]:
+                return False
+        return True
+
     def getString(self):
         return ','.join(str(item) for row in self.board for item in row)
 
@@ -67,9 +73,14 @@ def handleSendMove(self, data):
             if self.table.game.isValidMove(column, row):
                 self.table.sendXt("zm", self.table.game.currentPlayer - 1, column, row)
                 self.table.game.placeChip(column, row)
+                opponent = self.table.penguins[1 if self.table.game.currentPlayer == 1 else 0]
                 if self.table.game.isPositionWin(column, row):
-                    opponent = self.table.penguins[1 if self.table.game.currentPlayer == 1 else 0]
                     self.sendCoins(self.user.Coins + 10)
+                    opponent.sendCoins(opponent.user.Coins + 5)
+                    self.table.reset(self)
+                    return
+                if self.table.game.isBoardFull():
+                    self.sendCoins(self.user.Coins + 5)
                     opponent.sendCoins(opponent.user.Coins + 5)
                     self.table.reset(self)
                     return
