@@ -545,6 +545,21 @@ class XT:
         "Data": [XTData("Score", int)]
     }
 
+    GetWaddlePopulation = {
+        "Handler": "gw",
+        "Data": [VariableXTData("Waddles")]
+    }
+
+    JoinWaddle = {
+        "Handler": "jw",
+        "Data": [XTData("WaddleId", int)]
+    }
+
+    LeaveWaddle = {
+        "Handler": "lw",
+        "Data": [VariableXTData("Null")]
+    }
+
 
 class HandlerEvent(object):
 
