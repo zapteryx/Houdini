@@ -70,20 +70,24 @@ def handleSendMove(self, data):
         gameReady = len(self.table.penguins) > 1
         if isPlayer and gameReady:
             column, row = map(int, data.Move)
-            if self.table.game.isValidMove(column, row):
-                self.table.sendXt("zm", self.table.game.currentPlayer - 1, column, row)
-                self.table.game.placeChip(column, row)
-                opponent = self.table.penguins[1 if self.table.game.currentPlayer == 1 else 0]
-                if self.table.game.isPositionWin(column, row):
-                    self.sendCoins(self.user.Coins + 10)
-                    opponent.sendCoins(opponent.user.Coins + 5)
-                    self.table.reset(self)
-                    return
-                if self.table.game.isBoardFull():
-                    self.sendCoins(self.user.Coins + 5)
-                    opponent.sendCoins(opponent.user.Coins + 5)
-                    self.table.reset(self)
-                    return
+            currentPlayer = self.table.penguins[self.table.game.currentPlayer - 1]
+            if currentPlayer != self:
+                return
+            if not self.table.game.isValidMove(column, row):
+                return
+            self.table.sendXt("zm", self.table.game.currentPlayer - 1, column, row)
+            self.table.game.placeChip(column, row)
+            opponent = self.table.penguins[1 if self.table.game.currentPlayer == 1 else 0]
+            if self.table.game.isPositionWin(column, row):
+                self.sendCoins(self.user.Coins + 10)
+                opponent.sendCoins(opponent.user.Coins + 5)
+                self.table.reset(self)
+                return
+            if self.table.game.isBoardFull():
+                self.sendCoins(self.user.Coins + 5)
+                opponent.sendCoins(opponent.user.Coins + 5)
+                self.table.reset(self)
+                return
             self.table.game.currentPlayer = 2 if self.table.game.currentPlayer == 1 else 1
     except ValueError:
         self.logger.warn("Malformed move.".format(self.user.Username))
