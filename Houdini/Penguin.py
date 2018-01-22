@@ -3,7 +3,9 @@ import time, math
 from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Data.Puffle import Puffle
 from Houdini.Data.Mail import Mail
+
 from Houdini.Handlers.Games.Table import leaveTable
+from Houdini.Handlers.Games.Waddle import leaveWaddle
 
 class Penguin(Spheniscidae):
 
@@ -26,6 +28,7 @@ class Penguin(Spheniscidae):
 		self.membershipDays = None
 
 		self.table = None
+		self.waddle = None
 
 		self.logger.info("Penguin class instantiated")
 
@@ -111,6 +114,7 @@ class Penguin(Spheniscidae):
 		# and joined the server w/ all their stuff loaded
 		if hasattr(self, "room") and self.room is not None:
 			leaveTable(self)
+			leaveWaddle(self)
 			self.room.remove(self)
 
 			# Stop walking any puffles
