@@ -76,7 +76,7 @@ def handleGetTablePopulation(self, data):
     try:
         tablesString = []
         for tableId in data.Tables:
-            table = self.server.tables[int(tableId)]
+            table = self.room.tables[int(tableId)]
             tablesString.append("{}|{}".format(tableId, len(table.penguins)))
         self.sendXt("gt", "%".join(tablesString))
     except KeyError:
@@ -86,7 +86,7 @@ def handleGetTablePopulation(self, data):
 def handleJoinTable(self, data):
     try:
         if not self.table:
-            table = self.server.tables[data.TableId]
+            table = self.room.tables[data.TableId]
             table.add(self)
     except KeyError:
         self.logger.warn("{} tried to join a table which doesn't exist."

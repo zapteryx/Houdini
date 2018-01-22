@@ -12,6 +12,9 @@ class Room(SchemaObject):
         self.players = []
         self.isGame = 900 <= self.Id <= 1000
 
+        self.tables = {}
+        self.waddles = {}
+
     def send(self, data):
         for player in self.players:
             player.sendLine(data)

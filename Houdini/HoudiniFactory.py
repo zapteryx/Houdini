@@ -24,6 +24,7 @@ from Houdini.Events.PluginFileEvent import PluginFileEventHandler
 from Houdini.Handlers.Play.Pet import decreaseStats
 from Houdini.Handlers.Games.Table import Table
 from Houdini.Handlers.Games.FindFour import FindFour
+from Houdini.Handlers.Games.Waddle import Waddle, SledRace
 from Houdini.Penguin import Penguin
 from Houdini.Spheniscidae import Spheniscidae
 
@@ -95,16 +96,8 @@ class HoudiniFactory(Factory):
 
             self.openIgloos = {}
 
-            self.tables = {}
-
-            tablesConfig = self.config["Tables"]
-            fourRooms = tablesConfig["Four"]
-            for room in fourRooms:
-                tableIds = room["Tables"]
-                for tableId in tableIds:
-                    tableObject = Table(tableId, FindFour())
-
-                    self.tables[tableId] = tableObject
+            self.createTables()
+            self.createWaddles()
 
             self.puffleKiller = task.LoopingCall(decreaseStats, self)
             self.puffleKiller.start(1800)
@@ -118,6 +111,39 @@ class HoudiniFactory(Factory):
 
         self.plugins = {}
         self.loadPlugins()
+
+    def createTables(self):
+        tablesConfig = self.config["Tables"]
+        tableTypes = [("Four", FindFour), ("Mancala", FindFour), ("Treasure", FindFour)]
+
+        for tableType in tableTypes:
+            typeKey, typeClass = tableType
+            tableRooms = tablesConfig[typeKey]
+
+            for room in tableRooms:
+                roomObject = self.rooms[room["RoomId"]]
+                tableIds = room["Tables"]
+
+                for tableId in tableIds:
+                    tableObject = Table(tableId, typeClass())
+                    roomObject.tables[tableId] = tableObject
+
+    def createWaddles(self):
+        waddlesConfig = self.config["Waddles"]
+        waddleTypes = [("Sled", SledRace)]
+
+        for waddleType in waddleTypes:
+            typeKey, typeClass = waddleType
+            waddleRooms = waddlesConfig[typeKey]
+
+            for room in waddleRooms:
+                roomObject = self.rooms[room["RoomId"]]
+                waddles = room["Waddles"]
+
+                for waddle in waddles:
+                    waddleObject = Waddle(waddle["Id"], waddle["Seats"],
+                                          typeClass, roomObject)
+                    roomObject.waddles[waddle["Id"]] = waddleObject
 
     def loadPlugins(self):
         for pluginPackage in self.getPackageModules(Plugins):
