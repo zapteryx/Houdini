@@ -36,6 +36,9 @@ def determineCoinsOverdose(self, score):
 
 @Handlers.Handle(XT.GameOver)
 def handleSendGameOver(self, data):
+    if self.waddle or self.table:
+        return
+
     if self.room.isGame:
         if determineCoinsOverdose(self, data.Score):
             return cheatBan(self, self.user.ID, comment="Coin cheat detected")
