@@ -2,7 +2,9 @@ import time
 
 from marshmallow import Schema, fields, post_load
 from Houdini.Crumbs import SchemaObject, SchemaObjectCollection
+
 from Houdini.Handlers.Games.Table import leaveTable
+from Houdini.Handlers.Games.Waddle import leaveWaddle
 
 class Room(SchemaObject):
 
@@ -33,6 +35,7 @@ class Room(SchemaObject):
             return player.sendError(210)
 
         leaveTable(player)
+        leaveWaddle(player)
 
         self.players.append(player)
 
