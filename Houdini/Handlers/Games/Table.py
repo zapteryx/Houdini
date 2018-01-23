@@ -2,9 +2,11 @@ from Houdini.Handlers import Handlers, XT
 
 class Table(object):
 
-    def __init__(self, id, gameInstance):
+    def __init__(self, id, game, room):
         self.id = id
-        self.game = gameInstance
+        self.game = game()
+        self.room = room
+
         self.penguins = []
 
     def add(self, penguin):
@@ -13,7 +15,7 @@ class Table(object):
         seatId = len(self.penguins) - 1
 
         penguin.sendXt("jt", self.id, seatId + 1)
-        penguin.room.sendXt("ut", self.id, len(self.penguins))
+        self.room.sendXt("ut", self.id, len(self.penguins))
         penguin.table = self
 
         return seatId
@@ -22,16 +24,16 @@ class Table(object):
         self.penguins.remove(penguin)
 
         penguin.sendXt("lt")
-        penguin.room.sendXt("ut", self.id, len(self.penguins))
+        self.room.sendXt("ut", self.id, len(self.penguins))
         penguin.table = None
 
-    def reset(self, penguin):
+    def reset(self):
         for penguin in self.penguins:
             penguin.table = None
 
         self.game = type(self.game)()
         self.penguins = []
-        penguin.room.sendXt("ut", self.id, 0)
+        self.room.sendXt("ut", self.id, 0)
 
     def getSeatId(self, penguin):
         return self.penguins.index(penguin)
@@ -67,7 +69,7 @@ def leaveTable(self):
         gameReady = len(self.table.penguins) > 1
         if isPlayer and gameReady:
             self.table.sendXt("cz", self.user.Username)
-            self.table.reset(self)
+            self.table.reset()
         else:
             self.table.remove(self)
 

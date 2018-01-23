@@ -81,12 +81,12 @@ def handleSendMove(self, data):
             if self.table.game.isPositionWin(column, row):
                 self.sendCoins(self.user.Coins + 10)
                 opponent.sendCoins(opponent.user.Coins + 5)
-                self.table.reset(self)
+                self.table.reset()
                 return
             if self.table.game.isBoardFull():
                 self.sendCoins(self.user.Coins + 5)
                 opponent.sendCoins(opponent.user.Coins + 5)
-                self.table.reset(self)
+                self.table.reset()
                 return
             self.table.game.currentPlayer = 2 if self.table.game.currentPlayer == 1 else 1
     except ValueError:

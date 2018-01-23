@@ -125,7 +125,7 @@ class HoudiniFactory(Factory):
                 tableIds = room["Tables"]
 
                 for tableId in tableIds:
-                    tableObject = Table(tableId, typeClass())
+                    tableObject = Table(tableId, typeClass, roomObject)
                     roomObject.tables[tableId] = tableObject
 
     def createWaddles(self):
