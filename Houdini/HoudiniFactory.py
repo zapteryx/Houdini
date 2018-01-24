@@ -25,6 +25,7 @@ from Houdini.Handlers.Play.Pet import decreaseStats
 from Houdini.Handlers.Games.Table import Table
 from Houdini.Handlers.Games.FindFour import FindFour
 from Houdini.Handlers.Games.Mancala import Mancala
+from Houdini.Handlers.Games.TreasureHunt import TreasureHunt
 from Houdini.Handlers.Games.Waddle import Waddle
 from Houdini.Handlers.Games.SledRace import SledRace
 from Houdini.Penguin import Penguin
@@ -116,7 +117,8 @@ class HoudiniFactory(Factory):
 
     def createTables(self):
         tablesConfig = self.config["Tables"]
-        tableTypes = [("Four", FindFour), ("Mancala", Mancala), ("Treasure", FindFour)]
+        tableTypes = [("Four", FindFour), ("Mancala", Mancala),
+                      ("Treasure", TreasureHunt)]
 
         for tableType in tableTypes:
             typeKey, typeClass = tableType
