@@ -25,7 +25,8 @@ from Houdini.Handlers.Play.Pet import decreaseStats
 from Houdini.Handlers.Games.Table import Table
 from Houdini.Handlers.Games.FindFour import FindFour
 from Houdini.Handlers.Games.Mancala import Mancala
-from Houdini.Handlers.Games.Waddle import Waddle, SledRace
+from Houdini.Handlers.Games.Waddle import Waddle
+from Houdini.Handlers.Games.SledRace import SledRace
 from Houdini.Penguin import Penguin
 from Houdini.Spheniscidae import Spheniscidae
 
