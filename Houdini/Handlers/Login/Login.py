@@ -73,7 +73,8 @@ def handleLogin(self, data):
 
     self.logger.info("{} logged in successfully".format(username))
 
-    loginKey = Crypto.hash(self.randomKey[::-1])
+    randomKey = Crypto.generateRandomKey()
+    loginKey = Crypto.hash(randomKey[::-1])
 
     self.session.add(user)
 
