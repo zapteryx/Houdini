@@ -122,6 +122,7 @@ class Penguin(Spheniscidae):
 		if hasattr(self, "room") and self.room is not None:
 			leaveTable(self)
 			leaveWaddle(self)
+			self.server.matchMaker.remove(self)
 			self.room.remove(self)
 
 			# Stop walking any puffles
