@@ -49,6 +49,7 @@ from Houdini.Crumbs.Igloo import IglooSchema, IglooCollection
 from Houdini.Crumbs.Pin import PinSchema, PinCollection
 from Houdini.Crumbs.Stamp import StampSchema, StampGroupSchema,\
     StampGroupCollection, StampCollection
+from Houdini.Crumbs.Card import CardSchema, CardCollection
 
 def retrieveItemCollection(crumbsFile="crumbs/paper_items.json"):
     assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
@@ -154,3 +155,18 @@ def retrieveStampsCollection(crumbsFile="crumbs/stamps.json"):
         logger.info("%d stamps loaded", len(stampCollection))
 
         return stampGroupCollection, stampCollection
+
+def retrieveCardCollection(crumbsFile="crumbs/cards.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as fileHandle:
+        items = json.load(fileHandle)
+
+        schema = CardSchema(many=True)
+        result = schema.load(items)
+
+        cardCollection = CardCollection(result.data)
+
+        logger.info("%d cards loaded", len(cardCollection))
+
+        return cardCollection

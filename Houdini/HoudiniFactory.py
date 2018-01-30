@@ -17,7 +17,7 @@ import Houdini.Handlers as Handlers
 import Houdini.Plugins as Plugins
 from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection, \
     retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection, \
-    retrievePinCollection, retrieveStampsCollection
+    retrievePinCollection, retrieveStampsCollection, retrieveCardCollection
 from Houdini.Events import Events
 from Houdini.Events.HandlerFileEvent import HandlerFileEventHandler
 from Houdini.Events.PluginFileEvent import PluginFileEventHandler
@@ -96,6 +96,7 @@ class HoudiniFactory(Factory):
             self.floors = retrieveFloorCollection()
             self.pins = retrievePinCollection()
             self.stampGroups, self.stamps = retrieveStampsCollection()
+            self.cards = retrieveCardCollection()
 
             self.openIgloos = {}
 
