@@ -99,8 +99,7 @@ class Commands(object):
             player.y = 0
             player.frame = 1
 
-            reactor.callFromThread(player.room.remove, player)
-            reactor.callFromThread(self.server.rooms[arguments.RoomId].add, player)
+            reactor.callFromThread(player.joinRoom, arguments.RoomId)
 
     def handleCoinsCommand(self, player, arguments):
         self.logger.debug("%s is trying to add %d coins" % (player.user.Username, arguments.Coins))

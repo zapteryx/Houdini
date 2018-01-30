@@ -8,8 +8,7 @@ class SledRace(object):
         self.seats = seats
 
         for penguin in self.penguins:
-            penguin.room.remove(penguin)
-            penguin.server.rooms[999].add(penguin)
+            penguin.joinRoom(999)
 
             penguin.waddle = self
 

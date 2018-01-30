@@ -67,6 +67,10 @@ class Penguin(Spheniscidae):
 		if sendXt:
 			self.sendXt("aabs", stampId)
 
+	def joinRoom(self, roomId):
+		self.room.remove(self)
+		self.server.rooms[roomId].add(self)
+
 	def receiveSystemPostcard(self, postcardId):
 		currentTimestamp = int(time.time())
 		postcard = Mail(Recipient=self.user.ID, SenderName="sys",
