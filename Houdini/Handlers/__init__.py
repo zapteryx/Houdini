@@ -530,6 +530,11 @@ class XT:
         "Data": [VariableXTData("Null")]
     }
 
+    UpdateGame = {
+        "Handler": "uz",
+        "Data": [VariableXTData("Null")]
+    }
+
     JoinGame = {
         "Handler": "jz",
         "Data": [VariableXTData("Null")]
@@ -560,6 +565,10 @@ class XT:
         "Data": [VariableXTData("Null")]
     }
 
+    CardGameOver = {
+        "Handler": "czo",
+        "Data": [XTData("Whatever", int)]
+    }
 
 class HandlerEvent(object):
 
