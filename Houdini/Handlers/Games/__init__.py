@@ -2,6 +2,13 @@ import math, time
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Handlers.Play.Moderation import cheatBan
+from Houdini.Handlers.Games.Table import Table
+from Houdini.Handlers.Games.FindFour import FindFour
+from Houdini.Handlers.Games.Mancala import Mancala
+from Houdini.Handlers.Games.TreasureHunt import TreasureHunt
+from Houdini.Handlers.Games.Waddle import Waddle
+from Houdini.Handlers.Games.SledRace import SledRace
+from Houdini.Handlers.Games.CardJitsu import CardMat
 
 maxCoins = 1000000
 
@@ -87,3 +94,35 @@ def handleGetGame(self, data):
     if self.room.Id == 802:
         puckX, puckY = self.server.rinkPuck if hasattr(self.server, "rinkPuck") else (0, 0)
         self.sendXt("gz", puckX, puckY)
+
+def createTables(tablesConfig, roomObjects):
+    tableTypes = [("Four", FindFour), ("Mancala", Mancala),
+                  ("Treasure", TreasureHunt)]
+
+    for tableType in tableTypes:
+        typeKey, typeClass = tableType
+        tableRooms = tablesConfig[typeKey]
+
+        for room in tableRooms:
+            roomObject = roomObjects[room["RoomId"]]
+            tableIds = room["Tables"]
+
+            for tableId in tableIds:
+                tableObject = Table(tableId, typeClass, roomObject)
+                roomObject.tables[tableId] = tableObject
+
+def createWaddles(waddlesConfig, roomObjects):
+    waddleTypes = [("Sled", SledRace), ("Card", CardMat)]
+
+    for waddleType in waddleTypes:
+        typeKey, typeClass = waddleType
+        waddleRooms = waddlesConfig[typeKey]
+
+        for room in waddleRooms:
+            roomObject = roomObjects[room["RoomId"]]
+            waddles = room["Waddles"]
+
+            for waddle in waddles:
+                waddleObject = Waddle(waddle["Id"], waddle["Seats"],
+                                      typeClass, roomObject)
+                roomObject.waddles[waddle["Id"]] = waddleObject
