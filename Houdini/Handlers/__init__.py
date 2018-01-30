@@ -585,6 +585,22 @@ class XT:
         "Data": []
     }
 
+    JoinMatchMaking = {
+        "Handler": "jmm",
+        "Data": [VariableXTData("Null")]
+    }
+
+    LeaveMatchMaking = {
+        "Handler": "lmm",
+        "Data": [VariableXTData("Null")]
+    }
+
+    JoinSensei = {
+        "Handler": "jsen",
+        "Data": [VariableXTData("Null")]
+    }
+
+
 class HandlerEvent(object):
 
     def __init__(self, handlerDetails):
