@@ -40,3 +40,6 @@ class Penguin(Base):
     RecentStamps = Column(Text, nullable=False)
     StampBook = Column(Text, nullable=False, server_default=text("'1%1%0%1'"))
     EPF = Column(String(9), nullable=False, server_default=text("'0,0,0'"))
+    NinjaRank = Column(SmallInteger, nullable=False, server_default=text("'0'"))
+    NinjaProgress = Column(SmallInteger, nullable=False, server_default=text("'0'"))
+    Deck = Column(SmallInteger, nullable=False, server_default=text("'1,1|6,1|9,1|14,1|17,1|20,1|22,1|23,1|26,1|73,1|89,1|81,1'"))
