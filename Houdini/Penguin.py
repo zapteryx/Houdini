@@ -25,6 +25,8 @@ class Penguin(Spheniscidae):
 		self.ignore = {}
 		self.throttle = {}
 
+		self.deck = []
+
 		self.membershipDays = None
 
 		self.table = None
