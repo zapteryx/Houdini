@@ -52,6 +52,11 @@ def handleJoinWorld(self, data):
         furnitureId, furnitureQuantity = furnitureDetails.split("|")
         self.furniture[int(furnitureId)] = int(furnitureQuantity)
 
+    for card in self.user.Deck.split("|"):
+        cardId, cardQuantity = card.split(",")
+        for x in xrange(int(cardQuantity)):
+            self.deck.append(self.server.cards[int(cardId)])
+
     self.sendXt("lp", self.getPlayerString(), self.user.Coins, 0, 1440,
                 penguinStandardTime, self.age, 0, self.age, None, serverTimeOffset)
 
