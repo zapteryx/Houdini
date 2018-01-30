@@ -22,12 +22,8 @@ from Houdini.Events import Events
 from Houdini.Events.HandlerFileEvent import HandlerFileEventHandler
 from Houdini.Events.PluginFileEvent import PluginFileEventHandler
 from Houdini.Handlers.Play.Pet import decreaseStats
-from Houdini.Handlers.Games.Table import Table
-from Houdini.Handlers.Games.FindFour import FindFour
-from Houdini.Handlers.Games.Mancala import Mancala
-from Houdini.Handlers.Games.TreasureHunt import TreasureHunt
-from Houdini.Handlers.Games.Waddle import Waddle
-from Houdini.Handlers.Games.SledRace import SledRace
+from Houdini.Handlers.Games import createTables, createWaddles
+from Houdini.Handlers.Games.MatchMaking import MatchMaking
 from Houdini.Penguin import Penguin
 from Houdini.Spheniscidae import Spheniscidae
 
@@ -105,6 +101,8 @@ class HoudiniFactory(Factory):
 
             self.puffleKiller = task.LoopingCall(decreaseStats, self)
             self.puffleKiller.start(1800)
+
+            self.matchMaker = MatchMaking()
 
             self.loadHandlerModules(excludeLoad="Houdini.Handlers.Login.Login")
             self.logger.info("Running world server")
