@@ -38,10 +38,10 @@ class Waddle(object):
     def getSeatId(self, penguin):
         return self.penguins.index(penguin)
 
-def WaddleHandler(waddle):
+def WaddleHandler(*waddle):
     def handlerFunction(function):
         def handler(penguin, data):
-            if penguin.waddle and type(penguin.waddle) == waddle:
+            if penguin.waddle and type(penguin.waddle) in waddle:
                 function(penguin, data)
             return function
         return handler
