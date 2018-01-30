@@ -30,9 +30,9 @@ class FindFour(object):
         return False
 
     def isValidMove(self, column, row):
-        if row <= 5 and (row == 5 or (self.board[column][row] == 0
-                                      and self.board[column][row + 1])):
-            return True
+        if 0 <= row <= 5 and 0 <= column <= 6:
+            if row == 5 or (self.board[column][row] == 0 and self.board[column][row + 1]):
+                return True
         return False
 
     def isBoardFull(self):
@@ -42,7 +42,7 @@ class FindFour(object):
         return True
 
     def getString(self):
-        return ','.join(str(item) for row in self.board for item in row)
+        return ",".join(str(item) for row in self.board for item in row)
 
 @Handlers.Handle(XT.GetGame)
 @TableHandler(FindFour)
