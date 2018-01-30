@@ -79,6 +79,7 @@ class Penguin(Spheniscidae):
 						SenderID=0, Details="", Date=currentTimestamp,
 						Type=postcardId)
 		self.session.add(postcard)
+		self.session.commit()
 		self.sendXt("mr", self.user.Username, self.user.ID, postcardId,
 					"", currentTimestamp, postcard.ID)
 
