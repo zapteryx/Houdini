@@ -570,6 +570,21 @@ class XT:
         "Data": [XTData("Whatever", int)]
     }
 
+    GetNinjaRanks = {
+        "Handler": "ni#gnr",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    GetNinjaLevel = {
+        "Handler": "ni#gnl",
+        "Data": []
+    }
+
+    GetCards = {
+        "Handler": "ni#gcd",
+        "Data": []
+    }
+
 class HandlerEvent(object):
 
     def __init__(self, handlerDetails):
