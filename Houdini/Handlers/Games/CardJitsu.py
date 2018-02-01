@@ -292,7 +292,7 @@ def handleSendMove(self, data):
     senseiCardStrings = []
     while len(self.waddle.deck[1]) < 5:
         waddleDeck = list(self.waddle.deck[1].values())
-        usableDeck = [card for card in self.deck if not card.PowerId or self.user.NinjaRank >= 9 and
+        usableDeck = [card for card in self.deck if (not card.PowerId or self.user.NinjaRank >= 9) and
                       sum(find.Id == card.Id for find in self.deck) >
                       sum(find.Id == card.Id for find in waddleDeck)]
         card = random.choice(usableDeck)
