@@ -20,7 +20,7 @@ maxScorePerMinute = {
 }
 
 def determineCoinsEarned(gameId, gameScore):
-    defaultScoreGames = (904, 905, 906, 912, 916, 917, 918, 919, 950)
+    defaultScoreGames = (904, 905, 906, 912, 916, 917, 918, 919, 950, 952)
 
     if gameId in defaultScoreGames:
         coinsEarned = gameScore
