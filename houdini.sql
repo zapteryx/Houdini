@@ -105,7 +105,7 @@ CREATE TABLE `penguins` (
   `Buddies` text NOT NULL,
   `Ignore` text NOT NULL,
   `NinjaRank` tinyint(10) NOT NULL DEFAULT '0',
-  `NinjaRank` tinyint(100) NOT NULL DEFAULT '0',
+  `NinjaProgress` tinyint(10) NOT NULL DEFAULT '0',
   `Deck` varchar(2048) NOT NULL DEFAULT '1,1|6,1|9,1|14,1|17,1|20,1|22,1|23,1|26,1|73,1|89,1|81,1',
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Username` (`Username`)
