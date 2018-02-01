@@ -45,6 +45,7 @@ class Room(SchemaObject):
 
         if self.isGame:
             player.sendXt("jg", self.Id)
+            player.gameFinished = False
         else:
             player.sendXt("jr", self.Id, self.generateRoomString())
 

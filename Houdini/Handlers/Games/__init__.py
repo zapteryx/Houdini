@@ -46,7 +46,8 @@ def handleSendGameOver(self, data):
     if self.waddle or self.table:
         return
 
-    if self.room.isGame:
+    if self.room.isGame and not self.gameFinished:
+        self.gameFinished = True
         if determineCoinsOverdose(self, data.Score):
             return cheatBan(self, self.user.ID, comment="Coin cheat detected")
 

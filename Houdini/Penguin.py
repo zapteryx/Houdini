@@ -32,6 +32,8 @@ class Penguin(Spheniscidae):
 		self.table = None
 		self.waddle = None
 
+		self.gameFinished = True
+
 		self.logger.info("Penguin class instantiated")
 
 	def addItem(self, itemId, itemCost=0):
