@@ -565,6 +565,16 @@ class XT:
         "Data": [VariableXTData("Null")]
     }
 
+    ChangeDifficulty = {
+        "Handler": "zd",
+        "Data": [XTData("Difficulty", int)]
+    }
+
+    GetGameAgain = {
+        "Handler": "zr",
+        "Data": [VariableXTData("Null")]
+    }
+
     CardGameOver = {
         "Handler": "czo",
         "Data": [XTData("Whatever", int)]
