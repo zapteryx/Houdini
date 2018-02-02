@@ -125,6 +125,7 @@ class Penguin(Spheniscidae):
 			leaveTable(self)
 			leaveWaddle(self)
 			self.server.matchMaker.remove(self)
+			self.server.danceFloor.remove(self)
 			self.room.remove(self)
 
 			# Stop walking any puffles
