@@ -50,6 +50,7 @@ from Houdini.Crumbs.Pin import PinSchema, PinCollection
 from Houdini.Crumbs.Stamp import StampSchema, StampGroupSchema,\
     StampGroupCollection, StampCollection
 from Houdini.Crumbs.Card import CardSchema, CardCollection
+from Houdini.Crumbs.Dance import SongSchema, DanceCollection
 
 def retrieveItemCollection(crumbsFile="crumbs/paper_items.json"):
     assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
@@ -170,3 +171,18 @@ def retrieveCardCollection(crumbsFile="crumbs/cards.json"):
         logger.info("%d cards loaded", len(cardCollection))
 
         return cardCollection
+
+def retrieveDanceCollection(crumbsFile="crumbs/dance.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as fileHandle:
+        dance = json.load(fileHandle)
+
+        schema = SongSchema(many=True)
+        result = schema.load(dance)
+
+        danceCollection = DanceCollection(result.data)
+
+        logger.info("%d dance tracks loaded", len(danceCollection))
+
+        return danceCollection
