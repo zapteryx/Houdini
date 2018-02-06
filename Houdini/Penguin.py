@@ -130,7 +130,7 @@ class Penguin(Spheniscidae):
 
 			# Stop walking any puffles
 			puffleId = self.session.query(Puffle.ID) \
-				.filter(Puffle.Owner == self.user.ID, Puffle.Walking == 1)
+				.filter(Puffle.Owner == self.user.ID, Puffle.Walking == 1).scalar()
 
 			if puffleId is not None:
 				self.user.Hand = 0
