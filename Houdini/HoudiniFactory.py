@@ -17,13 +17,15 @@ import Houdini.Handlers as Handlers
 import Houdini.Plugins as Plugins
 from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection, \
     retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection, \
-    retrievePinCollection, retrieveStampsCollection, retrieveCardCollection
+    retrievePinCollection, retrieveStampsCollection, retrieveCardCollection, \
+    retrieveDanceCollection
 from Houdini.Events import Events
 from Houdini.Events.HandlerFileEvent import HandlerFileEventHandler
 from Houdini.Events.PluginFileEvent import PluginFileEventHandler
 from Houdini.Handlers.Play.Pet import decreaseStats
 from Houdini.Handlers.Games import createTables, createWaddles
 from Houdini.Handlers.Games.MatchMaking import MatchMaking
+from Houdini.Handlers.Games.Dance import DanceFloor
 from Houdini.Penguin import Penguin
 from Houdini.Spheniscidae import Spheniscidae
 
@@ -101,11 +103,13 @@ class HoudiniFactory(Factory):
             self.pins = retrievePinCollection()
             self.stampGroups, self.stamps = retrieveStampsCollection()
             self.cards = retrieveCardCollection()
+            self.dance = retrieveDanceCollection()
 
             self.openIgloos = {}
 
             createTables(self.config["Tables"], self.rooms)
             createWaddles(self.config["Waddles"], self.rooms)
+            self.danceFloor = DanceFloor(self.dance)
 
             self.puffleKiller = task.LoopingCall(decreaseStats, self)
             self.puffleKiller.start(1800)

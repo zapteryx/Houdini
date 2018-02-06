@@ -79,7 +79,7 @@ CREATE TABLE `penguins` (
   `LoginKey` char(32) NOT NULL,
   `Email` char(254) NOT NULL,
   `RegistrationDate` int(8) NOT NULL,
-  `LastPaycheck` int(8) NOT NULL,
+  `LastPaycheck` int(8) NOT NULL DEFAULT '0',
   `Moderator` tinyint(1) NOT NULL DEFAULT '0',
   `Inventory` text NOT NULL,
   `Coins` mediumint(7) unsigned NOT NULL DEFAULT '500',

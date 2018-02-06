@@ -32,6 +32,8 @@ class Penguin(Spheniscidae):
 		self.table = None
 		self.waddle = None
 
+		self.gameFinished = True
+
 		self.logger.info("Penguin class instantiated")
 
 	def addItem(self, itemId, itemCost=0):
@@ -123,6 +125,7 @@ class Penguin(Spheniscidae):
 			leaveTable(self)
 			leaveWaddle(self)
 			self.server.matchMaker.remove(self)
+			self.server.danceFloor.remove(self)
 			self.room.remove(self)
 
 			# Stop walking any puffles
