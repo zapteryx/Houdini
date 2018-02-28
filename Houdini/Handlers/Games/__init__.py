@@ -12,13 +12,6 @@ from Houdini.Handlers.Games.CardJitsu import CardMat
 
 maxCoins = 1000000
 
-maxScorePerMinute = {
-    901: 2000,
-    902: 2000,
-    903: 500,
-    905: 2500
-}
-
 def determineCoinsEarned(gameId, gameScore):
     defaultScoreGames = (904, 905, 906, 912, 916, 917, 918, 919, 950, 952)
 
@@ -30,7 +23,7 @@ def determineCoinsEarned(gameId, gameScore):
     return coinsEarned
 
 def determineCoinsOverdose(self, score):
-    maxGameScore = maxScorePerMinute[self.room.Id] if self.room.Id in maxScorePerMinute else 9000
+    maxGameScore = 9000
     minutesSinceJoin = ((int(time.time()) - self.lastJoinedRoom) / 60) + 1
     maxGameScore = maxGameScore * minutesSinceJoin
     self.logger.info("%d: User earned %d score in %d minutes, that's %d points per minute", self.room.Id, score,
