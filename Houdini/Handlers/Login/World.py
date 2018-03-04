@@ -2,6 +2,8 @@ from Houdini.Handlers import Handlers, XML
 from Houdini.Data.Penguin import Penguin
 from Houdini.Crypto import Crypto
 
+import time
+
 @Handlers.Handle(XML.Login)
 def handleLogin(self, data):
     username = data.Username
@@ -24,6 +26,15 @@ def handleLogin(self, data):
         self.logger.debug("{} failed to login.".format(username))
 
         return self.sendErrorAndDisconnect(101)
+
+    if user.Banned == "perm":
+        return self.sendErrorAndDisconnect(603)
+
+    banExpiry = int(user.Banned)
+    loginTimestamp = time.time()
+
+    if banExpiry > loginTimestamp:
+        return self.transport.loseConnection()
 
     if user.ID in self.server.players:
         self.server.players[user.ID].transport.loseConnection()
