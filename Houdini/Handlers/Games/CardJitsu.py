@@ -7,10 +7,9 @@ class CardJitsu(object):
 
     def __init__(self, penguins, seats):
         self.penguins, self.seats = penguins, seats
-        self.deck = [{}, {}]
-        self.cardsChosen = [False, False]
-        self.playerCards = [{"f":[], "w":[], "s": []},
-                            {"f":[], "w":[], "s": []}]
+        self.deck = [{} for _ in xrange(2)]
+        self.cardsChosen = [False for _ in xrange(2)]
+        self.playerCards = [{"f":[], "w":[], "s": []} for _ in xrange(2)]
         self.cardId = 1
         self.powers = {}
         self.discards = []
