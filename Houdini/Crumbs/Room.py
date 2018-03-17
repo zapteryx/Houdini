@@ -69,8 +69,6 @@ class RoomSchema(Schema):
     Member = fields.Integer(load_from="is_member")
     Path = fields.String(load_from="path")
     MaxUsers = fields.Integer(load_from="max_users")
-    JumpEnabled = fields.Boolean(load_from="jump_enabled")
-    JumpDisabled = fields.Boolean(load_from="jump_disabled")
     RequiredItem = fields.Integer(load_from="required_item", allow_none=True)
     ShortName = fields.String(load_from="short_name")
 
