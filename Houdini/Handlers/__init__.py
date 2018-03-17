@@ -610,6 +610,21 @@ class XT:
         "Data": [VariableXTData("Null")]
     }
 
+    JoinRedemption = {
+        "Handler": "rjs",
+        "Data": [XTData("ID", int), XTData("LoginKey", str), XTData("Language", str)]
+    }
+
+    SendCode = {
+        "Handler": "rsc",
+        "Data": [XTData("Code", str)]
+    }
+
+    SendGoldenChoice = {
+        "Handler": "rsgc",
+        "Data": [XTData("Code", str), XTData("Choice", int)]
+    }
+
 
 class HandlerEvent(object):
 
