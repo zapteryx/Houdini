@@ -1,45 +1,114 @@
 # coding: utf-8
-from sqlalchemy import Column, Integer, SmallInteger, String, Text, text
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, SmallInteger, String, Table, text
+from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+from Houdini.Data import Base
 metadata = Base.metadata
 
+
 class Penguin(Base):
-    __tablename__ = 'penguins'
+    __tablename__ = 'penguin'
 
     ID = Column(Integer, primary_key=True)
     Username = Column(String(12), nullable=False, unique=True)
-    Nickname = Column(String(16), nullable=False)
+    Nickname = Column(String(12), nullable=False)
+    Approval = Column(Integer, nullable=False, server_default=text("0"))
     Password = Column(String(255), nullable=False)
-    LoginKey = Column(String(32), nullable=False)
-    Email = Column(String(254), nullable=False)
-    RegistrationDate = Column(Integer, nullable=False)
-    LastPaycheck = Column(Integer, nullable=False)
-    Moderator = Column(Integer, nullable=False, server_default=text("'0'"))
-    Inventory = Column(Text, nullable=False)
-    Coins = Column(Integer, nullable=False, server_default=text("'200000'"))
-    Igloo = Column(Integer, nullable=False)
-    Igloos = Column(Text, nullable=False)
-    Floors = Column(Text, nullable=False)
-    Furniture = Column(Text, nullable=False)
-    Buddies = Column(Text, nullable=False)
-    Ignore = Column(Text, nullable=False)
-    Color = Column(Integer, nullable=False, server_default=text("'1'"))
-    Head = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    Face = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    Neck = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    Body = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    Hand = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    Feet = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    Photo = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    Flag = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    Walking = Column(Integer, nullable=False, server_default=text("'0'"))
-    Banned = Column(String(20), nullable=False, server_default=text("'0'"))
-    Stamps = Column(Text, nullable=False)
-    RecentStamps = Column(Text, nullable=False)
-    StampBook = Column(Text, nullable=False, server_default=text("'1%1%0%1'"))
-    EPF = Column(String(9), nullable=False, server_default=text("'0,0,0'"))
-    NinjaRank = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    NinjaProgress = Column(SmallInteger, nullable=False, server_default=text("'0'"))
-    Deck = Column(Text, nullable=False, server_default=text("'1,1|6,1|9,1|14,1|17,1|20,1|22,1|23,1|26,1|73,1|89,1|81,1'"))
+    LoginKey = Column(String(255), server_default=text("''"))
+    Email = Column(String(255), nullable=False, index=True)
+    RegistrationDate = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
+    Active = Column(Integer, nullable=False, server_default=text("0"))
+    LastPaycheck = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
+    MinutesPlayed = Column(Integer, nullable=False, server_default=text("0"))
+    Moderator = Column(Integer, nullable=False, server_default=text("0"))
+    MascotStamp = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Coins = Column(Integer, nullable=False, server_default=text("500"))
+    Color = Column(Integer, nullable=False, server_default=text("1"))
+    Head = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Face = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Neck = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Body = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Hand = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Feet = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Photo = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Flag = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Permaban = Column(Integer, nullable=False, server_default=text("0"))
+    BookModified = Column(Integer, nullable=False, server_default=text("0"))
+    BookColor = Column(Integer, nullable=False, server_default=text("1"))
+    BookHighlight = Column(Integer, nullable=False, server_default=text("1"))
+    BookPattern = Column(Integer, nullable=False, server_default=text("0"))
+    BookIcon = Column(Integer, nullable=False, server_default=text("1"))
+    AgentStatus = Column(Integer, nullable=False, server_default=text("0"))
+    FieldOpStatus = Column(Integer, nullable=False, server_default=text("0"))
+    CareerMedals = Column(Integer, nullable=False, server_default=text("0"))
+    AgentMedals = Column(Integer, nullable=False, server_default=text("0"))
+    LastFieldOp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
+    NinjaRank = Column(Integer, nullable=False, server_default=text("0"))
+    NinjaProgress = Column(Integer, nullable=False, server_default=text("0"))
+    FireNinjaRank = Column(Integer, nullable=False, server_default=text("0"))
+    FireNinjaProgress = Column(Integer, nullable=False, server_default=text("0"))
+    WaterNinjaRank = Column(Integer, nullable=False, server_default=text("0"))
+    WaterNinjaProgress = Column(Integer, nullable=False, server_default=text("0"))
+    NinjaMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
+    FireMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
+    WaterMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
+
+    parents = relationship(
+        u'Penguin',
+        secondary='buddy_list',
+        primaryjoin=u'Penguin.ID == buddy_list.c.BuddyID',
+        secondaryjoin=u'Penguin.ID == buddy_list.c.PenguinID'
+    )
+    parents1 = relationship(
+        u'Penguin',
+        secondary='ignore_list',
+        primaryjoin=u'Penguin.ID == ignore_list.c.IgnoreID',
+        secondaryjoin=u'Penguin.ID == ignore_list.c.PenguinID'
+    )
+
+
+class IgnoreList(Base):
+    __tablename__ = 'ignore_list'
+
+    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                       nullable=False)
+    IgnoreID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                      nullable=False, index=True)
+
+
+class BuddyList(Base):
+    __tablename__ = 'buddy_list'
+
+    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                       nullable=False)
+    BuddyID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                     nullable=False, index=True)
+
+class Inventory(Base):
+    __tablename__ = 'inventory'
+
+    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False)
+    ItemID = Column(SmallInteger, primary_key=True, nullable=False, server_default=text("0"))
+
+    penguin = relationship(u'Penguin')
+
+
+class IglooInventory(Base):
+    __tablename__ = 'igloo_inventory'
+
+    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                       nullable=False, server_default=text("0"))
+    IglooID = Column(Integer, primary_key=True, nullable=False, server_default=text("0"))
+
+    penguin = relationship(u'Penguin')
+
+
+class FurnitureInventory(Base):
+    __tablename__ = 'furniture_inventory'
+
+    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                       nullable=False, server_default=text("0"))
+    FurnitureID = Column(Integer, primary_key=True, nullable=False, server_default=text("0"))
+    Quantity = Column(Integer, nullable=False, server_default=text("1"))
+
+    penguin = relationship(u'Penguin')
