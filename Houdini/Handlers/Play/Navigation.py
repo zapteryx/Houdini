@@ -85,17 +85,24 @@ def handleJoinRoom(self, data):
     if data.RoomId in tableRooms:
         self.sendXt("jr", data.RoomId)
 
+    room = self.server.rooms[data.RoomId]
+
+    if len(room.players) >= room.MaxUsers:
+        return self.sendError(210)
+
     if data.RoomId in self.server.rooms:
         self.x = data.X
         self.y = data.Y
         self.frame = 1
 
         self.room.remove(self)
-        self.server.rooms[data.RoomId].add(self)
+        room.add(self)
+
 
 @Handlers.Handle(XT.RefreshRoom)
 def handleRefreshRoom(self, data):
     self.room.refresh(self)
+
 
 @Handlers.Handle(XT.JoinPlayerIgloo)
 def handleJoinPlayerIgloo(self, data):
@@ -116,6 +123,9 @@ def handleJoinPlayerIgloo(self, data):
         igloo = self.server.rooms[data.Id] = Room(**iglooFieldKeywords)
     else:
         igloo = self.server.rooms[data.Id]
+
+    if len(igloo.players) >= igloo.MaxUsers:
+        return self.sendError(210)
 
     self.room.remove(self)
 

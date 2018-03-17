@@ -31,9 +31,6 @@ class Room(SchemaObject):
         return roomString
 
     def add(self, player):
-        if len(self.players) > self.MaxUsers:
-            return player.sendError(210)
-
         leaveTable(player)
         leaveWaddle(player)
 
