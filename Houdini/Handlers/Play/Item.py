@@ -1,8 +1,21 @@
+from beaker.cache import cache_region, region_invalidate
+
 from Houdini.Handlers import Handlers, XT
 from Houdini.Handlers.Play.Moderation import cheatBan
-from Houdini.Data.Penguin import Penguin
+from Houdini.Data.Penguin import Inventory
+
+cardStarterDeckId = 821
+fireBoosterDeckId = 8006
+waterBoosterDeckId = 8010
+
+boosterDecks = {
+    cardStarterDeckId: [1, 6, 9, 14, 17, 20, 22, 23, 26, 73, 89, 81],
+    fireBoosterDeckId: [3, 18, 216, 222, 229, 303, 304, 314, 319, 250, 352],
+    waterBoosterDeckId: [202, 204, 305, 15, 13, 312, 218, 220, 29, 90]
+}
 
 @Handlers.Handle(XT.BuyInventory)
+@Handlers.Throttle()
 def handleBuyInventory(self, data):
     if data.ItemId not in self.server.items:
         return self.sendError(402)
@@ -16,6 +29,9 @@ def handleBuyInventory(self, data):
     if self.server.items.isTourGuide(data.ItemId):
         self.receiveSystemPostcard(126)
 
+    if data.ItemId in boosterDecks:
+        self.addCards(*boosterDecks[data.ItemId])
+
     itemCost = self.server.items.getCost(data.ItemId)
 
     if self.user.Coins < itemCost:
@@ -23,54 +39,41 @@ def handleBuyInventory(self, data):
 
     self.addItem(data.ItemId, itemCost)
 
+    region_invalidate(getPinString, 'houdini', 'pins', self.user.ID)
+    region_invalidate(getAwardsString, 'houdini', 'awards', self.user.ID)
+
 @Handlers.Handle(XT.GetInventory)
 @Handlers.Throttle(-1)
 def handleGetInventory(self, data):
-    inventoryArray = self.user.Inventory.split("%")
+    self.sendXt("gi", "%".join(map(str, self.inventory)))
 
-    try:
-        inventoryArray = [int(itemId) for itemId in inventoryArray]
-        self.inventory = inventoryArray
 
-    except ValueError:
-        self.inventory = []
+@cache_region('houdini', 'pins')
+def getPinString(self, penguinId):
+    def getString(pinId):
+        isMember = int(self.server.items[pinId].Member)
+        timestamp = self.server.pins.getUnixTimestamp(pinId)
+        return "|".join(map(str, [pinId, timestamp, isMember]))
 
-    finally:
-        self.sendXt("gi", self.user.Inventory)
+    pinsArray = [getString(itemId) for itemId, in self.session.query(Inventory.ItemID)
+        .filter_by(PenguinID=penguinId) if self.server.items.isItemPin(itemId)]
+    return "%".join(pinsArray)
+
+
+@cache_region('houdini', 'awards')
+def getAwardsString(self, penguinId):
+    awardsArray = [itemId for itemId, in self.session.query(Inventory.ItemID)
+        .filter_by(PenguinID=penguinId) if self.server.items.isItemAward(itemId)]
+    return "%".join(map(str, awardsArray))
+
 
 @Handlers.Handle(XT.GetPlayerPins)
+@Handlers.Throttle()
 def handleGetPlayerPins(self, data):
-    player = self.session.query(Penguin.Inventory).\
-        filter(Penguin.ID == data.PlayerId).first()
+    self.sendXt("qpp", getPinString(self, data.PlayerId))
 
-    if player is None:
-        return self.transport.loseConnection()
-
-    inventory = player.Inventory.split("%")
-    pinsArray = []
-
-    for itemId in inventory:
-        if self.server.items.isItemPin(itemId):
-            isMember = int(self.server.items[int(itemId)].Member)
-            timestamp = self.server.pins.getUnixTimestamp(itemId)
-            pinString = "|".join([itemId, str(timestamp), str(isMember)])
-            pinsArray.append(pinString)
-
-    self.sendXt("qpp", "%".join(pinsArray))
 
 @Handlers.Handle(XT.GetPlayerAwards)
+@Handlers.Throttle()
 def handleGetPlayerAwards(self, data):
-    player = self.session.query(Penguin.Inventory).\
-        filter(Penguin.ID == data.PlayerId).first()
-
-    if player is None:
-        return self.transport.loseConnection()
-
-    inventory = player.Inventory.split("%")
-    awardsArray = []
-
-    for itemId in inventory:
-        if self.server.items.isItemAward(itemId):
-            awardsArray.append(itemId)
-
-    self.sendXt("qpa", data.PlayerId, "%".join(awardsArray))
+    self.sendXt("qpa", data.PlayerId, getAwardsString(self, data.PlayerId))

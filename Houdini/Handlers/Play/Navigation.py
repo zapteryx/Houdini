@@ -1,8 +1,8 @@
 import time, random
-from datetime import date
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Crumbs.Room import Room
+from Houdini.Handlers.Play.Stampbook import getStampsString
 
 RoomFieldKeywords = {
     "Id": None,
@@ -14,11 +14,10 @@ RoomFieldKeywords = {
     "Member": 0,
     "Path": "",
     "MaxUsers": 100,
-    "JumpEnabled": False,
-    "JumpDisabled": True,
     "RequiredItem": None,
     "ShortName": "Igloo"
 }
+
 
 @Handlers.Handle(XT.JoinWorld)
 @Handlers.Throttle(-1)
@@ -33,50 +32,30 @@ def handleJoinWorld(self, data):
         self.user.LoginKey = ""
         return self.sendErrorAndDisconnect(101)
 
-    hasUpdatedBookCover = int(self.user.StampBook != "1%1%0%1")
-    self.sendXt("js", 1, self.agentStatus, self.user.Moderator, hasUpdatedBookCover)
+    self.sendXt("js", self.user.AgentStatus, 0, self.user.Moderator, self.user.BookModified)
 
-    # Casting to integer floor's and removes the decimal
     currentTime = int(time.time())
     penguinStandardTime = currentTime * 1000
     serverTimeOffset = 7
 
-    registrationDate = date.fromtimestamp(self.user.RegistrationDate)
-    currentDateTime = date.fromtimestamp(currentTime)
-
-    self.age = (currentDateTime - registrationDate).days
-
-    for furnitureDetails in self.user.Furniture.split("%"):
-        if not furnitureDetails:
-            break
-        furnitureId, furnitureQuantity = furnitureDetails.split("|")
-        self.furniture[int(furnitureId)] = int(furnitureQuantity)
-
-    for card in self.user.Deck.split("|"):
-        cardId, cardQuantity = card.split(",")
-        for x in xrange(int(cardQuantity)):
-            self.deck.append(self.server.cards[int(cardId)])
-
     self.sendXt("lp", self.getPlayerString(), self.user.Coins, 0, 1440,
-                penguinStandardTime, self.age, 0, self.age, None, serverTimeOffset)
+                penguinStandardTime, self.age, 0, self.user.MinutesPlayed, None, serverTimeOffset)
 
-    self.sendXt("gps", self.user.ID, self.user.Stamps)
+    self.sendXt("gps", self.user.ID, getStampsString(self, self.user.ID))
 
     self.user.LoginKey = ""
-    self.user.LastLogin = currentTime
 
     self.session.commit()
 
     self.server.players[self.user.ID] = self
 
-    buddyList = self.getBuddyList()
-
-    for buddyId in buddyList.keys():
+    for buddyId, buddyNickname in self.buddies.items():
         if buddyId in self.server.players:
             self.server.players[buddyId].sendXt("bon", self.user.ID)
 
     randomRoomId = random.choice(self.server.spawnRooms)
     self.server.rooms[randomRoomId].add(self)
+
 
 @Handlers.Handle(XT.JoinRoom)
 @Handlers.Throttle(0.2)

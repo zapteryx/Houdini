@@ -80,14 +80,4 @@ def handleGetLatestRevision(self, data):
 
 @Handlers.Handle(XT.GetPlayer)
 def handleLoadPlayerObject(self, data):
-    playerTuple = self.session.query(Penguin.ID, Penguin.Username, Penguin.Color, Penguin.Head, Penguin.Face,
-                                     Penguin.Neck, Penguin.Body, Penguin.Hand, Penguin.Feet, Penguin.Flag,
-                                     Penguin.Photo).filter_by(ID=data.Id).first()
-
-    if playerTuple is not None:
-        playerData = [str(playerDetail) for playerDetail in playerTuple]
-        playerData.insert(2, "1")
-
-        playerString = "|".join(playerData)
-
-        self.sendXt("gp", playerString)
+    self.sendXt("gp", getPlayerString(self, data.Id))

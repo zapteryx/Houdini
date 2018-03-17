@@ -1,42 +1,40 @@
+import datetime
+
 from Houdini.Handlers import Handlers, XT
-from Houdini.Data.Penguin import Penguin
+from Houdini.Data.Penguin import Inventory
 
 @Handlers.Handle(XT.GetAgentStatus)
 def handleGetAgentStatus(self, data):
-    self.sendXt("epfga", self.agentStatus)
+    self.sendXt("epfga", self.user.AgentStatus)
 
 @Handlers.Handle(XT.SetAgentStatus)
 @Handlers.Throttle(-1)
 def handleSetAgentStatus(self, data):
-    self.agentStatus = 1
-    self.user.EPF = ",".join(map(str, [self.agentStatus, self.fieldOpStatus,
-                                       self.careerPoints, self.agentPoints]))
-    self.session.commit()
-    self.sendXt("epfsa", self.agentStatus)
+    if not self.user.AgentStatus:
+        self.user.AgentStatus = 1
+        self.sendXt("epfsa", self.user.AgentStatus)
 
 @Handlers.Handle(XT.GetFieldOpStatus)
 def handleGetFieldOpStatus(self, data):
-    self.sendXt("epfgf", self.fieldOpStatus)
+    self.sendXt("epfgf", self.user.FieldOpStatus)
 
 @Handlers.Handle(XT.SetFieldOpStatus)
 def handleSetFieldOpStatus(self, data):
     if data.FieldOpStatus > 2:
         return
 
-    if self.fieldOpStatus + 1 == data.FieldOpStatus:
-        self.fieldOpStatus += 1
-        if self.fieldOpStatus == 2:
-            self.careerPoints += 2
-            self.agentPoints += 2
+    if self.user.FieldOpStatus + 1 == data.FieldOpStatus:
+        self.user.FieldOpStatus += 1
+        if self.user.FieldOpStatus == 2:
+            self.user.CareerMedals += 2
+            self.user.AgentMedals += 2
 
-        self.sendXt("epfsf", self.fieldOpStatus)
-        self.user.EPF = ",".join(map(str, [self.agentStatus, self.fieldOpStatus,
-                                       self.careerPoints, self.agentPoints]))
-        self.session.commit()
+        self.sendXt("epfsf", self.user.FieldOpStatus)
+        self.user.LastFieldOp = datetime.datetime.now()
 
 @Handlers.Handle(XT.GetEpfPoints)
 def handleGetEpfPoints(self, data):
-    self.sendXt("epfgr", self.careerPoints, self.agentPoints)
+    self.sendXt("epfgr", self.user.CareerMedals, self.user.AgentMedals)
 
 @Handlers.Handle(XT.BuyEpfItem)
 def handleBuyEpfItem(self, data):
@@ -49,17 +47,12 @@ def handleBuyEpfItem(self, data):
 
         itemCost = self.server.items.getCost(data.ItemId)
 
-        if self.agentPoints < itemCost:
+        if self.user.AgentMedals < itemCost:
             return self.sendError(401)
 
         self.inventory.append(data.ItemId)
 
-        stringifiedInventory = map(str, self.inventory)
-        self.user.Inventory = "%".join(stringifiedInventory)
+        self.session.add(Inventory(PenguinID=self.user.ID, ItemID=data.ItemId))
 
-        self.agentPoints -= itemCost
-
-        self.user.EPF = ",".join(map(str, [self.agentStatus, self.fieldOpStatus,
-                                       self.careerPoints, self.agentPoints]))
-        self.session.commit()
-        self.sendXt("epfai", self.agentPoints)
+        self.user.AgentMedals -= itemCost
+        self.sendXt("epfai", self.user.AgentMedals)

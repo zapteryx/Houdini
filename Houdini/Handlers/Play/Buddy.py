@@ -1,5 +1,5 @@
 from Houdini.Handlers import Handlers, XT
-from Houdini.Data.Penguin import Penguin
+from Houdini.Data.Penguin import Penguin, BuddyList
 
 @Handlers.Handle(XT.GetBuddyList)
 @Handlers.Throttle(-1)
@@ -44,30 +44,18 @@ def handleBuddyAccept(self, data):
     buddyUsername, buddyBuddies = self.buddyRequests[data.Id]
     self.buddies[data.Id] = buddyUsername
 
-    buddyString = "%".join(["%s|%s" % (buddyId, buddyUsername) for (buddyId, buddyUsername) in self.buddies.items()])
-    self.user.Buddies = buddyString
-
     buddyBuddies[self.user.ID] = self.user.Username
-    buddyString = "%".join(["%s|%s" % (buddyId, buddyUsername) for (buddyId, buddyUsername) in buddyBuddies.items()])
-    self.logger.debug("buddyBuddies string: %s", buddyString)
 
-    self.session.query(Penguin).\
-        filter(Penguin.ID == data.Id).\
-        update({"Buddies": buddyString})
-
-    self.session.commit()
+    self.session.add(BuddyList(PenguinID=self.user.ID, BuddyID=data.Id))
+    self.session.add(BuddyList(PenguinID=data.Id, BuddyID=self.user.ID))
 
     del self.buddyRequests[data.Id]
 
     try:
         buddyObject = self.server.players[data.Id]
-
         buddyObject.sendXt("ba", self.user.ID, self.user.Username)
-        buddyObject.buddies = buddyBuddies
-
     except KeyError:
         self.sendXt("bof", data.Id)
-
     finally:
         self.logger.debug("%d and %d are now buddies.", data.Id, self.user.ID)
 
@@ -79,34 +67,14 @@ def handleRemoveBuddy(self, data):
 
     del self.buddies[data.Id]
 
-    buddyString = "%".join(["%s|%s" % (buddyId, buddyUsername) for (buddyId, buddyUsername) in self.buddies.items()])
-    self.user.Buddies = buddyString
-
-    self.session.query(Penguin). \
-        filter(Penguin.ID == self.user.ID). \
-        update({"Buddies": buddyString})
-
-    buddy = self.session.query(Penguin).filter_by(ID=data.Id).first()
-    oldBuddiesArray = buddy.Buddies.split("%")
-    newBuddiesArray = []
-
-    for buddyPair in oldBuddiesArray:
-        buddyId, buddyUsername = buddyPair.split("|")
-
-        if self.user.ID != int(buddyId):
-            newBuddiesArray.append(buddyPair)
-
-    buddyString = "%".join(newBuddiesArray)
-    buddy.Buddies = buddyString
-
-    self.session.commit()
+    self.session.query(BuddyList).filter_by(PenguinID=self.user.ID, BuddyID=data.Id).delete()
+    self.session.query(BuddyList).filter_by(PenguinID=data.Id, BuddyID=self.user.ID).delete()
 
     try:
         buddyObject = self.server.players[data.Id]
 
         buddyObject.sendXt("rb", self.user.ID)
         del buddyObject.buddies[self.user.ID]
-
     except KeyError:
         self.logger.debug("%d tried removing an offline buddy (%d)", self.user.ID, data.Id)
 
@@ -114,12 +82,13 @@ def handleRemoveBuddy(self, data):
         self.logger.debug("%d and %d are no longer buddies", self.user.ID, data.Id)
 
 
-# Possible TODO: Check if data.Id is a buddy?
 @Handlers.Handle(XT.FindBuddy)
 def handleFindBuddy(self, data):
     try:
+        if data.Id not in self.buddies:
+            return
+
         buddyObject = self.server.players[data.Id]
         self.sendXt("bf", buddyObject.room.Id)
-
     except KeyError:
         self.logger.debug("%s (%d) tried to find a buddy who was offline!", self.user.Username, self.user.ID)

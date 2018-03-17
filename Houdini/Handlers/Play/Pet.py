@@ -2,7 +2,7 @@ import time, random
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Puffle import Puffle
-from Houdini.Data.Mail import Mail
+from Houdini.Data.Postcard import Postcard
 
 puffleStatistics = {
     0: (100, 100, 100),
@@ -36,45 +36,41 @@ def decreaseStats(server):
         for (puffleId, puffle) in player.puffles.items():
             maxHealth, maxHunger, maxRest = puffleStatistics[puffle.Type]
             if int(puffle.Walking):
-                puffle.Hunger = max(10, min(puffle.Hunger - 4, maxHunger))
-                puffle.Rest = max(10, min(puffle.Rest - 4, maxRest))
+                puffle.Hunger = max(10, min(puffle.Hunger - 8, maxHunger))
+                puffle.Rest = max(10, min(puffle.Rest - 8, maxRest))
             else:
-                puffle.Health = max(0, min(puffle.Health - 2, maxHealth))
-                puffle.Hunger = max(0, min(puffle.Hunger - 2, maxHunger))
-                puffle.Rest = max(0, min(puffle.Rest - 2, maxRest))
+                puffle.Health = max(0, min(puffle.Health - 4, maxHealth))
+                puffle.Hunger = max(0, min(puffle.Hunger - 4, maxHunger))
+                puffle.Rest = max(0, min(puffle.Rest - 4, maxRest))
 
             if puffle.Health == 0 and puffle.Hunger == 0 and puffle.Rest == 0:
                 runPostcard = runPostcards[puffle.Type]
-                postcard = Mail(Recipient=player.user.ID, SenderName="sys",
-                                SenderID=0, Details=puffle.Name, Date=int(time.time()),
-                                Type=runPostcard)
-                player.session.add(postcard)
-                player.session.query(Puffle).filter(Puffle.ID == puffle.ID).delete()
-                player.session.commit()
-                player.sendXt("mr", "sys", 0, runPostcard, puffle.Name, int(time.time()), postcard.ID)
+                player.receiveSystemPostcard(runPostcard, puffle.Name)
                 del player.puffles[puffle.ID]
-
+                player.session.query(Puffle).filter_by(ID=puffle.ID).delete()
             elif puffle.Hunger < 10:
-                q = player.session.query(Mail).filter(Mail.Recipient == player.user.ID). \
-                    filter(Mail.Type == 110). \
-                    filter(Mail.Details == Puffle.Name)
-                notificationAware = player.session.query(q.exists()).scalar()
+                notificationAware = player.session.query(Postcard).filter(Postcard.RecipientID == player.user.ID). \
+                    filter(Postcard.Type == 110). \
+                    filter(Postcard.Details == Puffle.Name).scalar()
                 if not notificationAware:
-                    postcard = Mail(Recipient=player.user.ID, SenderName="sys",
-                                    SenderID=0, Details=puffle.Name, Date=int(time.time()),
-                                    Type=110)
-                    player.session.add(postcard)
-                    player.session.commit()
-                    player.sendXt("mr", "sys", 0, 110, puffle.Name, int(time.time()), postcard.ID)
+                    player.receiveSystemPostcard(110, puffle.Name)
         player.session.commit()
         handleGetMyPlayerPuffles(player, [])
 
+def getStatistics(puffleType, puffleHealth, puffleHunger, puffleRest):
+    maxHealth, maxHunger, maxRest = puffleStatistics[puffleType]
+    puffleHealth = int(float(puffleHealth) / maxHealth * 100)
+    puffleRest = int(float(puffleRest) / maxRest * 100)
+    puffleHunger = int(float(puffleHunger) / maxHunger * 100)
+    return "{}|{}|{}".format(puffleHealth, puffleHunger, puffleRest)
+
 @Handlers.Handle(XT.GetPlayerPuffles)
 def handleGetPuffles(self, data):
-    ownedPuffles = self.session.query(Puffle).filter(Puffle.Owner == data.PlayerId)
+    ownedPuffles = self.session.query(Puffle).filter(Puffle.PenguinID == data.PlayerId)
 
-    playerPuffles = ["%d|%s|%d|%d|%d|%d|100|100|100|0|0|%d" % (puffle.ID, puffle.Name, puffle.Type, puffle.Health,
-                                                               puffle.Hunger, puffle.Rest, puffle.Walking)
+    playerPuffles = ["{}|{}|{}|{}|100|100|100|0|0|0|{}".format(puffle.ID, puffle.Name, puffle.Type,
+                                                               getStatistics(puffle.Type, puffle.Health,
+                                                                             puffle.Hunger, puffle.Rest), puffle.Walking)
                      for puffle in ownedPuffles]
 
     playerPufflesString = "%".join(playerPuffles)
@@ -83,14 +79,10 @@ def handleGetPuffles(self, data):
 
 @Handlers.Handle(XT.GetMyPlayerPuffles)
 def handleGetMyPlayerPuffles(self, data):
-    ownedPuffles = self.session.query(Puffle).filter(Puffle.Owner == self.user.ID)
-
-    for ownedPuffle in ownedPuffles:
-        self.puffles[ownedPuffle.ID] = ownedPuffle
-
-    playerPuffles = ["%d|%s|%d|%d|%d|%d|100|100|100" % (puffle.ID, puffle.Name, puffle.Type, puffle.Health,
-                                                        puffle.Hunger, puffle.Rest)
-                     for puffle in ownedPuffles]
+    playerPuffles = ["{}|{}|{}|{}|100|100|100".format(puffle.ID, puffle.Name, puffle.Type,
+                                                      getStatistics(puffle.Type, puffle.Health,
+                                                                    puffle.Hunger, puffle.Rest))
+                     for puffle in self.puffles.values()]
 
     myPufflesString = "%".join(playerPuffles)
 
@@ -101,7 +93,7 @@ def handleSendAdoptPuffle(self, data):
     if not data.TypeId in puffleStatistics:
         return self.transport.loseConnection()
 
-    if not 16 > len(data.Name) > 4:
+    if not 16 > len(data.Name) >= 3:
         return self.sendError(441)
 
     if self.user.Coins < 800:
@@ -114,23 +106,17 @@ def handleSendAdoptPuffle(self, data):
 
     maxHealth, maxHunger, maxRest = puffleStatistics[data.TypeId]
 
-    adoptionDate = int(time.time())
-
-    puffle = Puffle(Owner=self.user.ID, Name=data.Name, AdoptionDate=adoptionDate, Type=data.TypeId,
-                    Health=maxHunger, Hunger=maxHunger, Rest=maxRest)
+    puffle = Puffle(PenguinID=self.user.ID, Name=data.Name, Type=data.TypeId,
+                    Health=maxHealth, Hunger=maxHunger, Rest=maxRest)
     self.session.add(puffle)
     self.session.commit()
 
-    puffleString = "%d|%s|%d|100|100|100|100|100|100" % (puffle.ID, data.Name, data.TypeId)
+    self.puffles[puffle.ID] = puffle
+
+    puffleString = "{}|{}|{}|100|100|100|100|100|100".format(puffle.ID, data.Name, data.TypeId)
     self.sendXt("pn", self.user.Coins, puffleString)
 
-    postcard = Mail(Recipient=self.user.ID, SenderName="sys",
-                    SenderID=0, Details=data.Name, Date=adoptionDate,
-                    Type=111)
-    self.session.add(postcard)
-    self.session.commit()
-
-    self.sendXt("mr", "sys", 0, 111, data.Name, adoptionDate, postcard.ID)
+    self.receiveSystemPostcard(111, data.Name)
 
     # Refresh my player puffles
     handleGetMyPlayerPuffles(self, [])
@@ -150,7 +136,6 @@ def handleSendPuffleWalk(self, data):
         puffle.Walking = 1 if not puffle.Walking else 0
 
         self.session.add(puffle)
-        self.session.commit()
 
         # Blame Club Penguin and not me!
         puffleData = [data.PuffleId]
@@ -183,7 +168,8 @@ def handleSendPufflePlay(self, data):
 
         playType = 1 if puffle.Rest > 80 else random.choice([0, 2])
 
-        playString = "%d|Hou|dini|%d|%d|%d" % (puffle.ID, puffle.Health, puffle.Hunger, puffle.Rest)
+        playString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
+                                                                      puffle.Hunger, puffle.Rest))
 
         self.room.sendXt("pp", playString, playType)
 
@@ -204,7 +190,8 @@ def handleSendPuffleRest(self, data):
         minStatistic = min(puffle.Hunger, puffle.Rest)
         puffle.Health = random.randrange(minStatistic, maxStatistic)
 
-        restString = "%d|Hou|dini|%d|%d|%d" % (puffle.ID, puffle.Health, puffle.Hunger, puffle.Rest)
+        restString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
+                                                                      puffle.Hunger, puffle.Rest))
 
         self.room.sendXt("pr", restString)
 
@@ -221,7 +208,8 @@ def handleSendPuffleTreat(self, data):
 
         self.user.Coins -= 5
 
-        treatString = "%d|Hou|dini|%d|%d|%d" % (puffle.ID, puffle.Health, puffle.Hunger, puffle.Rest)
+        treatString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
+                                                                       puffle.Hunger, puffle.Rest))
 
         self.room.sendXt("pt", self.user.Coins, treatString, data.TreatId)
 
@@ -237,7 +225,8 @@ def handleSendPuffleFood(self, data):
 
         self.user.Coins -= 10
 
-        feedString = "%d|Hou|dini|%d|%d|%d" % (puffle.ID, puffle.Health, puffle.Hunger, puffle.Rest)
+        feedString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
+                                                                      puffle.Hunger, puffle.Rest))
 
         self.room.sendXt("pf", self.user.Coins, feedString)
 
@@ -253,7 +242,8 @@ def handleSendPuffleBath(self, data):
 
         self.user.Coins -= 5
 
-        bathString = "%d|Hou|dini|%d|%d|%d" % (puffle.ID, puffle.Health, puffle.Hunger, puffle.Rest)
+        bathString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
+                                                                      puffle.Hunger, puffle.Rest))
 
         self.room.sendXt("pb", self.user.Coins, bathString)
 
@@ -287,7 +277,8 @@ def handleSendPlayInteraction(self, data):
         minStatistic = min(puffle.Hunger, puffle.Rest)
         puffle.Health = random.randrange(minStatistic, maxStatistic)
 
-        playString = "%d|Hou|dini|%d|%d|%d" % (puffle.ID, puffle.Health, puffle.Hunger, puffle.Rest)
+        playString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
+                                                                      puffle.Hunger, puffle.Rest))
 
         self.room.sendXt("ip", playString, data.X, data.Y)
 
@@ -308,7 +299,8 @@ def handleSendRestInteraction(self, data):
         minStatistic = min(puffle.Hunger, puffle.Rest)
         puffle.Health = random.randrange(minStatistic, maxStatistic)
 
-        restString = "%d|Hou|dini|%d|%d|%d" % (puffle.ID, puffle.Health, puffle.Hunger, puffle.Rest)
+        restString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
+                                                                      puffle.Hunger, puffle.Rest))
 
         self.room.sendXt("ir", restString, data.X, data.Y)
 
@@ -324,7 +316,8 @@ def handleSendFeedInteraction(self, data):
 
         self.user.Coins -= 10
 
-        feedString = "%d|Hou|dini|%d|%d|%d" % (puffle.ID, puffle.Health, puffle.Hunger, puffle.Rest)
+        feedString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
+                                                                      puffle.Hunger, puffle.Rest))
 
         self.room.sendXt("if", self.user.Coins, feedString, data.X, data.Y)
 
