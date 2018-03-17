@@ -16,6 +16,10 @@ def handleSetAgentStatus(self, data):
 
 @Handlers.Handle(XT.GetFieldOpStatus)
 def handleGetFieldOpStatus(self, data):
+    today = datetime.date.today()
+    monday = today - datetime.timedelta(days=today.weekday())
+    if self.user.LastFieldOp.date() < monday:
+        self.user.FieldOpStatus = 0
     self.sendXt("epfgf", self.user.FieldOpStatus)
 
 @Handlers.Handle(XT.SetFieldOpStatus)
