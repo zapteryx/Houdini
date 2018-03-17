@@ -600,6 +600,16 @@ class XT:
         "Data": []
     }
 
+    GetNinjaFireLevel = {
+        "Handler": "ni#gfl",
+        "Data": []
+    }
+
+    GetNinjaWaterLevel = {
+        "Handler": "ni#gwl",
+        "Data": []
+    }
+
     GetCards = {
         "Handler": "ni#gcd",
         "Data": []
