@@ -5,6 +5,7 @@ from Houdini.Crumbs import SchemaObject, SchemaObjectCollection
 
 from Houdini.Handlers.Games.Table import leaveTable
 from Houdini.Handlers.Games.Waddle import leaveWaddle
+from Houdini.Handlers.Play.Stampbook import giveMascotStamp
 
 class Room(SchemaObject):
 
@@ -47,6 +48,7 @@ class Room(SchemaObject):
             player.sendXt("jr", self.Id, self.generateRoomString())
 
         self.sendXt("ap", player.getPlayerString())
+        giveMascotStamp(player)
 
     def refresh(self, player):
         player.sendXt("grs", self.Id, self.generateRoomString())

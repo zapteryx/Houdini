@@ -25,6 +25,16 @@ def getStampsString(self, penguinId):
         [stampId for stampId, in self.session.query(Stamp.Stamp).filter_by(PenguinID=penguinId)]
     return "|".join(map(str, stamps))
 
+
+def giveMascotStamp(self):
+    for roomPlayer in self.room.players:
+        if roomPlayer.user.MascotStamp:
+            self.addStamp(roomPlayer.user.MascotStamp, True)
+    if self.user.MascotStamp:
+        for roomPlayer in self.room.players:
+            roomPlayer.addStamp(self.user.MascotStamp, True)
+
+
 @Handlers.Handle(XT.StampAdd)
 @Handlers.Throttle(1)
 def handleStampAdd(self, data):
