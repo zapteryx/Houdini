@@ -62,7 +62,7 @@ class ItemCollection(SchemaObjectCollection):
         return hasattr(self.schemaObjects[int(itemId)], "Tour")
 
     def isPuffle(self, itemId):
-        return itemId in range(750, 758)
+        return itemId in range(750, 759)
 
     def getCost(self, itemId):
         return self.schemaObjects[int(itemId)].Cost
