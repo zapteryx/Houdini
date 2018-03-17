@@ -9,6 +9,7 @@ from Houdini.Handlers.Games.TreasureHunt import TreasureHunt
 from Houdini.Handlers.Games.Waddle import Waddle
 from Houdini.Handlers.Games.SledRace import SledRace
 from Houdini.Handlers.Games.CardJitsu import CardMat
+from Houdini.Handlers.Games.CardFire import FireMat
 
 maxCoins = 1000000
 
@@ -101,7 +102,7 @@ def createTables(tablesConfig, roomObjects):
                 roomObject.tables[tableId] = tableObject
 
 def createWaddles(waddlesConfig, roomObjects):
-    waddleTypes = [("Sled", SledRace), ("Card", CardMat)]
+    waddleTypes = [("Sled", SledRace), ("Card", CardMat), ("CardFire", FireMat)]
 
     for waddleType in waddleTypes:
         typeKey, typeClass = waddleType
