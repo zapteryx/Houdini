@@ -731,6 +731,9 @@ class Handlers:
         xtHandlerDataStructure = xtListeners[0].handler["Data"]
         xtData = Data()
 
+        if clientObject.user is None:
+            return False
+
         # TODO: Catch IndexError exceptions
         if xtHandlerDataStructure:
             dataIndex = 4
