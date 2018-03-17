@@ -1,5 +1,29 @@
+from beaker.cache import cache_region as Cache, region_invalidate as Invalidate
+
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
+@Cache("houdini", "book")
+def getBookCoverString(self, penguinId):
+    coverDetails = self.session.query(Penguin.BookColor, Penguin.BookHighlight, Penguin.BookPattern,
+                                      Penguin.BookIcon).filter_by(ID=penguinId).first()
+
+    if coverDetails is None:
+        return str()
+
+    bookColor, bookHighlight, bookPattern, bookIcon = coverDetails
+    coverStamps = self.session.query(CoverStamp).filter_by(PenguinID=penguinId)
+
+    coverString = "%".join(["{}|{}|{}|{}|{}|{}".format(stamp.Type, stamp.Stamp, stamp.X, stamp.Y, stamp.Rotation,
+                                                       stamp.Depth) for stamp in coverStamps])
+
+    return "%".join(map(str, [bookColor, bookHighlight, bookPattern, bookIcon, coverString]))
+
+
+@Cache("houdini", "stamps")
+def getStampsString(self, penguinId):
+    stamps = self.stamps if penguinId == self.user.ID else \
+        [stampId for stampId, in self.session.query(Stamp.Stamp).filter_by(PenguinID=penguinId)]
+    return "|".join(map(str, stamps))
 
 @Handlers.Handle(XT.StampAdd)
 @Handlers.Throttle(1)

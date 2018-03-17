@@ -1,5 +1,17 @@
+from beaker.cache import cache_region as Cache
+
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
+
+@Cache("houdini", "player")
+def getPlayerString(self, penguinId):
+    playerTuple = self.session.query(Penguin.ID, Penguin.Nickname, Penguin.Approval, Penguin.Color, Penguin.Head,
+                                     Penguin.Face, Penguin.Neck, Penguin.Body, Penguin.Hand, Penguin.Feet, Penguin.Flag,
+                                     Penguin.Photo).filter_by(ID=penguinId).first()
+    if playerTuple is not None:
+        playerData = [str(playerDetail) for playerDetail in playerTuple]
+        return "|".join(playerData)
+    return str()
 
 @Handlers.Handle(XT.Heartbeat)
 @Handlers.Throttle(60)

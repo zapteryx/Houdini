@@ -1,4 +1,5 @@
 import time, math
+from beaker.cache import region_invalidate as Invalidate
 
 from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Data.Puffle import Puffle

@@ -1,5 +1,23 @@
+from beaker.cache import cache_region as Cache, region_invalidate as Invalidate
+
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Igloo import Igloo
+@Cache("houdini", "igloo")
+def getIglooString(self, penguinId):
+    igloo = self.igloo if self.user.ID == penguinId else self.session.query(Igloo)\
+        .filter_by(PenguinID=penguinId).first()
+
+    if igloo is None:
+        return str()
+
+    iglooFurniture = self.session.query(IglooFurniture).join(Igloo, Igloo.PenguinID == penguinId)\
+        .filter(IglooFurniture.IglooID == Igloo.ID)
+    furnitureString = ",".join(["{}|{}|{}|{}|{}".format(furniture.FurnitureID, furniture.X, furniture.Y,
+                                                        furniture.Rotation, furniture.Frame)
+                                for furniture in iglooFurniture])
+
+    return "%".join(map(str, [penguinId, igloo.Type, igloo.Music, igloo.Floor, furnitureString]))
+
 
 @Handlers.Handle(XT.SendActivateIgloo)
 def handleSendActivateIgloo(self, data):
