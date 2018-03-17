@@ -11,7 +11,11 @@ def handleBanPlayer(self, data):
 
 @Handlers.Handle(XT.MutePlayer)
 def handleMutePlayer(self, data):
-    return
+    if self.user.Moderator:
+        if data.PlayerId in self.server.players:
+            target = self.server.players[data.PlayerId]
+            if not target.user.Moderator:
+                target.muted = True
 
 @Handlers.Handle(XT.KickPlayer)
 def handleKickPlayer(self, data):
