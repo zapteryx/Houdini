@@ -194,6 +194,16 @@ class XT:
         "Data": [XTData("Id", int)]
     }
 
+    SendLineMessage = {
+        "Handler": "u#sl",
+        "Data": [XTData("Id", int)]
+    }
+
+    SendMascotMessage = {
+        "Handler": "u#sma",
+        "Data": [XTData("Id", int)]
+    }
+
     GetLatestRevision = {
         "Handler": "u#glr",
         "Data": []

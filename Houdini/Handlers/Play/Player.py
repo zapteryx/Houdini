@@ -61,6 +61,17 @@ def handleSafeMessage(self, data):
 def handleSendTourGuide(self, data):
     self.room.sendXt("sg", self.user.ID, data.Id)
 
+@Handlers.Handle(XT.SendLineMessage)
+@Handlers.Throttle()
+def handleSendLineMessage(self, data):
+    self.room.sendXt("sl", self.user.ID, data.Id)
+
+@Handlers.Handle(XT.SendMascotMessage)
+@Handlers.Throttle()
+def handleSendMascotMessage(self, data):
+    if self.user.MascotStamp:
+        self.room.sendXt("sma", self.user.ID, data.Id)
+
 @Handlers.Handle(XT.GetLatestRevision)
 @Handlers.Throttle(-1)
 def handleGetLatestRevision(self, data):
