@@ -1,7 +1,8 @@
+from datetime import datetime, timedelta
+
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 from Houdini.Data.Ban import Ban
-import time
 
 @Handlers.Handle(XT.BanPlayer)
 def handleBanPlayer(self, data):
@@ -10,7 +11,11 @@ def handleBanPlayer(self, data):
 
 @Handlers.Handle(XT.MutePlayer)
 def handleMutePlayer(self, data):
-    return
+    if self.user.Moderator:
+        if data.PlayerId in self.server.players:
+            target = self.server.players[data.PlayerId]
+            if not target.user.Moderator:
+                target.muted = True
 
 @Handlers.Handle(XT.KickPlayer)
 def handleKickPlayer(self, data):
@@ -25,22 +30,22 @@ def cheatBan(self, targetPlayer, banDuration=24, comment=""):
     if targetPlayer in self.server.players:
         target = self.server.players[targetPlayer]
         numberOfBans = self.session.query(Ban).\
-            filter(Ban.Player == targetPlayer).\
-            count()
+            filter(Ban.PenguinID == targetPlayer).count()
 
+        dateIssued = datetime.now()
+        dateExpires = dateIssued + timedelta(hours=banDuration)
         if numberOfBans < 3:
-            target.user.Banned = int(time.time() + 60 * 60 * banDuration)
-            ban = Ban(Moderator="sys", Player=targetPlayer,
-                      Comment=comment, Expiration=banDuration, Time=time.time())
+            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                      ModeratorID=None, Reason=1, Comment=comment)
         else:
-            target.user.Banned = "perm"
-            ban = Ban(Moderator="sys", Player=targetPlayer,
-                      Comment=comment, Expiration="perm", Time=time.time())
+            target.user.Permaban = True
+            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                      ModeratorID=None, Reason=1, Comment=comment)
 
         self.session.add(ban)
-        self.session.commit()
 
         target.sendXt("e", 611, comment)
+        target.transport.loseConnection()
 
 def moderatorKick(self, targetPlayer):
     if targetPlayer in self.server.players:
@@ -61,20 +66,19 @@ def moderatorBan(self, targetPlayer, banDuration=24, comment=""):
                 player.sendXt("ma", "b", targetPlayer, target.Username)
 
         numberOfBans = self.session.query(Ban).\
-            filter(Ban.Player == targetPlayer).\
-            count()
+            filter(Ban.PenguinID == targetPlayer).count()
 
+        dateIssued = datetime.now()
+        dateExpires = dateIssued + timedelta(hours=banDuration)
         if numberOfBans < 3:
-            target.Banned = int(time.time() + 60 * 60 * banDuration)
-            ban = Ban(Moderator=self.user.Username, Player=targetPlayer,
-                      Comment=comment, Expiration=banDuration, Time=time.time())
+            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                      ModeratorID=self.user.ID, Reason=2, Comment=comment)
         else:
-            target.Banned = "perm"
-            ban = Ban(Moderator=self.user.Username, Player=targetPlayer,
-                      Comment=comment, Expiration="perm", Time=time.time())
+            target.Permaban = True
+            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                      ModeratorID=self.user.ID, Reason=2, Comment=comment)
 
         self.session.add(ban)
-        self.session.commit()
 
         if targetPlayer in self.server.players:
             self.server.players[targetPlayer].sendXt("e", 610, comment)

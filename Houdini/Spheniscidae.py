@@ -21,26 +21,6 @@ class Spheniscidae(LineOnlyReceiver, object):
         # Defined once the client requests it (see handleRandomKey)
         self.randomKey = None
 
-    """
-    The login server relies on knowing all the buddies the player has
-    and since the login server uses this class instead of the Penguin child class,
-    it's placed here. :-)
-    """
-    def getBuddyList(self):
-        buddiesArray = self.user.Buddies.split('%')
-        self.buddies = {}
-
-        for buddyDetails in buddiesArray:
-            try:
-                buddyId, buddyUsername = buddyDetails.split('|')
-                self.buddies[int(buddyId)] = buddyUsername
-
-            except ValueError as valueError:
-                self.logger.debug('getBuddyList: %s', valueError.message)
-                break  # No buddies
-
-        return self.buddies
-
     def sendErrorAndDisconnect(self, error):
         self.sendError(error)
         self.transport.loseConnection()

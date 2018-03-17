@@ -194,6 +194,16 @@ class XT:
         "Data": [XTData("Id", int)]
     }
 
+    SendLineMessage = {
+        "Handler": "u#sl",
+        "Data": [XTData("Id", int)]
+    }
+
+    SendMascotMessage = {
+        "Handler": "u#sma",
+        "Data": [XTData("Id", int)]
+    }
+
     GetLatestRevision = {
         "Handler": "u#glr",
         "Data": []
@@ -590,6 +600,16 @@ class XT:
         "Data": []
     }
 
+    GetNinjaFireLevel = {
+        "Handler": "ni#gfl",
+        "Data": []
+    }
+
+    GetNinjaWaterLevel = {
+        "Handler": "ni#gwl",
+        "Data": []
+    }
+
     GetCards = {
         "Handler": "ni#gcd",
         "Data": []
@@ -608,6 +628,21 @@ class XT:
     JoinSensei = {
         "Handler": "jsen",
         "Data": [VariableXTData("Null")]
+    }
+
+    JoinRedemption = {
+        "Handler": "rjs",
+        "Data": [XTData("ID", int), XTData("LoginKey", str), XTData("Language", str)]
+    }
+
+    SendCode = {
+        "Handler": "rsc",
+        "Data": [XTData("Code", str)]
+    }
+
+    SendGoldenChoice = {
+        "Handler": "rsgc",
+        "Data": [XTData("Code", str), XTData("Choice", int)]
     }
 
 
@@ -695,6 +730,9 @@ class Handlers:
         xtListeners = Handlers.XTHandlers[packetId]
         xtHandlerDataStructure = xtListeners[0].handler["Data"]
         xtData = Data()
+
+        if clientObject.user is None:
+            return False
 
         # TODO: Catch IndexError exceptions
         if xtHandlerDataStructure:

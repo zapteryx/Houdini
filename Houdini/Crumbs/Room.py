@@ -5,6 +5,7 @@ from Houdini.Crumbs import SchemaObject, SchemaObjectCollection
 
 from Houdini.Handlers.Games.Table import leaveTable
 from Houdini.Handlers.Games.Waddle import leaveWaddle
+from Houdini.Handlers.Play.Stampbook import giveMascotStamp
 
 class Room(SchemaObject):
 
@@ -31,9 +32,6 @@ class Room(SchemaObject):
         return roomString
 
     def add(self, player):
-        if len(self.players) > self.MaxUsers:
-            return player.sendError(210)
-
         leaveTable(player)
         leaveWaddle(player)
 
@@ -50,6 +48,7 @@ class Room(SchemaObject):
             player.sendXt("jr", self.Id, self.generateRoomString())
 
         self.sendXt("ap", player.getPlayerString())
+        giveMascotStamp(player)
 
     def refresh(self, player):
         player.sendXt("grs", self.Id, self.generateRoomString())
@@ -70,8 +69,6 @@ class RoomSchema(Schema):
     Member = fields.Integer(load_from="is_member")
     Path = fields.String(load_from="path")
     MaxUsers = fields.Integer(load_from="max_users")
-    JumpEnabled = fields.Boolean(load_from="jump_enabled")
-    JumpDisabled = fields.Boolean(load_from="jump_disabled")
     RequiredItem = fields.Integer(load_from="required_item", allow_none=True)
     ShortName = fields.String(load_from="short_name")
 

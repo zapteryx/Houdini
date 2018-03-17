@@ -7,6 +7,7 @@ import sys
 from logging.handlers import RotatingFileHandler
 
 import redis
+from beaker.cache import cache_regions
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from twisted.internet import reactor, task
@@ -82,7 +83,8 @@ class HoudiniFactory(Factory):
         self.sessionValidator.start(timeoutInSeconds - 5)
 
         self.redis = redis.StrictRedis()
-        self.redis.flushdb()
+        self.redis.delete("%s.players" % self.serverName)
+        self.redis.delete("%s.population" % self.serverName)
 
         self.players = {}
 
@@ -92,6 +94,13 @@ class HoudiniFactory(Factory):
 
         if self.server["World"]:
             self.protocol = Penguin
+
+            cache_regions.update({
+                "houdini": {
+                    "expire": self.server["CacheExpiry"],
+                    "type": "memory"
+                }
+            })
 
             self.spawnRooms = (100, 300, 400, 800, 809, 230, 130)
 

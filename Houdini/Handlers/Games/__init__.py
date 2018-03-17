@@ -9,6 +9,7 @@ from Houdini.Handlers.Games.TreasureHunt import TreasureHunt
 from Houdini.Handlers.Games.Waddle import Waddle
 from Houdini.Handlers.Games.SledRace import SledRace
 from Houdini.Handlers.Games.CardJitsu import CardMat
+from Houdini.Handlers.Games.CardFire import FireMat
 
 maxCoins = 1000000
 
@@ -46,19 +47,14 @@ def handleSendGameOver(self, data):
 
         if self.server.stampGroups.isStampRoom(self.room.Id):
             roomStamps = self.server.stampGroups.getStampGroupByRoomId(self.room.Id).StampsById
-            myStamps = map(int, self.user.Stamps.split("|")) if self.user.Stamps else []
-            collectedStamps = []
             totalGameStamps = 0
 
-            for myStamp in myStamps:
-                if myStamp in roomStamps:
-                    collectedStamps.append(myStamp)
-
+            for myStamp in self.stamps:
                 for groupId, stampGroup in self.server.stampGroups.schemaObjects.items():
                     if myStamp in stampGroup.StampsById:
                         totalGameStamps += 1
 
-            collectedStamps = [str(myStamp) for myStamp in myStamps if myStamp in roomStamps]
+            collectedStamps = [str(myStamp) for myStamp in self.stamps if myStamp in roomStamps]
             totalStamps = len(collectedStamps)
             totalStampsGame = len(roomStamps)
             collectedStampsString = "|".join(collectedStamps)
@@ -106,7 +102,7 @@ def createTables(tablesConfig, roomObjects):
                 roomObject.tables[tableId] = tableObject
 
 def createWaddles(waddlesConfig, roomObjects):
-    waddleTypes = [("Sled", SledRace), ("Card", CardMat)]
+    waddleTypes = [("Sled", SledRace), ("Card", CardMat), ("CardFire", FireMat)]
 
     for waddleType in waddleTypes:
         typeKey, typeClass = waddleType

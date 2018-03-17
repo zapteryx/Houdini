@@ -7,10 +7,9 @@ class CardJitsu(object):
 
     def __init__(self, penguins, seats):
         self.penguins, self.seats = penguins, seats
-        self.deck = [{}, {}]
-        self.cardsChosen = [False, False]
-        self.playerCards = [{"f":[], "w":[], "s": []},
-                            {"f":[], "w":[], "s": []}]
+        self.deck = [{} for _ in xrange(2)]
+        self.cardsChosen = [False for _ in xrange(2)]
+        self.playerCards = [{"f":[], "w":[], "s": []} for _ in xrange(2)]
         self.cardId = 1
         self.powers = {}
         self.discards = []
@@ -173,35 +172,17 @@ class CardJitsu(object):
             if penguin.user.NinjaRank == 0:
                 penguin.user.NinjaProgress += 100
             elif penguin.user.NinjaRank < 9:
-                points = math.floor(100 / (penguin.user.NinjaRank * self.rankSpeed
-                    if winnerSeatId == seatId else self.rankSpeed * 2))
+                points = math.floor(100 / (penguin.user.NinjaRank *
+                                           (self.rankSpeed if winnerSeatId == seatId else self.rankSpeed * 2)))
                 penguin.user.NinjaProgress += points
             if penguin.user.NinjaProgress >= 100:
-                penguin.user.NinjaRank += 1
-                penguin.user.NinjaProgress = 0
+                penguin.ninjaRankUp()
                 penguin.sendXt("cza", penguin.user.NinjaRank)
-                rankAwards = [4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 104]
-
-                penguin.inventory.append(rankAwards[penguin.user.NinjaRank - 1])
-                stringifiedInventory = map(str, penguin.inventory)
-                penguin.user.Inventory = "%".join(stringifiedInventory)
-
-                beltPostcards = {1: 177, 5: 178, 9: 179}
-                if penguin.user.NinjaRank in beltPostcards:
-                    penguin.receiveSystemPostcard(beltPostcards[penguin.user.NinjaRank])
-                beltStamps = {1: 230, 5: 232, 9: 234, 10: 236}
-                if penguin.user.NinjaRank in beltStamps:
-                    penguin.addStamp(beltStamps[penguin.user.NinjaRank], True)
             self.sendStampsEarned(penguin)
 
     def sendStampsEarned(self, penguin):
         cardStamps = penguin.server.stampGroups[38].StampsById
-        myStamps = map(int, penguin.user.Stamps.split("|")) if penguin.user.Stamps else []
-        collectedStamps = []
-        for myStamp in myStamps:
-            if myStamp in cardStamps:
-                collectedStamps.append(myStamp)
-        collectedStamps = [str(myStamp) for myStamp in myStamps if myStamp in cardStamps]
+        collectedStamps = [str(myStamp) for myStamp in penguin.stamps if myStamp in cardStamps]
         totalStamps = len(collectedStamps)
         totalStampsGame = len(cardStamps)
         collectedStampsString = "|".join(collectedStamps)
@@ -292,8 +273,8 @@ def handleSendMove(self, data):
     senseiCardStrings = []
     while len(self.waddle.deck[1]) < 5:
         waddleDeck = list(self.waddle.deck[1].values())
-        usableDeck = [card for card in self.deck if (not card.PowerId or self.user.NinjaRank >= 9) and
-                      sum(find.Id == card.Id for find in self.deck) >
+        usableDeck = [card for card in self.cards if (not card.PowerId or self.user.NinjaRank >= 9) and
+                      sum(find.Id == card.Id for find in self.cards) >
                       sum(find.Id == card.Id for find in waddleDeck)]
         card = random.choice(usableDeck)
         if self.user.NinjaRank < 9:
@@ -393,7 +374,7 @@ def handleSendMove(self, data):
 
     while len(self.waddle.deck[seatId]) < 5:
         waddleDeck = list(self.waddle.deck[seatId].values())
-        usableDeck = [card for card in self.deck if sum(find.Id == card.Id for find in self.deck) >
+        usableDeck = [card for card in self.cards if sum(find.Id == card.Id for find in self.cards) >
                       sum(find.Id == card.Id for find in waddleDeck)]
         card = random.choice(usableDeck)
         self.waddle.deck[seatId][self.waddle.cardId] = copy.copy(card)
@@ -457,6 +438,9 @@ def handleSendMove(self, data):
                 self.waddle.penguins[winnerSeatId].addStamp(238, True)
             if len([card for cards in self.waddle.playerCards[winnerSeatId].values() for card in cards]) >= 9:
                 self.waddle.penguins[winnerSeatId].addStamp(248, True)
+            self.waddle.penguins[winnerSeatId].user.NinjaMatchesWon += 1
+            if self.waddle.penguins[winnerSeatId].user.NinjaMatchesWon == 25:
+                self.waddle.penguins[winnerSeatId].addStamp(240, True)
 
             self.waddle.reset()
             return

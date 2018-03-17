@@ -1,148 +1,189 @@
-import time, math
+import time
+from beaker.cache import region_invalidate as Invalidate
 
 from Houdini.Spheniscidae import Spheniscidae
+from Houdini.Data.Penguin import Inventory, IglooInventory, FurnitureInventory
 from Houdini.Data.Puffle import Puffle
-from Houdini.Data.Mail import Mail
+from Houdini.Data.Postcard import Postcard
+from Houdini.Data.Stamp import Stamp
+from Houdini.Data.Deck import Deck
 
 from Houdini.Handlers.Games.Table import leaveTable
 from Houdini.Handlers.Games.Waddle import leaveWaddle
+from Houdini.Handlers.Play.Stampbook import getStampsString
+
 
 class Penguin(Spheniscidae):
 
-	def __init__(self, session, spirit):
-		super(Penguin, self).__init__(session, spirit)
+    def __init__(self, session, spirit):
+        super(Penguin, self).__init__(session, spirit)
+        self.user = None
+        self.throttle = {}
 
-		# Defined in handleLogin if authentication is successful
-		self.user = None
+        self.frame = 1
+        self.x, self.y = (0, 0)
+        self.age = 0
+        self.muted = False
+        self.playerString = None
 
-		self.frame = 1
-		self.x, self.y = (0, 0)
+        self.table = None
+        self.waddle = None
+        self.gameFinished = True
 
-		self.playerString = None
-		self.furniture = {}
-		self.buddies = {}
-		self.puffles = {}
-		self.ignore = {}
-		self.throttle = {}
+        self.logger.info("Penguin class instantiated")
 
-		self.deck = []
+    def addItem(self, itemId, itemCost=0):
+        if itemId in self.inventory:
+            return False
 
-		self.membershipDays = None
+        self.inventory.append(itemId)
+        self.session.add(Inventory(PenguinID=self.user.ID, ItemID=itemId))
 
-		self.table = None
-		self.waddle = None
+        self.user.Coins -= itemCost
 
-		self.gameFinished = True
+        self.sendXt("ai", itemId, self.user.Coins)
 
-		self.logger.info("Penguin class instantiated")
+    def addIgloo(self, iglooId, iglooCost=0):
+        if iglooId in self.igloos:
+            return False
 
-	def addItem(self, itemId, itemCost=0):
-		if itemId in self.inventory:
-			return False
+        self.igloos.append(iglooId)
+        self.session.add(IglooInventory(PenguinID=self.user.ID, IglooID=iglooId))
+        self.user.Coins -= iglooCost
 
-		self.inventory.append(itemId)
+        self.sendXt("au", iglooId, self.user.Coins)
 
-		stringifiedInventory = map(str, self.inventory)
-		self.user.Inventory = "%".join(stringifiedInventory)
+    def addFurniture(self, furnitureId, furnitureCost=0):
+        furnitureQuantity = 1
 
-		self.user.Coins -= itemCost
+        if furnitureId in self.furniture:
+            furnitureQuantity = self.furniture[furnitureId]
+            furnitureQuantity += 1
 
-		self.sendXt("ai", itemId, self.user.Coins)
+            if furnitureQuantity >= 100:
+                return False
 
-	def addStamp(self, stampId, sendXt=False):
-		stamps = self.user.Stamps.split("|")
-		if stampId in stamps:
-			return False
+            self.session.query(FurnitureInventory).filter_by(PenguinID=self.user.ID, FurnitureID=furnitureId) \
+                .update({"Quantity": furnitureQuantity})
+        else:
+            self.session.add(FurnitureInventory(PenguinID=self.user.ID, FurnitureID=furnitureId))
 
-		# Check if the first element is an empty string, if so remove
-		if not stamps[0]:
-			del stamps[0]
+        self.furniture[furnitureId] = furnitureQuantity
+        self.user.Coins -= furnitureCost
 
-		recentStamps = self.user.RecentStamps.split("|")
-		stamps.append(stampId)
-		recentStamps.append(stampId)
-		stringifiedStamps = map(str, stamps)
-		stringifiedRecentStamps = map(str, recentStamps)
+        self.sendXt("af", furnitureId, self.user.Coins)
 
-		self.user.Stamps = "|".join(stringifiedStamps)
-		self.user.RecentStamps = "|".join(stringifiedRecentStamps)
-		self.session.commit()
+    def addFlooring(self, floorId, floorCost=0):
+        self.user.Coins -= floorCost
+        self.igloo.Floor = floorId
 
-		if sendXt:
-			self.sendXt("aabs", stampId)
+        self.sendXt("ag", floorId, self.user.Coins)
 
-	def joinRoom(self, roomId):
-		self.room.remove(self)
-		self.server.rooms[roomId].add(self)
+    def addStamp(self, stampId, sendXt=False):
+        if stampId in self.stamps:
+            return False
 
-	def receiveSystemPostcard(self, postcardId):
-		currentTimestamp = int(time.time())
-		postcard = Mail(Recipient=self.user.ID, SenderName="sys",
-						SenderID=0, Details="", Date=currentTimestamp,
-						Type=postcardId)
-		self.session.add(postcard)
-		self.session.commit()
-		self.sendXt("mr", self.user.Username, self.user.ID, postcardId,
-					"", currentTimestamp, postcard.ID)
+        self.stamps.append(stampId)
+        self.recentStamps.append(stampId)
+        self.session.add(Stamp(PenguinID=self.user.ID, Stamp=stampId))
 
-	def sendCoins(self, coinAmount):
-		self.user.Coins = coinAmount
-		self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
+        if sendXt:
+            self.sendXt("aabs", stampId)
+        Invalidate(getStampsString, 'houdini', 'stamps', self.user.ID)
 
-	def getPlayerString(self):
-		if self.membershipDays is None:
-			self.membershipDays = math.floor((time.time() - self.user.RegistrationDate) / 86400)
+    def addCards(self, *args):
+        for cardId in args:
+            cardQuantity = 1
 
-		playerArray = (
-			self.user.ID,
-			self.user.Username,
-			1,
-			self.user.Color,
-			self.user.Head,
-			self.user.Face,
-			self.user.Neck,
-			self.user.Body,
-			self.user.Hand,
-			self.user.Feet,
-			self.user.Flag,
-			self.user.Photo,
-			self.x,
-			self.y,
-			self.frame,
-			1,
-			self.membershipDays,
-		)
+            if cardId in self.deck:
+                cardQuantity = self.deck[cardId]
+                cardQuantity += 1
 
-		playerStringArray = map(str, playerArray)
-		self.playerString = "|".join(playerStringArray)
+                self.session.query(Deck).filter_by(PenguinID=self.user.ID, CardID=cardId) \
+                    .update({"Quantity": cardQuantity})
+            else:
+                self.session.add(Deck(PenguinID=self.user.ID, CardID=cardId))
 
-		return self.playerString
+            self.deck[cardId] = cardQuantity
 
-	def connectionLost(self, reason):
-		# This indicates that the client was successfully authorized
-		# and joined the server w/ all their stuff loaded
-		if hasattr(self, "room") and self.room is not None:
-			leaveTable(self)
-			leaveWaddle(self)
-			self.server.matchMaker.remove(self)
-			self.server.danceFloor.remove(self)
-			self.room.remove(self)
+    def ninjaRankUp(self, levels=1):
+        rankAwards = [4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 104]
+        beltPostcards = {1: 177, 5: 178, 9: 179}
+        beltStamps = {1: 230, 5: 232, 9: 234, 10: 236}
+        for i in xrange(levels):
+            if self.user.NinjaRank == 10:
+                return False
+            self.user.NinjaRank += 1
+            self.user.NinjaProgress = 0
+            self.addItem(rankAwards[self.user.NinjaRank - 1])
+            if self.user.NinjaRank in beltPostcards:
+                self.receiveSystemPostcard(beltPostcards[self.user.NinjaRank])
+            if self.user.NinjaRank in beltStamps:
+                self.addStamp(beltStamps[self.user.NinjaRank], True)
 
-			# Stop walking any puffles
-			puffleId = self.session.query(Puffle.ID) \
-				.filter(Puffle.Owner == self.user.ID, Puffle.Walking == 1).scalar()
+    def joinRoom(self, roomId):
+        self.room.remove(self)
+        self.server.rooms[roomId].add(self)
 
-			if puffleId is not None:
-				self.user.Hand = 0
-				self.session.query(Puffle.ID == puffleId).update({"Walking": 0})
+    def receiveSystemPostcard(self, postcardId, details=""):
+        postcard = Postcard(RecipientID=self.user.ID, SenderID=None, Details=details, Type=postcardId)
+        self.session.add(postcard)
+        self.session.commit()
+        self.sendXt("mr", "sys", 0, postcardId, details, int(time.time()), postcard.ID)
 
-			# Let buddies know that they've logged off
-			for buddyId in self.buddies.keys():
-				if buddyId in self.server.players:
-					self.server.players[buddyId].sendXt("bof", self.user.ID)
+    def sendCoins(self, coinAmount):
+        self.user.Coins = coinAmount
+        self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
 
-			# Remove them from Redis
-			self.server.redis.srem("%s.players" % self.server.serverName, self.user.ID)
-			self.server.redis.decr("%s.population" % self.server.serverName)
+    def getPlayerString(self):
+        playerArray = (
+            self.user.ID,
+            self.user.Nickname,
+            self.user.Approval,
+            self.user.Color,
+            self.user.Head,
+            self.user.Face,
+            self.user.Neck,
+            self.user.Body,
+            self.user.Hand,
+            self.user.Feet,
+            self.user.Flag,
+            self.user.Photo,
+            self.x, self.y,
+            self.frame,
+            1, self.age
+        )
 
-		super(Penguin, self).connectionLost(reason)
+        playerStringArray = map(str, playerArray)
+        self.playerString = "|".join(playerStringArray)
+
+        return self.playerString
+
+    def connectionLost(self, reason):
+        if hasattr(self, "room") and self.room is not None:
+            leaveTable(self)
+            leaveWaddle(self)
+            self.server.matchMaker.remove(self)
+            self.server.danceFloor.remove(self)
+            self.room.remove(self)
+
+            puffleId = self.session.query(Puffle.ID) \
+                .filter(Puffle.PenguinID == self.user.ID, Puffle.Walking == 1).scalar()
+
+            if puffleId is not None:
+                self.user.Hand = 0
+                self.session.query(Puffle.ID == puffleId).update({"Walking": 0})
+
+            for buddyId in self.buddies.keys():
+                if buddyId in self.server.players:
+                    self.server.players[buddyId].sendXt("bof", self.user.ID)
+
+            loginUnix = time.mktime(self.login.Date.timetuple())
+            minutesPlayed = int(time.time() - loginUnix) / 60
+            self.user.MinutesPlayed += minutesPlayed
+            self.session.add(self.login)
+
+            self.server.redis.srem("%s.players" % self.server.serverName, self.user.ID)
+            self.server.redis.decr("%s.population" % self.server.serverName)
+
+        super(Penguin, self).connectionLost(reason)

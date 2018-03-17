@@ -1,8 +1,11 @@
 from Houdini.Handlers import Handlers, XML
-from Houdini.Data.Penguin import Penguin
+from Houdini.Data.Penguin import Penguin, BuddyList
+from Houdini.Data.Ban import Ban
 from Houdini.Crypto import Crypto
 
 import bcrypt, time
+
+from datetime import datetime
 
 @Handlers.Handle(XML.Login)
 def handleLogin(self, data):
@@ -56,13 +59,17 @@ def handleLogin(self, data):
         else:
             del self.server.loginAttempts[ipAddr]
 
-    if user.Banned == "perm":
+    if not user.Active:
+        return self.sendErrorAndDisconnect(900)
+
+    if user.Permaban:
         return self.sendErrorAndDisconnect(603)
 
-    banExpiry = int(user.Banned)
+    activeBan = self.session.query(Ban).filter(Ban.PenguinID == user.ID)\
+        .filter(Ban.Expires >= datetime.now()).first()
 
-    if banExpiry > loginTimestamp:
-        hoursLeft = int(banExpiry - loginTimestamp) / 60 / 60
+    if activeBan is not None:
+        hoursLeft = (activeBan.Expires - datetime.now()).seconds / 60 / 60
 
         if hoursLeft == 0:
             return self.sendErrorAndDisconnect(602)
@@ -81,7 +88,7 @@ def handleLogin(self, data):
     self.user = user
     self.user.LoginKey = loginKey
 
-    self.getBuddyList()
+    self.session.commit()
 
     buddyWorlds = []
     worldPopulations = []
@@ -105,7 +112,8 @@ def handleLogin(self, data):
                 self.logger.debug("Skipping buddy iteration for %s " % serverName)
                 continue
 
-            for buddyId in self.buddies.keys():
+            buddies = self.session.query(BuddyList.BuddyID).filter(BuddyList.PenguinID == self.user.ID)
+            for buddyId, in buddies:
                 if str(buddyId) in serverPlayers:
                     buddyWorlds.append(serversConfig[serverName]["Id"])
                     break
