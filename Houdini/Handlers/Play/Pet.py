@@ -3,6 +3,7 @@ import time, random
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Puffle import Puffle
 from Houdini.Data.Postcard import Postcard
+from Houdini.Data import commitOrRollback
 
 puffleStatistics = {
     0: (100, 100, 100),
@@ -54,7 +55,6 @@ def decreaseStats(server):
                     filter(Postcard.Details == Puffle.Name).scalar()
                 if not notificationAware:
                     player.receiveSystemPostcard(110, puffle.Name)
-        player.session.commit()
         handleGetMyPlayerPuffles(player, [])
 
 def getStatistics(puffleType, puffleHealth, puffleHunger, puffleRest):
@@ -89,6 +89,7 @@ def handleGetMyPlayerPuffles(self, data):
     self.sendXt("pgu", myPufflesString)
 
 @Handlers.Handle(XT.AdoptPuffle)
+@commitOrRollback()
 def handleSendAdoptPuffle(self, data):
     if not data.TypeId in puffleStatistics:
         return self.transport.loseConnection()
