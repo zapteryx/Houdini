@@ -39,7 +39,6 @@ def giveMascotStamp(self):
 
 
 @Handlers.Handle(XT.StampAdd)
-@Handlers.Throttle()
 def handleStampAdd(self, data):
     if data.StampId not in self.server.stamps:
         return
