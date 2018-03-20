@@ -27,7 +27,7 @@ def handleSendCode(self, data):
     if code is None:
         return self.sendError(720)
 
-    redeemed = self.session.query(PenguinRedemption).filter_by(CodeID=code.ID).scalar()
+    redeemed = self.session.query(PenguinRedemption).filter_by(PenguinID=self.user.ID, CodeID=code.ID).scalar()
     if redeemed is not None:
         return self.sendError(721)
 

@@ -7,6 +7,7 @@ from twisted.protocols.basic import LineOnlyReceiver
 
 from Houdini.Handlers import Handlers
 from Houdini.Events import Events
+from Houdini.Data import retryableTransaction
 
 class Spheniscidae(LineOnlyReceiver, object):
 
@@ -126,6 +127,7 @@ class Spheniscidae(LineOnlyReceiver, object):
         except UnicodeError as uniError:
             self.logger.error('Error decoding data')
 
+    @retryableTransaction()
     def connectionLost(self, reason):
         self.logger.info("Client disconnected")
 

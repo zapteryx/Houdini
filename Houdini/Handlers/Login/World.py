@@ -9,8 +9,10 @@ from Houdini.Data.Igloo import Igloo
 from Houdini.Data.Puffle import Puffle
 from Houdini.Data.Deck import Deck
 from Houdini.Crypto import Crypto
+from Houdini.Data import retryableTransaction
 
 @Handlers.Handle(XML.Login)
+@retryableTransaction()
 def handleLogin(self, data):
     username = data.Username
     password = data.Password

@@ -1,8 +1,8 @@
 import time, random, datetime
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Postcard import Postcard
-from Houdini.Data.Penguin import Penguin
-
+from Houdini.Data.Penguin import Penguin, IgnoreList
+from Houdini.Data import retryableTransaction
 
 @Handlers.Handle(XT.StartMailEngine)
 @Handlers.Throttle(-1)
@@ -67,15 +67,22 @@ def handleGetMail(self, data):
 
 @Handlers.Handle(XT.SendMail)
 @Handlers.Throttle(2)
+@retryableTransaction()
 def handleSendMail(self, data):
     if self.user.Coins < 10:
         self.sendXt("ms", self.user.Coins, 2)
-        self.logger.debug("%d tried to send postcard with insufficient funds.", self.user.ID)
+        self.logger.info("%d tried to send postcard with insufficient funds.", self.user.ID)
         return
     if data.RecipientId not in self.server.players:
+        Ignored = self.session.query(IgnoreList) \
+            .filter_by(PenguinID=data.RecipientId, IgnoreID=self.user.ID).scalar()
+        if Ignored is not None:
+            return self.sendXt("ms", self.user.Coins, 1)
         player = self.session.query(Penguin).filter_by(ID=data.RecipientId).scalar()
         if player is None:
             return
+    elif self.user.ID in self.server.players[data.RecipientId].ignore:
+        return self.sendXt("ms", self.user.Coins, 1)
     recipientMailCount = self.session.query(Postcard). \
         filter(Postcard.RecipientID == data.RecipientId).count()
     if recipientMailCount >= 100:
@@ -91,7 +98,7 @@ def handleSendMail(self, data):
         recipientObject = self.server.players[data.RecipientId]
         recipientObject.sendXt("mr", self.user.Username, self.user.ID, data.PostcardId,
                                "", currentTimestamp, postcard.ID)
-    self.logger.info("%d send %d a postcard (%d).", self.user.ID, data.RecipientId,
+    self.logger.info("%d sent %d a postcard (%d).", self.user.ID, data.RecipientId,
                      data.PostcardId)
 
 
