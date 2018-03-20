@@ -3,7 +3,7 @@ import time, random
 from Houdini.Handlers import Handlers, XT
 from Houdini.Crumbs.Room import Room
 from Houdini.Handlers.Play.Stampbook import getStampsString
-from Houdini.Data import commitOrRollback
+from Houdini.Data import retryableTransaction
 
 RoomFieldKeywords = {
     "Id": None,
@@ -22,7 +22,7 @@ RoomFieldKeywords = {
 
 @Handlers.Handle(XT.JoinWorld)
 @Handlers.Throttle(-1)
-@commitOrRollback()
+@retryableTransaction()
 def handleJoinWorld(self, data):
     if int(data.ID) != self.user.ID:
         return self.transport.loseConnection()

@@ -2,7 +2,7 @@ import time, random, datetime
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Postcard import Postcard
 from Houdini.Data.Penguin import Penguin
-from Houdini.Data import commitOrRollback
+from Houdini.Data import retryableTransaction
 
 @Handlers.Handle(XT.StartMailEngine)
 @Handlers.Throttle(-1)
@@ -67,7 +67,7 @@ def handleGetMail(self, data):
 
 @Handlers.Handle(XT.SendMail)
 @Handlers.Throttle(2)
-@commitOrRollback()
+@retryableTransaction()
 def handleSendMail(self, data):
     if self.user.Coins < 10:
         self.sendXt("ms", self.user.Coins, 2)
