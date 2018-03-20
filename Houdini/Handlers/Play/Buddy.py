@@ -30,6 +30,8 @@ def handleBuddyRequest(self, data):
 
     if not hasattr(buddyObject, "buddyRequests"):
         buddyObject.buddyRequests = {}
+    elif self.user.ID in buddyObject.buddyRequests:
+        return
 
     buddyObject.buddyRequests[self.user.ID] = [self.user.Username, self.buddies]
 
