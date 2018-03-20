@@ -64,7 +64,7 @@ def getPinString(self, penguinId):
 def getAwardsString(self, penguinId):
     awardsArray = [itemId for itemId, in self.session.query(Inventory.ItemID)
         .filter_by(PenguinID=penguinId) if self.server.items.isItemAward(itemId)]
-    return "%".join(map(str, awardsArray))
+    return "|".join(map(str, awardsArray))
 
 
 @Handlers.Handle(XT.GetPlayerPins)
