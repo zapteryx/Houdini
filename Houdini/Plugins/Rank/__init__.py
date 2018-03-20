@@ -23,7 +23,7 @@ class Rank(object):
         Penguin.Rank = Column(Integer, nullable=False, server_default=text("'1'"))
 
         try:
-            self.server.databaseEngine.execute("ALTER TABLE penguins add Rank TINYINT(1) DEFAULT 1;")
+            self.server.databaseEngine.execute("ALTER TABLE penguin add Rank TINYINT(1) DEFAULT 1;")
 
         except OperationalError as opError:
             if "Duplicate column name" not in opError.message:
