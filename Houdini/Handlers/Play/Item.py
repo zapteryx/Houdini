@@ -1,4 +1,4 @@
-from beaker.cache import cache_region, region_invalidate
+from beaker.cache import cache_region as Cache, region_invalidate as Invalidate
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Handlers.Play.Moderation import cheatBan
@@ -39,8 +39,8 @@ def handleBuyInventory(self, data):
 
     self.addItem(data.ItemId, itemCost)
 
-    region_invalidate(getPinString, 'houdini', 'pins', self.user.ID)
-    region_invalidate(getAwardsString, 'houdini', 'awards', self.user.ID)
+    Invalidate(getPinString, 'houdini', 'pins', self.user.ID)
+    Invalidate(getAwardsString, 'houdini', 'awards', self.user.ID)
 
 @Handlers.Handle(XT.GetInventory)
 @Handlers.Throttle(-1)
@@ -48,22 +48,31 @@ def handleGetInventory(self, data):
     self.sendXt("gi", "%".join(map(str, self.inventory)))
 
 
-@cache_region('houdini', 'pins')
+@Cache('houdini', 'pins')
 def getPinString(self, penguinId):
     def getString(pinId):
         isMember = int(self.server.items[pinId].Member)
         timestamp = self.server.pins.getUnixTimestamp(pinId)
         return "|".join(map(str, [pinId, timestamp, isMember]))
 
-    pinsArray = [getString(itemId) for itemId, in self.session.query(Inventory.ItemID)
-        .filter_by(PenguinID=penguinId) if self.server.items.isItemPin(itemId)]
+    if penguinId in self.inventory:
+        pinsArray = [getString(itemId) for itemId in self.server.players[penguinId].inventory
+                     if self.server.items.isItemPin(itemId)]
+    else:
+        pinsArray = [getString(itemId) for itemId, in self.session.query(Inventory.ItemID)
+            .filter_by(PenguinID=penguinId) if self.server.items.isItemPin(itemId)]
     return "%".join(pinsArray)
 
 
-@cache_region('houdini', 'awards')
+@Cache('houdini', 'awards')
 def getAwardsString(self, penguinId):
-    awardsArray = [itemId for itemId, in self.session.query(Inventory.ItemID)
-        .filter_by(PenguinID=penguinId) if self.server.items.isItemAward(itemId)]
+    if penguinId in self.inventory:
+        awardsArray = [itemId for itemId, in self.server.players[penguinId].inventory
+                       if self.server.items.isItemAward(itemId)]
+    else:
+        awardsArray = [itemId for itemId, in self.session.query(Inventory.ItemID)
+            .filter_by(PenguinID=penguinId) if self.server.items.isItemAward(itemId)]
+
     return "|".join(map(str, awardsArray))
 
 

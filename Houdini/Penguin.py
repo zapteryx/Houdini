@@ -106,6 +106,7 @@ class Penguin(Spheniscidae):
                 self.session.add(Deck(PenguinID=self.user.ID, CardID=cardId))
 
             self.deck[cardId] = cardQuantity
+            self.cards.append(self.server.cards[cardId])
 
     def ninjaRankUp(self, levels=1):
         rankAwards = [4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 104]
@@ -163,10 +164,6 @@ class Penguin(Spheniscidae):
 
     def connectionLost(self, reason):
         if hasattr(self, "room") and self.room is not None:
-            leaveTable(self)
-            leaveWaddle(self)
-            self.server.matchMaker.remove(self)
-            self.server.danceFloor.remove(self)
             self.room.remove(self)
 
             puffleId = self.session.query(Puffle.ID) \

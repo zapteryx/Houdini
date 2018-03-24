@@ -61,6 +61,9 @@ class HoudiniFactory(Factory):
                                                maxBytes=2097152, backupCount=3, encoding="utf-8")
         self.logger.addHandler(universalHandler)
 
+        level = logging.getLevelName(self.server["Logging"]["Level"])
+        self.logger.setLevel(level)
+
         errorHandler = logging.FileHandler(self.server["Logging"]["Errors"])
         errorHandler.setLevel(logging.ERROR)
         self.logger.addHandler(errorHandler)

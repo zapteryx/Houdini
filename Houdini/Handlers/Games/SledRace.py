@@ -38,11 +38,14 @@ def handleJoinGame(self, data):
 @Handlers.Handle(XT.SendMove)
 @WaddleHandler(SledRace)
 def handleSendMove(self, data):
-    playerId, x, y, gameTime = map(int, data.Move)
-    realPlayerId = self.waddle.penguins.index(self)
-    if playerId != realPlayerId:
-        return
-    self.waddle.sendXt("zm", playerId, x, y, gameTime)
+    try:
+        playerId, x, y, gameTime = map(float, data.Move)
+        realPlayerId = self.waddle.penguins.index(self)
+        if playerId != realPlayerId:
+            return
+        self.waddle.sendXt("zm", playerId, x, y, gameTime)
+    except ValueError:
+        self.logger.debug("Invalid sled race move!")
 
 @Handlers.Handle(XT.GameOver)
 @WaddleHandler(SledRace)

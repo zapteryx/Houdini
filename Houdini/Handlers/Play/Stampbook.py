@@ -7,8 +7,12 @@ from Houdini.Data.Stamp import Stamp, CoverStamp
 
 @Cache("houdini", "book")
 def getBookCoverString(self, penguinId):
-    coverDetails = self.session.query(Penguin.BookColor, Penguin.BookHighlight, Penguin.BookPattern,
-                                      Penguin.BookIcon).filter_by(ID=penguinId).first()
+    if penguinId in self.server.players:
+        player = self.server.players[penguinId]
+        coverDetails = (player.user.BookColor, player.user.BookHighlight, player.user.BookPattern, player.user.BookIcon)
+    else:
+        coverDetails = self.session.query(Penguin.BookColor, Penguin.BookHighlight, Penguin.BookPattern,
+                                          Penguin.BookIcon).filter_by(ID=penguinId).first()
 
     if coverDetails is None:
         return str()
@@ -78,22 +82,22 @@ def handleUpdateBookCover(self, data):
         return
 
     stampTracker = []
+    inventoryTracker = []
     for stamp in data.StampCover[4:10]:
         stampArray = stamp.split("|")
         if len(stampArray) != 6:
             return
         stampType, stampId, posX, posY, rotation, depth = map(int, stampArray)
-        if stampId in stampTracker:
-            return
-
-        if stampType == 0 and stampId not in self.stamps:
-            return
-        elif stampType == 1 and (stampId not in self.inventory
-                                 or not self.server.items.isItemPin(stampId)):
-            return
-        elif stampType == 2 and (stampId not in self.inventory
-                                 or not self.server.items.isItemAward(stampId)):
-            return
+        if stampType == 0:
+            if stampId in stampTracker or stampId not in self.stamps:
+                return
+            stampTracker.append(stampId)
+        elif stampType == 1 or stampType == 2:
+            if (stampId in inventoryTracker or stampId not in self.inventory or
+                    (stampType == 1 and not self.server.items.isItemPin(stampId)) or
+                    (stampType == 2 and not self.server.items.isItemAward(stampId))):
+                return
+            inventoryTracker.append(stampId)
 
         if not (0 <= stampType <= 2 and 0 <= posX <= 600 and 0 <= posY <= 600 and
                 0 <= rotation <= 360 and 0 <= depth <= 100):
@@ -101,7 +105,6 @@ def handleUpdateBookCover(self, data):
 
         self.session.add(CoverStamp(PenguinID=self.user.ID, Stamp=stampId, Type=stampType, X=posX,
                                     Y=posY, Rotation=rotation, Depth=depth))
-        stampTracker.append(stampId)
 
     self.user.BookColor = color
     self.user.BookHighlight = highlight

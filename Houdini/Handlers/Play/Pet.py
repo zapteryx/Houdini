@@ -165,7 +165,7 @@ def handleSendPufflePlay(self, data):
 
         maxStatistic = max(puffle.Hunger, puffle.Rest)
         minStatistic = min(puffle.Hunger, puffle.Rest)
-        puffle.Health = random.randrange(minStatistic, maxStatistic)
+        puffle.Health = random.randrange(minStatistic, maxStatistic + 1)
 
         playType = 1 if puffle.Rest > 80 else random.choice([0, 2])
 
@@ -189,7 +189,7 @@ def handleSendPuffleRest(self, data):
 
         maxStatistic = max(puffle.Hunger, puffle.Rest)
         minStatistic = min(puffle.Hunger, puffle.Rest)
-        puffle.Health = random.randrange(minStatistic, maxStatistic)
+        puffle.Health = random.randrange(minStatistic, maxStatistic + 1)
 
         restString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
                                                                       puffle.Hunger, puffle.Rest))
@@ -239,8 +239,9 @@ def handleSendPuffleBath(self, data):
         maxHealth, maxHunger, maxRest = puffleStatistics[puffle.Type]
 
         additionalRest = random.randrange(5, 15)
+        additionalHealth = random.randrange(5, 15)
         puffle.Rest = max(0, min(puffle.Rest + additionalRest, maxRest))
-
+        puffle.Health = max(0, min(puffle.Health + additionalHealth, maxHealth))
         self.user.Coins -= 5
 
         bathString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
@@ -276,7 +277,7 @@ def handleSendPlayInteraction(self, data):
 
         maxStatistic = max(puffle.Hunger, puffle.Rest)
         minStatistic = min(puffle.Hunger, puffle.Rest)
-        puffle.Health = random.randrange(minStatistic, maxStatistic)
+        puffle.Health = random.randrange(minStatistic, maxStatistic + 1)
 
         playString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
                                                                       puffle.Hunger, puffle.Rest))
@@ -298,7 +299,7 @@ def handleSendRestInteraction(self, data):
 
         maxStatistic = max(puffle.Hunger, puffle.Rest)
         minStatistic = min(puffle.Hunger, puffle.Rest)
-        puffle.Health = random.randrange(minStatistic, maxStatistic)
+        puffle.Health = random.randrange(minStatistic, maxStatistic + 1)
 
         restString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Health,
                                                                       puffle.Hunger, puffle.Rest))

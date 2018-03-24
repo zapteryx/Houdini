@@ -5,9 +5,15 @@ from Houdini.Data.Penguin import Penguin
 
 @Cache("houdini", "player")
 def getPlayerString(self, penguinId):
-    playerTuple = self.session.query(Penguin.ID, Penguin.Nickname, Penguin.Approval, Penguin.Color, Penguin.Head,
-                                     Penguin.Face, Penguin.Neck, Penguin.Body, Penguin.Hand, Penguin.Feet, Penguin.Flag,
-                                     Penguin.Photo).filter_by(ID=penguinId).first()
+    if penguinId in self.server.players:
+        player = self.server.players[penguinId]
+        playerTuple = (player.user.ID, player.user.Nickname, player.user.Approval, player.user.Color, player.user.Head,
+                       player.user.Face, player.user.Neck, player.user.Body, player.user.Hand,
+                       player.user.Feet, player.user.Flag, player.user.Photo)
+    else:
+        playerTuple = self.session.query(Penguin.ID, Penguin.Nickname, Penguin.Approval, Penguin.Color, Penguin.Head,
+                                         Penguin.Face, Penguin.Neck, Penguin.Body, Penguin.Hand, Penguin.Feet, Penguin.Flag,
+                                         Penguin.Photo).filter_by(ID=penguinId).first()
     if playerTuple is not None:
         playerData = [str(playerDetail) for playerDetail in playerTuple]
         return "|".join(playerData)
