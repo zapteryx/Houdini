@@ -1,5 +1,7 @@
 import inspect, os, time
 
+from Houdini.Data import retryableTransaction
+
 class Data:
     pass
 
@@ -726,6 +728,7 @@ class Handlers:
             xmlListener(clientObject, xmlData)
 
     @staticmethod
+    @retryableTransaction()
     def HandleXT(clientObject, packetId, packetData):
         xtListeners = Handlers.XTHandlers[packetId]
         xtHandlerDataStructure = xtListeners[0].handler["Data"]
@@ -762,8 +765,9 @@ class Handlers:
         try:
             for xtListener in xtListeners:
                 xtListener(clientObject, xtData)
-
-        except Exception:
+                if clientObject.session.dirty:
+                    clientObject.session.commit()
+        except StandardError:
             clientObject.logger.exception("Uh oh! Caught potentially fatal error.")
 
     @staticmethod

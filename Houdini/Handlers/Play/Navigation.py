@@ -22,7 +22,6 @@ RoomFieldKeywords = {
 
 @Handlers.Handle(XT.JoinWorld)
 @Handlers.Throttle(-1)
-@retryableTransaction()
 def handleJoinWorld(self, data):
     if int(data.ID) != self.user.ID:
         return self.transport.loseConnection()
@@ -46,8 +45,6 @@ def handleJoinWorld(self, data):
     self.sendXt("gps", self.user.ID, getStampsString(self, self.user.ID))
 
     self.user.LoginKey = ""
-
-    self.session.commit()
 
     self.server.players[self.user.ID] = self
 
