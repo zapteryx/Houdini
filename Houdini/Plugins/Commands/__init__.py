@@ -8,6 +8,34 @@ from Houdini.Data.Penguin import Penguin
 from Houdini.Handlers.Play.Item import handleBuyInventory
 from Houdini.Handlers.Play.Moderation import moderatorBan, moderatorKick
 
+commandCollection = {}
+
+def Command(commandName, *commandArguments):
+    def decoratorFunction(commandHandler):
+        uppercaseCommand = commandName.upper()
+
+        commandCollection[uppercaseCommand] = {
+            "Handler": commandHandler,
+            "Arguments": commandArguments
+        }
+
+        return commandHandler
+    return decoratorFunction
+
+class CommandArgument(object):
+
+    def __init__(self, arbitraryName, argumentType):
+        self.arbitraryName = arbitraryName
+        self.argumentType = argumentType
+
+class TokenizedArgument(CommandArgument):
+    pass
+
+class VariableCommandArgument(object):
+
+    def __init__(self, arbitraryName):
+        self.arbitraryName = arbitraryName
+
 class Commands(object):
     zope.interface.implements(Plugin)
 
@@ -16,46 +44,16 @@ class Commands(object):
     description = "A commands plugin"
 
     commandPrefix = "!"
+    tokenizedDelimiter = " / "
 
     coinLimit = 1000000
+
+    commands = {}
 
     def __init__(self, server):
         self.logger = logging.getLogger("Houdini")
 
         self.server = server
-
-        self.commands = {
-            "AC": {
-                "Handler": self.handleCoinsCommand,
-                "Arguments": [CommandArgument("Coins", int)]
-            },
-
-            "AI": {
-                "Handler": self.handleItemCommand,
-                "Arguments": [CommandArgument("ItemId", int)]
-            },
-
-            "PING": {
-                "Handler": self.handlePingCommand,
-                "Arguments": []
-            },
-
-            "JR": {
-                "Handler": self.handleJoinRoomCommand,
-                "Arguments": [CommandArgument("RoomId", int)]
-            },
-
-            "BAN": {
-                "Handler": self.handleBanCommand,
-                "Arguments": [CommandArgument("Username", str), CommandArgument("Duration", int),
-                              VariableCommandArgument("Reason")]
-            },
-
-            "KICK": {
-                "Handler": self.handleKickCommand,
-                "Arguments": [CommandArgument("Username", str)]
-            }
-        }
 
         self.bot = self.server.plugins["Bot"]
 
@@ -68,6 +66,7 @@ class Commands(object):
 
         return player
 
+    @Command("kick", VariableCommandArgument("Username"))
     def handleKickCommand(self, player, arguments):
         if player.user.Moderator:
             playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
@@ -79,20 +78,24 @@ class Commands(object):
 
                     self.logger.info("%s has kicked %s" % (player.user.Username, arguments.Username))
 
+    @Command("ban", TokenizedArgument("Username", str),
+             TokenizedArgument("Duration", int),
+             TokenizedArgument("Reason", str))
     def handleBanCommand(self, player, arguments):
         if player.user.Moderator:
-            banReason = " ".join(arguments.Reason)
+            self.logger.info("%s is attempting to ban %s." % (player.user.Username, arguments.Username))
 
             playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
                                               arguments.Username, Penguin.ID)
 
             if playerId is not None:
                 reactor.callFromThread(moderatorBan, player, playerId,
-                                       arguments.Duration, banReason)
+                                       arguments.Duration, arguments.Reason)
 
-                self.logger.info("%s has banned %s using the !BAN command." %
-                                 (player.user.Username, arguments.Username))
+                self.logger.info("%s has banned %s for %s hours using the !BAN command." %
+                                 (player.user.Username, arguments.Username, arguments.Duration))
 
+    @Command("jr", CommandArgument("RoomId", int))
     def handleJoinRoomCommand(self, player, arguments):
         if arguments.RoomId in self.server.rooms:
             player.x = 0
@@ -101,6 +104,7 @@ class Commands(object):
 
             reactor.callFromThread(player.joinRoom, arguments.RoomId)
 
+    @Command("ac", CommandArgument("Coins", int))
     def handleCoinsCommand(self, player, arguments):
         self.logger.debug("%s is trying to add %d coins" % (player.user.Username, arguments.Coins))
 
@@ -108,12 +112,14 @@ class Commands(object):
 
         reactor.callFromThread(player.sendCoins, newAmount)
 
+    @Command("ai", CommandArgument("ItemId", int))
     def handleItemCommand(self, player, arguments):
         self.logger.debug("%s is trying to add an item (id: %d)" % (player.user.Username, arguments.ItemId))
 
         if not self.server.items.isBait(arguments.ItemId):
             reactor.callFromThread(handleBuyInventory, player, arguments)
 
+    @Command("ping")
     def handlePingCommand(self, player, arguments):
         self.logger.debug("Received ping command from %s" % player.user.Username)
 
@@ -126,14 +132,19 @@ class Commands(object):
         commandTokens = commandMessage.split(" ")
         commandString = commandTokens.pop(0).upper()
 
-        if commandString not in self.commands:
+        if commandString not in commandCollection:
             return  # Command doesn't exist!
 
-        commandArguments = self.commands[commandString]["Arguments"]
-        commandHandler = self.commands[commandString]["Handler"]
+        commandArguments = commandCollection[commandString]["Arguments"]
+        commandHandler = commandCollection[commandString]["Handler"]
 
         if not commandArguments:
-            return commandHandler(playerObject, None)
+            return commandHandler(self, playerObject, None)
+
+        # Better way to do this?
+        if isinstance(commandArguments[0], TokenizedArgument):
+            commandTokens = commandMessage.split(" ")[1:] # Remove the command itself
+            commandTokens = " ".join(commandTokens).split(self.tokenizedDelimiter) # Rejoin and split by the delimiter
 
         commandData = CommandData()
         tokenIndex = 0
@@ -161,7 +172,7 @@ class Commands(object):
             if tokenIndex > len(commandArguments) - 1:
                 break
 
-        return commandHandler(playerObject, commandData)
+        return commandHandler(self, playerObject, commandData)
 
     def handleCommandError(self, error):
         self.logger.error(error)
@@ -181,13 +192,4 @@ class Commands(object):
 class CommandData:
     pass
 
-class CommandArgument(object):
 
-    def __init__(self, arbitraryName, argumentType):
-        self.arbitraryName = arbitraryName
-        self.argumentType = argumentType
-
-class VariableCommandArgument(object):
-
-    def __init__(self, arbitraryName):
-        self.arbitraryName = arbitraryName
