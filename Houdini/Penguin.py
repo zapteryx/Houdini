@@ -163,10 +163,6 @@ class Penguin(Spheniscidae):
 
     def connectionLost(self, reason):
         if hasattr(self, "room") and self.room is not None:
-            leaveTable(self)
-            leaveWaddle(self)
-            self.server.matchMaker.remove(self)
-            self.server.danceFloor.remove(self)
             self.room.remove(self)
 
             puffleId = self.session.query(Puffle.ID) \

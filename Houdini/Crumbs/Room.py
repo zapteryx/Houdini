@@ -32,9 +32,6 @@ class Room(SchemaObject):
         return roomString
 
     def add(self, player):
-        leaveTable(player)
-        leaveWaddle(player)
-
         self.players.append(player)
 
         player.room = self
@@ -54,6 +51,11 @@ class Room(SchemaObject):
         player.sendXt("grs", self.Id, self.generateRoomString())
 
     def remove(self, player):
+        leaveTable(player)
+        leaveWaddle(player)
+        player.server.matchMaker.remove(player)
+        player.server.danceFloor.remove(player)
+
         self.players.remove(player)
 
         self.sendXt("rp", player.user.ID)
