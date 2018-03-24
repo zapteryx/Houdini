@@ -106,6 +106,7 @@ class Penguin(Spheniscidae):
                 self.session.add(Deck(PenguinID=self.user.ID, CardID=cardId))
 
             self.deck[cardId] = cardQuantity
+            self.cards.append(self.server.cards[cardId])
 
     def ninjaRankUp(self, levels=1):
         rankAwards = [4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 104]
