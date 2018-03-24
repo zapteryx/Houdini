@@ -5,6 +5,7 @@ from Houdini.Data.Redemption import RedemptionCode, RedemptionAward, PenguinRede
 
 
 @Handlers.Handle(XT.JoinRedemption)
+@Handlers.Throttle(-1)
 def handleJoinRedemption(self, data):
     if int(data.ID) != self.user.ID:
         return self.transport.loseConnection()
