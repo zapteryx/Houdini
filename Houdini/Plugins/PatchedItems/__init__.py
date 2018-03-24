@@ -122,7 +122,8 @@ class PatchedItems(object):
             directoryScan = [y for x in os.walk(self.mediaPath + subdirectory) for y in glob(os.path.join(x[0], '*.swf'))]
             for path in directoryScan:
                 workingDir = os.path.dirname(os.path.realpath(__file__))
-                disFlash = subprocess.check_output([workingDir + self.flasmExecutable, '-d', path])
+                disFlash = subprocess.check_output([workingDir + self.flasmExecutable, '-d', path],
+                                                   stderr=open(os.devnull, 'w'))
 
                 items += self.disassembledItemIds(disFlash)
                 furniture += self.disassembledItemIds(disFlash, "buyFurniture")
