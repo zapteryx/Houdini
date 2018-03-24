@@ -154,6 +154,7 @@ class CardJitsu(object):
 
         for player in self.penguins:
             player.sendXt("cz", penguin.user.Username)
+        self.reset()
 
     def reset(self):
         for penguin in self.penguins:
