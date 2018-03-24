@@ -7,8 +7,12 @@ from Houdini.Data.Stamp import Stamp, CoverStamp
 
 @Cache("houdini", "book")
 def getBookCoverString(self, penguinId):
-    coverDetails = self.session.query(Penguin.BookColor, Penguin.BookHighlight, Penguin.BookPattern,
-                                      Penguin.BookIcon).filter_by(ID=penguinId).first()
+    if penguinId in self.server.players:
+        player = self.server.players[penguinId]
+        coverDetails = (player.user.BookColor, player.user.BookHighlight, player.user.BookPattern, player.user.BookIcon)
+    else:
+        coverDetails = self.session.query(Penguin.BookColor, Penguin.BookHighlight, Penguin.BookPattern,
+                                          Penguin.BookIcon).filter_by(ID=penguinId).first()
 
     if coverDetails is None:
         return str()
