@@ -5,7 +5,6 @@ from sqlalchemy.exc import OperationalError
 from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
 from Houdini.Data.Penguin import Penguin
-from Houdini.Handlers.Play.Navigation import handleJoinWorld
 
 class Rank(object):
     zope.interface.implements(Plugin)
@@ -30,7 +29,7 @@ class Rank(object):
             if "Duplicate column name" not in opError.message:
                 self.logger.warn(opError.message)
 
-        Handlers.JoinWorld += self.adjustMembershipDays
+        Handlers.Login += self.adjustMembershipDays
 
     def adjustMembershipDays(self, player, data):
         playerRank = player.session.query(Penguin.Rank). \
@@ -40,7 +39,6 @@ class Rank(object):
             playerRank = 4
 
         player.age = Rank.membershipDaysByRank[playerRank]
-        self.logger.info(player.age)
 
     def ready(self):
         self.logger.info("Rank plugin is ready!")
