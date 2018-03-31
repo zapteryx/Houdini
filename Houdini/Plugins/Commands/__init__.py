@@ -66,6 +66,34 @@ class Commands(object):
 
         return player
 
+    def botRandomize(self, player, arguments):
+        if player.user.Moderator:
+            self.logger.debug("Bot randomization command used by {}".format(player.user.Username))
+
+            self.bot.randomizeClothing()
+            self.bot.randomizeName()
+            self.bot.updateString()
+            reactor.callFromThread(self.bot.removeFromRoom, player)
+            reactor.callFromThread(self.bot.addToRoom, player)
+
+    def botAnnounce(self, player, arguments):
+        if player.user.Moderator:
+            announcementMessage = " ".join(arguments)
+
+            for otherPlayer in self.server.players.values():
+                self.bot.sendMessage(otherPlayer, announcementMessage)
+
+    @Command("bot", VariableCommandArgument("Action"))
+    def handleBotCommand(self, player, arguments):
+        if player.user.Moderator:
+            subCommand = arguments.Action[0].lower().title()
+
+            commandMethod = getattr(self, "bot" + subCommand, lambda x, y: "Invalid sub-command.")
+            if not commandMethod:
+                return
+
+            commandMethod(player, arguments.Action[1:])
+
     @Command("kick", VariableCommandArgument("Username"))
     def handleKickCommand(self, player, arguments):
         if player.user.Moderator:
@@ -78,6 +106,7 @@ class Commands(object):
 
                     self.logger.info("%s has kicked %s" % (player.user.Username, arguments.Username))
 
+    # Example: !BAN King Arthur / 24 / Not actually king.
     @Command("ban", TokenizedArgument("Username", str),
              TokenizedArgument("Duration", int),
              TokenizedArgument("Reason", str))
