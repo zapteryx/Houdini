@@ -104,6 +104,9 @@ class Commands(object):
 
             reactor.callFromThread(player.joinRoom, arguments.RoomId)
 
+            if self.bot.isStationary:
+                reactor.callFromThread(self.bot.addToRoom, player)
+
     @Command("ac", CommandArgument("Coins", int))
     def handleCoinsCommand(self, player, arguments):
         self.logger.debug("%s is trying to add %d coins" % (player.user.Username, arguments.Coins))
