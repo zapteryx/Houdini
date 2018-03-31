@@ -1,3 +1,6 @@
+import os
+import random
+
 import zope.interface, logging
 from twisted.internet import reactor
 
@@ -12,67 +15,38 @@ class Bot(object):
     description = "A bot plugin"
 
     id = 0
-    name = "Harry"
+    name = None
     x, y = (0, 0)
     frame = 1
-    membershipDays = 1440
+    membershipDays = 750
 
     # Set the attribute to None for random clothing
-    clothing = {
-        "Color": 14,
-        "Head": 413,
-        "Face": 2063,
-        "Neck": 3014,
-        "Body": 288,
-        "Hand": 5050,
-        "Feet": 6069,
-        "Flag": 578,
-        "Photo": 973
-    }
+    clothing = None
 
     # If you set this to False, the bot will not automatically spawn in the room.
     # Instead, he will show up and disappear whenever he's needed.
     isStationary = True
+
+    botString = None
+
+    namesFile = "names.txt" # Path relative to this plugin
+    namesFileUrl = "https://www.cs.cmu.edu/Groups/AI/areas/nlp/corpora/names/other/names.txt"
+    namesList = None
 
     def __init__(self, server):
         self.logger = logging.getLogger("Houdini")
 
         self.server = server
 
+        self.namesFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.namesFile)
+
+        if self.name is None: # Ooh~
+            self.randomizeName()
+
         if self.clothing is None: # Lewd~! o//o
-            import random
+            self.randomizeClothing()
 
-            allItems = self.server.items.keys()
-
-            self.clothing = {
-                "Color": random.randrange(1, 14),
-                "Head": random.choice(allItems),
-                "Face": random.choice(allItems),
-                "Neck": random.choice(allItems),
-                "Body": random.choice(allItems),
-                "Hand": random.choice(allItems),
-                "Feet": random.choice(allItems),
-                "Flag": random.choice(allItems),
-                "Photo": random.choice(allItems)
-            }
-
-        self.botString = ("{bot.id}|"
-                          "{bot.name}|"
-                          "1|"
-                          "{Color}|"
-                          "{Head}|"
-                          "{Face}|"
-                          "{Neck}|"
-                          "{Body}|"
-                          "{Hand}|"
-                          "{Feet}|"
-                          "{Flag}|"
-                          "{Photo}|"
-                          "{bot.x}|"
-                          "{bot.y}|"
-                          "{bot.frame}|"
-                          "1|"
-                          "{bot.membershipDays}".format(bot=self, **self.clothing))
+        self.updateString()
 
         Handlers.GetInventory += self.handleJoinRoom # For the initial room join
         Handlers.JoinRoom += self.handleJoinRoom
@@ -101,3 +75,68 @@ class Bot(object):
 
     def ready(self):
         self.logger.info("Bot plugin has been loaded")
+
+    def randomizeName(self):
+        if not os.path.isfile(self.namesFile):
+            self.downloadNames()
+
+        if self.namesList is None:
+            with open(self.namesFile, "r") as namesFile:
+                self.namesList = namesFile.readlines()
+
+        self.name = random.choice(self.namesList).strip()
+
+    def randomizeClothing(self):
+        allItems = self.server.items.schemaObjects.keys()
+
+        # TODO: Exclude bait items probably (LAZY)
+        headIds = [itemId for itemId in allItems if self.server.items.isItemHead(itemId)]
+        faceIds = [itemId for itemId in allItems if self.server.items.isItemFace(itemId)]
+        neckIds = [itemId for itemId in allItems if self.server.items.isItemNeck(itemId)]
+        bodyIds = [itemId for itemId in allItems if self.server.items.isItemBody(itemId)]
+        handIds = [itemId for itemId in allItems if self.server.items.isItemHand(itemId)]
+        feetIds = [itemId for itemId in allItems if self.server.items.isItemFeet(itemId)]
+        flagIds = [itemId for itemId in allItems if self.server.items.isItemPin(itemId)]
+        photoIds = [itemId for itemId in allItems if self.server.items.isItemPhoto(itemId)]
+
+        self.clothing = {
+            "Color": random.randrange(1, 14),
+            "Head": random.choice(headIds),
+            "Face": random.choice(faceIds),
+            "Neck": random.choice(neckIds),
+            "Body": random.choice(bodyIds),
+            "Hand": random.choice(handIds),
+            "Feet": random.choice(feetIds),
+            "Flag": random.choice(flagIds),
+            "Photo": random.choice(photoIds)
+        }
+
+    def updateString(self):
+        self.botString = ("{bot.id}|"
+                          "{bot.name}|"
+                          "1|"
+                          "{Color}|"
+                          "{Head}|"
+                          "{Face}|"
+                          "{Neck}|"
+                          "{Body}|"
+                          "{Hand}|"
+                          "{Feet}|"
+                          "{Flag}|"
+                          "{Photo}|"
+                          "{bot.x}|"
+                          "{bot.y}|"
+                          "{bot.frame}|"
+                          "1|"
+                          "{bot.membershipDays}".format(bot=self, **self.clothing))
+
+    def downloadNames(self):
+        import urllib2
+        namesResponse = urllib2.urlopen(self.namesFileUrl)
+
+        with open(self.namesFile, "w") as namesFile:
+            namesFile.write(namesResponse.read())
+
+        namesResponse.close()
+
+        self.logger.info("[Bot] Names file has been downloaded.")
