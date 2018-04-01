@@ -43,6 +43,22 @@ class Bot(object):
         if self.name is None: # Ooh~
             self.randomizeName()
 
+        allItems = self.server.items.schemaObjects.keys()
+
+        """
+        This is intentionally placed outside of the if statement to allow randomization (via the command)
+        even if the bot wasn't initially created randomly.
+        """
+        # TODO: Exclude bait items probably (LAZY)
+        self.headIds = [itemId for itemId in allItems if self.server.items.isItemHead(itemId)]
+        self.faceIds = [itemId for itemId in allItems if self.server.items.isItemFace(itemId)]
+        self.neckIds = [itemId for itemId in allItems if self.server.items.isItemNeck(itemId)]
+        self.bodyIds = [itemId for itemId in allItems if self.server.items.isItemBody(itemId)]
+        self.handIds = [itemId for itemId in allItems if self.server.items.isItemHand(itemId)]
+        self.feetIds = [itemId for itemId in allItems if self.server.items.isItemFeet(itemId)]
+        self.flagIds = [itemId for itemId in allItems if self.server.items.isItemPin(itemId)]
+        self.photoIds = [itemId for itemId in allItems if self.server.items.isItemPhoto(itemId)]
+
         if self.clothing is None: # Lewd~! o//o
             self.randomizeClothing()
 
@@ -87,28 +103,16 @@ class Bot(object):
         self.name = random.choice(self.namesList).strip()
 
     def randomizeClothing(self):
-        allItems = self.server.items.schemaObjects.keys()
-
-        # TODO: Exclude bait items probably (LAZY)
-        headIds = [itemId for itemId in allItems if self.server.items.isItemHead(itemId)]
-        faceIds = [itemId for itemId in allItems if self.server.items.isItemFace(itemId)]
-        neckIds = [itemId for itemId in allItems if self.server.items.isItemNeck(itemId)]
-        bodyIds = [itemId for itemId in allItems if self.server.items.isItemBody(itemId)]
-        handIds = [itemId for itemId in allItems if self.server.items.isItemHand(itemId)]
-        feetIds = [itemId for itemId in allItems if self.server.items.isItemFeet(itemId)]
-        flagIds = [itemId for itemId in allItems if self.server.items.isItemPin(itemId)]
-        photoIds = [itemId for itemId in allItems if self.server.items.isItemPhoto(itemId)]
-
         self.clothing = {
             "Color": random.randrange(1, 14),
-            "Head": random.choice(headIds),
-            "Face": random.choice(faceIds),
-            "Neck": random.choice(neckIds),
-            "Body": random.choice(bodyIds),
-            "Hand": random.choice(handIds),
-            "Feet": random.choice(feetIds),
-            "Flag": random.choice(flagIds),
-            "Photo": random.choice(photoIds)
+            "Head": random.choice(self.headIds),
+            "Face": random.choice(self.faceIds),
+            "Neck": random.choice(self.neckIds),
+            "Body": random.choice(self.bodyIds),
+            "Hand": random.choice(self.handIds),
+            "Feet": random.choice(self.feetIds),
+            "Flag": random.choice(self.flagIds),
+            "Photo": random.choice(self.photoIds)
         }
 
     def updateString(self):
