@@ -48,11 +48,11 @@ def handleStartMailEngine(self, data):
 
 @Handlers.Handle(XT.GetMail)
 @Handlers.Throttle(-1)
+@retryableTransaction()
 def handleGetMail(self, data):
     mailbox = self.session.query(Postcard, Penguin.Nickname) \
-        .join(Penguin, ((Penguin.ID == Postcard.SenderID) | (Postcard.SenderID == None))) \
+        .join(Penguin, Penguin.ID == Postcard.SenderID, isouter=True) \
         .filter(Postcard.RecipientID == self.user.ID)\
-        .group_by(Postcard.ID)\
         .order_by(Postcard.SendDate.desc())
     postcardArray = []
     for postcard, penguinName in mailbox:
@@ -63,6 +63,7 @@ def handleGetMail(self, data):
                                        str(postcard.ID), str(int(postcard.HasRead))]))
     postcardString = "%".join(postcardArray)
     self.sendXt("mg", postcardString)
+    self.session.commit()
 
 
 @Handlers.Handle(XT.SendMail)
