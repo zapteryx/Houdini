@@ -587,6 +587,11 @@ class XT:
         "Data": [VariableXTData("Null")]
     }
 
+    LeaveGame = {
+        "Handler": "lz",
+        "Data": [VariableXTData("Null")]
+    }
+
     CardGameOver = {
         "Handler": "czo",
         "Data": [XTData("Whatever", int)]
