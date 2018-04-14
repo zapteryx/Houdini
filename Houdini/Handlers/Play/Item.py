@@ -55,7 +55,7 @@ def getPinString(self, penguinId):
         timestamp = self.server.pins.getUnixTimestamp(pinId)
         return "|".join(map(str, [pinId, timestamp, isMember]))
 
-    if penguinId in self.inventory:
+    if penguinId in self.server.players:
         pinsArray = [getString(itemId) for itemId in self.server.players[penguinId].inventory
                      if self.server.items.isItemPin(itemId)]
     else:
@@ -66,14 +66,14 @@ def getPinString(self, penguinId):
 
 @Cache('houdini', 'awards')
 def getAwardsString(self, penguinId):
-    if penguinId in self.inventory:
-        awardsArray = [itemId for itemId, in self.server.players[penguinId].inventory
+    if penguinId in self.server.players:
+        awardsArray = [str(itemId) for itemId in self.server.players[penguinId].inventory
                        if self.server.items.isItemAward(itemId)]
     else:
-        awardsArray = [itemId for itemId, in self.session.query(Inventory.ItemID)
+        awardsArray = [str(itemId) for itemId, in self.session.query(Inventory.ItemID)
             .filter_by(PenguinID=penguinId) if self.server.items.isItemAward(itemId)]
 
-    return "|".join(map(str, awardsArray))
+    return "|".join(awardsArray)
 
 
 @Handlers.Handle(XT.GetPlayerPins)
