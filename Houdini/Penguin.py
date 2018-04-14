@@ -33,7 +33,7 @@ class Penguin(Spheniscidae):
 
         self.logger.info("Penguin class instantiated")
 
-    def addItem(self, itemId, itemCost=0):
+    def addItem(self, itemId, itemCost=0, sendXt=True):
         if itemId in self.inventory:
             return False
 
@@ -42,7 +42,8 @@ class Penguin(Spheniscidae):
 
         self.user.Coins -= itemCost
 
-        self.sendXt("ai", itemId, self.user.Coins)
+        if sendXt:
+            self.sendXt("ai", itemId, self.user.Coins)
 
     def addIgloo(self, iglooId, iglooCost=0):
         if iglooId in self.igloos:
@@ -117,7 +118,7 @@ class Penguin(Spheniscidae):
                 return False
             self.user.NinjaRank += 1
             self.user.NinjaProgress = 0
-            self.addItem(rankAwards[self.user.NinjaRank - 1])
+            self.addItem(rankAwards[self.user.NinjaRank - 1], sendXt=False)
             if self.user.NinjaRank in beltPostcards:
                 self.receiveSystemPostcard(beltPostcards[self.user.NinjaRank])
             if self.user.NinjaRank in beltStamps:
