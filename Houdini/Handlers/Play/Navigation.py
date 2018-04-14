@@ -93,6 +93,8 @@ def handleJoinPlayerIgloo(self, data):
             and playerId not in self.server.openIgloos:
         return self.transport.loseConnection()
 
+    data.Id += 1000
+
     if data.Id not in self.server.rooms:
         iglooFieldKeywords = RoomFieldKeywords.copy()
         iglooFieldKeywords["Id"] = data.Id
@@ -107,5 +109,4 @@ def handleJoinPlayerIgloo(self, data):
 
     self.room.remove(self)
 
-    self.sendXt("jp", data.Id)
     igloo.add(self)
