@@ -43,8 +43,8 @@ class Room(SchemaObject):
             player.gameFinished = False
         else:
             player.sendXt("jr", self.Id, self.generateRoomString())
+            self.sendXt("ap", player.getPlayerString())
 
-        self.sendXt("ap", player.getPlayerString())
         giveMascotStamp(player)
 
     def refresh(self, player):
