@@ -179,15 +179,7 @@ class CardJitsu(object):
             if penguin.user.NinjaProgress >= 100:
                 penguin.ninjaRankUp()
                 penguin.sendXt("cza", penguin.user.NinjaRank)
-            self.sendStampsEarned(penguin)
-
-    def sendStampsEarned(self, penguin):
-        cardStamps = penguin.server.stampGroups[38].StampsById
-        collectedStamps = [str(myStamp) for myStamp in penguin.stamps if myStamp in cardStamps]
-        totalStamps = len(collectedStamps)
-        totalStampsGame = len(cardStamps)
-        collectedStampsString = "|".join(collectedStamps)
-        penguin.sendXt("cjsi", collectedStampsString, totalStamps, totalStampsGame)
+            sendStampsEarned(penguin, 38)
 
 class CardMat(CardJitsu):
 
@@ -234,6 +226,16 @@ def CardEventHandler(event):
             return function
         return handler
     return handlerFunction
+
+
+def sendStampsEarned(penguin, stampGroupId):
+    cardStamps = penguin.server.stampGroups[stampGroupId].StampsById
+    collectedStamps = [str(myStamp) for myStamp in penguin.stamps if myStamp in cardStamps]
+    totalStamps = len(collectedStamps)
+    totalStampsGame = len(cardStamps)
+    collectedStampsString = "|".join(collectedStamps)
+    penguin.sendXt("cjsi", collectedStampsString, totalStamps, totalStampsGame)
+
 
 @Handlers.Handle(XT.GetGame)
 @WaddleHandler(CardJitsu, CardMat)
