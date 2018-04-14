@@ -81,7 +81,7 @@ class Spheniscidae(LineOnlyReceiver, object):
         handlerId = data.pop(0)
 
         try:
-            internalId = self.room.internalId
+            internalId = self.room.InternalId
         except AttributeError:
             internalId = -1
 
