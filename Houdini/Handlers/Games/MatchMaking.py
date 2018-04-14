@@ -1,9 +1,15 @@
 from itertools import izip
 
-from twisted.internet import reactor, task
+from twisted.internet import task, reactor
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Handlers.Games.CardJitsu import CardJitsu, CardSensei
+from Houdini.Handlers.Games.CardFire import CardFire, FireSensei
+
+MatchMakers = {
+    951: (CardJitsu, CardSensei, 2, "NinjaRank", 2),
+    953: (CardFire, FireSensei, 4, "FireNinjaRank", 4)
+}
 
 class MatchMaking(object):
 
@@ -12,27 +18,44 @@ class MatchMaking(object):
         self.ticker = task.LoopingCall(self.tick)
 
     def tick(self):
-        self.penguins.sort(key=lambda x: x.user.NinjaRank)
-        a = iter(self.penguins)
-        for penguins in izip(a, a):
-            firstPenguin, secondPenguin = penguins
-            for penguin in penguins:
-                penguin.tick -= 1
-            if firstPenguin.tick == 0 or secondPenguin.tick == 0:
-                for penguin in penguins:
-                    penguin.sendXt("tmm", -1, firstPenguin.user.Username, secondPenguin.user.Username)
-                    penguin.sendXt("scard", 0, 0)
-                    self.remove(penguin)
-                    continue
-                CardJitsu([firstPenguin, secondPenguin], 2)
-            for penguin in penguins:
-                penguin.sendXt("tmm", penguin.tick, penguin.user.Username)
+        for roomId, matchMaker in MatchMakers.iteritems():
+            cardGame, senseiGame, maxPlayers, sortBy, delay = matchMaker
+
+            penguins = [penguin for penguin in self.penguins if penguin.room.Id == roomId]
+            penguins.sort(key=lambda player: getattr(player.user, sortBy))
+
+            matchCount = len(penguins) % maxPlayers
+            matchSize = max(2, maxPlayers if matchCount == 0 else matchCount)
+
+            for matchedPenguins in izip(*[iter(penguins)] * matchSize):
+                nicknames = "%".join([penguin.user.Nickname + "|" + str(penguin.user.Color) if maxPlayers > 2
+                                      else penguin.user.Nickname for penguin in matchedPenguins])
+
+                for penguin in matchedPenguins:
+                    penguin.tick -= 1
+
+                    if penguin.tick < -1:
+                        for removePenguin in matchedPenguins:
+                            removePenguin.sendXt("scard", 0, 0, len(matchedPenguins), 0, nicknames)
+
+                        # delay on the server because start waddle is unreliable!
+                        if penguin.tick == -delay:
+                            cardGame(list(matchedPenguins), matchSize)
+                        matchedPenguins = []
+                        break
+
+                for matchedPenguin in matchedPenguins:
+                    if maxPlayers > 2:
+                        matchedPenguin.sendXt("tmm", len(matchedPenguins), matchedPenguin.tick, nicknames)
+                    else:
+                        matchedPenguin.sendXt("tmm", matchedPenguin.tick, nicknames)
 
     def add(self, penguin):
-        self.penguins.append(penguin)
-        penguin.tick = 10
-        if len(self.penguins) == 2:
-            self.ticker.start(1)
+        if penguin not in self.penguins:
+            self.penguins.append(penguin)
+            penguin.tick = 10
+            if len(self.penguins) == 2:
+                self.ticker.start(1)
 
     def remove(self, penguin):
         if penguin in self.penguins:
@@ -42,15 +65,20 @@ class MatchMaking(object):
 
 @Handlers.Handle(XT.JoinMatchMaking)
 def handleJoinMatchMaking(self, data):
-    if self.room.Id == 951:
+    if self.room.Id in MatchMakers:
         self.server.matchMaker.add(self)
         self.sendXt("jmm", self.user.Username)
 
 @Handlers.Handle(XT.LeaveMatchMaking)
 def handleLeaveMatchMaking(self, data):
     self.server.matchMaker.remove(self)
-    self.sendXt("lmm")
 
 @Handlers.Handle(XT.JoinSensei)
 def handleJoinSensei(self, data):
-    CardSensei(self)
+    if self.room.Id in MatchMakers:
+        cardGame, senseiGame, maxPlayers, sortBy, delay = MatchMakers[self.room.Id]
+        if maxPlayers > 2:
+            self.sendXt("scard", 0, 0, 1, 0, self.user.Nickname + "|" + str(self.user.Color))
+            reactor.callLater(delay, senseiGame, self)
+        else:
+            senseiGame(self)
