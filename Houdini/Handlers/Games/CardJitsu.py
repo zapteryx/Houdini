@@ -127,7 +127,7 @@ class CardJitsu(object):
             card.Player = cardSeatId
             card.Opponent = opponentSeatId
 
-            onPlayed = powerId in (1, 13, 16, 17, 18)
+            onPlayed = powerId in (1, 16, 17, 18)
             onScored = not onPlayed
             currentRound = powerId in (4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 17, 18)
             nextRound = not currentRound
