@@ -1,4 +1,5 @@
 from beaker.cache import cache_region as Cache
+from sqlalchemy import or_
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
@@ -19,11 +20,28 @@ def getPlayerString(self, penguinId):
         return "|".join(playerData)
     return str()
 
+@Cache("houdini", "player_info")
+def getPlayerInfo(self, penguinId):
+    if penguinId in self.server.players:
+        player = self.server.players[penguinId]
+        playerTuple = (player.user.Username, player.user.ID, player.user.Username)
+    else:
+        playerTuple = self.session.query(Penguin.Username, Penguin.ID, Penguin.Username).filter_by(ID=penguinId).first()
+
+    if playerTuple is not None:
+        playerData = [str(playerDetail) for playerDetail in playerTuple]
+        return "|".join(playerData)
+
+    return str()
+
+@Handlers.Handle(XT.GetBestFriendsList)
+def handleGetBestFriendsList(self, data):
+    self.sendXt("gbffl", None)
+
 @Handlers.Handle(XT.Heartbeat)
 @Handlers.Throttle(60)
 def handleSendHeartbeat(self, data):
     self.sendXt("h")
-    
 
 @Handlers.Handle(XT.ThrowBall)
 @Handlers.Throttle()
@@ -84,8 +102,24 @@ def handleSendMascotMessage(self, data):
 def handleGetLatestRevision(self, data):
     self.room.sendXt("glr", "0")
 
-
 @Handlers.Handle(XT.GetPlayer)
 @Handlers.Throttle()
 def handleLoadPlayerObject(self, data):
     self.sendXt("gp", getPlayerString(self, data.Id))
+
+
+@Handlers.Handle(XT.GetPlayerInfoById)
+@Handlers.Throttle()
+def handleGetPlayerInfoById(self, data):
+    self.sendXt("pbi", getPlayerInfo(self, data.Id))
+
+@Handlers.Handle(XT.PlayerBySwidUsername)
+@Handlers.Throttle()
+def handlePlayerBySwidUsername(self, data):
+    playerIds = data.IdList.split(",")
+
+    usernames = self.session.query(Penguin.Username)\
+        .filter(or_(*((Penguin.ID == playerId) for playerId in playerIds))).all()
+
+    self.sendXt("pbsu", ",".join([username for username, in usernames]))
+
