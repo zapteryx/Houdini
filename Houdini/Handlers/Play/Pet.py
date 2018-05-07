@@ -327,3 +327,7 @@ def handleSendFeedInteraction(self, data):
 def handleSendPuffleFrame(self, data):
     if data.PuffleId in self.puffles:
         self.room.sendXt("ps", data.PuffleId, data.FrameId)
+
+@Handlers.Handle(XT.GetCareInventory)
+def handleGetCareInventory(self, data):
+    self.sendXt("pgpi", None)
