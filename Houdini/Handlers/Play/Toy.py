@@ -3,7 +3,7 @@ from Houdini.Handlers import Handlers, XT
 @Handlers.Handle(XT.OpenBook)
 @Handlers.Throttle()
 def handleOpenPlayerBook(self, data):
-    self.room.sendXt("at", self.user.ID)
+    self.room.sendXt("at", self.user.ID, data.ToyId)
 
 @Handlers.Handle(XT.CloseBook)
 @Handlers.Throttle()
