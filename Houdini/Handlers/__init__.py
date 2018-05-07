@@ -263,7 +263,7 @@ class XT:
 
     JoinPlayerIgloo = {
         "Handler": "j#jp",
-        "Data": [XTData("Id", int)]
+        "Data": [XTData("Id", int), XTData("RoomType", str)]
     }
 
     GetOwnedIgloos = {
@@ -274,11 +274,6 @@ class XT:
     UpdateIglooMusic = {
         "Handler": "g#um",
         "Data": [XTData("MusicId", int)]
-    }
-
-    GetFurnitureList = {
-        "Handler": "g#gf",
-        "Data": []
     }
 
     UpdateFloor = {
@@ -296,31 +291,15 @@ class XT:
         "Data": [XTData("FurnitureId", int)]
     }
 
-    SaveIglooFurniture = {
-        "Handler": "g#ur",
-        "Data": [VariableXTData("FurnitureList")]
-    }
-
     SendActivateIgloo = {
         "Handler": "g#ao",
         "Data": [XTData("TypeId", int)]
     }
 
-    LoadPlayerIglooList = {
+    GetOpenIglooList = {
         "Handler": "g#gr",
         "Data": []
     }
-
-    UnlockIgloo = {
-        "Handler": "g#or",
-        "Data": []
-    }
-
-    LockIgloo = {
-        "Handler": "g#cr",
-        "Data": []
-    }
-
     StartMailEngine = {
         "Handler": "l#mst",
         "Data": []
@@ -491,14 +470,15 @@ class XT:
         "Data": [XTData("PuffleId", int), XTData("X", int), XTData("Y", int)]
     }
 
+    # The following two packets have disposable data
     OpenBook = {
         "Handler": "t#at",
-        "Data": [VariableXTData("Discard")]
+        "Data": [XTData("ToyId", int)]
     }
 
     CloseBook = {
         "Handler": "t#rt",
-        "Data": [VariableXTData("Discard")]
+        "Data": []
     }
 
     BanPlayer = {
@@ -652,6 +632,87 @@ class XT:
         "Data": [XTData("Code", str), XTData("Choice", int)]
     }
 
+    GetPlayerInfoById = {
+        "Handler": "u#pbi",
+        "Data": [XTData("Id", int)]
+    }
+
+    GetFurnitureInventory = {
+        "Handler": "g#gii",
+        "Data": [XTData("Id", int)]
+    }
+
+    GetCareInventory = {
+        "Handler": "p#pgpi",
+        "Data": []
+    }
+
+    GetAllIglooLayouts = {
+        "Handler": "g#gail",
+        "Data": [XTData("Id", int)]
+    }
+
+    UpdateIglooSlotSummary = {
+        "Handler": "g#uiss",
+        "Data": [XTData("LayoutId", int), XTData("SlotSummary", str)]
+    }
+
+    UpdateIglooConfiguration = {
+        "Handler": "g#uic",
+        "Data": [XTData("LayoutId", int), XTData("IglooId", int), XTData("FloorId", int),
+                 XTData("LocationId", int), XTData("MusicId", int), XTData("FurnitureList", str)]
+    }
+
+    AddIglooLayout = {
+        "Handler": "g#al",
+        "Data": [XTData("LayoutDetails", str)]
+    }
+
+    IsPlayerIglooOpen = {
+        "Handler": "g#pio",
+        "Data": [XTData("Id", int)]
+    }
+
+    GetBestFriendsList = {
+        "Handler": "u#gbffl",
+        "Data": []
+    }
+
+    GetFriendsIglooList = {
+        "Handler": "g#grf",
+        "Data": []
+    }
+
+    GetIglooLikeBy = {
+        "Handler": "g#gili",
+        "Data": [XTData("PaginationStart", int), XTData("PaginationEnd", int)]
+    }
+
+    LikeIgloo = {
+        "Handler": "g#li",
+        "Data": []
+    }
+
+    PlayerBySwidUsername = {
+        "Handler": "u#pbsu",
+        # The following parameter would normally be a "swid" but Houdini stores and uses player ids instead
+        "Data": [XTData("IdList", str)]
+    }
+
+    CanLikeIgloo = {
+        "Handler": "g#cli",
+        "Data": []
+    }
+
+    SetIglooManagement = {
+        "Handler": "g#im",
+        "Data": [XTData("Status", int)]
+    }
+
+    BuyIglooLocation = {
+        "Handler": "g#aloc",
+        "Data": [XTData("LocationId", int)]
+    }
 
 class HandlerEvent(object):
 
