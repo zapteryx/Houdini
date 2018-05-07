@@ -31,7 +31,7 @@ class Room(SchemaObject):
 
         return roomString
 
-    def add(self, player):
+    def add(self, player, roomType=None):
         self.players.append(player)
 
         player.room = self
@@ -41,9 +41,12 @@ class Room(SchemaObject):
         if self.isGame:
             player.sendXt("jg", self.Id)
             player.gameFinished = False
-        else:
-            player.sendXt("jr", self.Id, self.generateRoomString())
-            self.sendXt("ap", player.getPlayerString())
+
+        if self.Id > 1000:
+            player.sendXt("jp", self.InternalId, self.Id, roomType)
+
+        player.sendXt("jr", self.Id, self.generateRoomString())
+        self.sendXt("ap", player.getPlayerString())
 
         giveMascotStamp(player)
 
