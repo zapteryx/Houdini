@@ -3,7 +3,7 @@ import time, random
 from Houdini.Handlers import Handlers, XT
 from Houdini.Crumbs.Room import Room
 from Houdini.Handlers.Play.Stampbook import getStampsString
-from Houdini.Data import retryableTransaction
+from Houdini.Data.Penguin import Penguin
 
 RoomFieldKeywords = {
     "Id": None,
@@ -19,7 +19,6 @@ RoomFieldKeywords = {
     "ShortName": "Igloo"
 }
 
-
 @Handlers.Handle(XT.JoinWorld)
 @Handlers.Throttle(-1)
 def handleJoinWorld(self, data):
@@ -33,6 +32,8 @@ def handleJoinWorld(self, data):
         self.user.LoginKey = ""
         return self.sendErrorAndDisconnect(101)
 
+    self.sendXt("activefeatures")
+
     self.sendXt("js", self.user.AgentStatus, 0, self.user.Moderator, self.user.BookModified)
 
     currentTime = int(time.time())
@@ -40,7 +41,7 @@ def handleJoinWorld(self, data):
     serverTimeOffset = 7
 
     self.sendXt("lp", self.getPlayerString(), self.user.Coins, 0, 1440,
-                penguinStandardTime, self.age, 0, self.user.MinutesPlayed, None, serverTimeOffset)
+                penguinStandardTime, self.age, 0, self.user.MinutesPlayed, None, serverTimeOffset, 1, 0, 211843)
 
     self.sendXt("gps", self.user.ID, getStampsString(self, self.user.ID))
 
@@ -54,7 +55,6 @@ def handleJoinWorld(self, data):
 
     randomRoomId = random.choice(self.server.spawnRooms)
     self.server.rooms[randomRoomId].add(self)
-
 
 @Handlers.Handle(XT.JoinRoom)
 @Handlers.Throttle(0.2)
@@ -76,21 +76,15 @@ def handleJoinRoom(self, data):
         self.room.remove(self)
         room.add(self)
 
-
 @Handlers.Handle(XT.RefreshRoom)
 def handleRefreshRoom(self, data):
     self.room.refresh(self)
 
-
 @Handlers.Handle(XT.JoinPlayerIgloo)
+@Handlers.Throttle()
 def handleJoinPlayerIgloo(self, data):
-    if data.Id < 1000:
-        return self.transport.loseConnection()
-
-    playerId = data.Id - 1000
-
-    if playerId != self.user.ID and playerId not in self.buddies \
-            and playerId not in self.server.openIgloos:
+    if data.Id != self.user.ID and data.Id not in self.buddies \
+            and data.Id not in self.server.openIgloos:
         return self.transport.loseConnection()
 
     data.Id += 1000
@@ -98,7 +92,8 @@ def handleJoinPlayerIgloo(self, data):
     if data.Id not in self.server.rooms:
         iglooFieldKeywords = RoomFieldKeywords.copy()
         iglooFieldKeywords["Id"] = data.Id
-        iglooFieldKeywords["InternalId"] = data.Id
+        iglooFieldKeywords["InternalId"] = data.Id - 1000
+        iglooFieldKeywords["IglooId"] = self.session.query(Penguin.Igloo).filter_by(ID=data.Id - 1000).scalar()
 
         igloo = self.server.rooms[data.Id] = Room(**iglooFieldKeywords)
     else:
@@ -109,4 +104,4 @@ def handleJoinPlayerIgloo(self, data):
 
     self.room.remove(self)
 
-    igloo.add(self)
+    igloo.add(self, data.RoomType)
