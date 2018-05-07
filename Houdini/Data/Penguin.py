@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, SmallInteger, String, Table, text
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, SmallInteger, String, text
 from sqlalchemy.orm import relationship
 
 from Houdini.Data import Base
@@ -15,9 +15,11 @@ class Penguin(Base):
     Approval = Column(Integer, nullable=False, server_default=text("0"))
     Password = Column(String(255), nullable=False)
     LoginKey = Column(String(255), server_default=text("''"))
+    ConfirmationHash = Column(String(255), server_default=text("''"))
     Email = Column(String(255), nullable=False, index=True)
     RegistrationDate = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
-    Active = Column(Integer, nullable=False, server_default=text("0"))
+    Active = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Igloo = Column(Integer, nullable=False, server_default=text("0"))
     LastPaycheck = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     MinutesPlayed = Column(Integer, nullable=False, server_default=text("0"))
     Moderator = Column(Integer, nullable=False, server_default=text("0"))
@@ -110,5 +112,23 @@ class FurnitureInventory(Base):
                        nullable=False, server_default=text("0"))
     FurnitureID = Column(Integer, primary_key=True, nullable=False, server_default=text("0"))
     Quantity = Column(Integer, nullable=False, server_default=text("1"))
+
+    penguin = relationship(u'Penguin')
+
+class FloorInventory(Base):
+    __tablename__ = 'floor_inventory'
+
+    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                       nullable=False, server_default=text("0"))
+    FloorID = Column(Integer, primary_key=True, nullable=False, server_default=text("0"))
+
+    penguin = relationship(u'Penguin')
+
+class LocationInventory(Base):
+    __tablename__ = 'location_inventory'
+
+    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                       nullable=False, server_default=text("0"))
+    LocationID = Column(Integer, primary_key=True, nullable=False, server_default=text("0"))
 
     penguin = relationship(u'Penguin')
