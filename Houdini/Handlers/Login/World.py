@@ -4,34 +4,43 @@ from Houdini.Handlers import Handlers, XML
 from Houdini.Data.Login import Login
 from Houdini.Data.Ban import Ban
 from Houdini.Data.Stamp import Stamp
-from Houdini.Data.Penguin import Penguin, BuddyList, IgnoreList, IglooInventory, FurnitureInventory, Inventory
+from Houdini.Data.Penguin import Penguin, BuddyList, IgnoreList, IglooInventory, \
+    FurnitureInventory, FloorInventory, LocationInventory, Inventory
 from Houdini.Data.Igloo import Igloo
 from Houdini.Data.Puffle import Puffle
 from Houdini.Data.Deck import Deck
 from Houdini.Crypto import Crypto
 from Houdini.Data import retryableTransaction
+from Houdini.Handlers.Play.Navigation import RoomFieldKeywords, Room
 
 @Handlers.Handle(XML.Login)
 @retryableTransaction()
 def handleLogin(self, data):
-    username = data.Username
-    password = data.Password
+    rawLoginData = data.Username
+    passwordHashes = data.Password
 
-    self.logger.info("{0} is attempting to login..".format(username))
+    playerId, _, swid, loginKey, languageApproved, languageRejected = rawLoginData.split("|")
+    clientLoginKey, confirmationHash = passwordHashes.split("#")
+
+    self.logger.info("{} is attempting to login..".format(playerId))
 
     self.session.commit()
-    user = self.session.query(Penguin).filter_by(Username=username).first()
+    user = self.session.query(Penguin).filter_by(ID=playerId).first()
 
     if user is None:
         return self.sendErrorAndDisconnect(100)
+
+    # TODO: Perform more validation checks
+    # i.e. checking to make sure that the login key sent by the server matches the one in the rawLoginData variable
+    # and check confirmationHash
 
     if not user.LoginKey:
         return self.transport.loseConnection()
 
     loginHash = Crypto.encryptPassword(user.LoginKey + self.randomKey) + user.LoginKey
 
-    if password != loginHash:
-        self.logger.debug("{} failed to login.".format(username))
+    if clientLoginKey != loginHash:
+        self.logger.info("{} failed to login.".format(user.Username))
 
         return self.sendErrorAndDisconnect(101)
 
@@ -49,7 +58,7 @@ def handleLogin(self, data):
     if user.ID in self.server.players:
         self.server.players[user.ID].transport.loseConnection()
 
-    self.logger.info("{} logged in successfully".format(username))
+    self.logger.info("{} logged in successfully".format(user.Username))
 
     self.session.add(user)
     self.user = user
@@ -85,12 +94,36 @@ def handleLogin(self, data):
     self.furniture = {furnitureId: quantity for furnitureId, quantity in self.session.query(
         FurnitureInventory.FurnitureID, FurnitureInventory.Quantity).filter_by(PenguinID=self.user.ID)}
 
+    self.floors = [floorId for floorId, in self.session.query(FloorInventory.FloorID).filter_by(PenguinID=self.user.ID)]
+
     self.deck = {cardId: quantity for cardId, quantity in self.session.query(
         Deck.CardID, Deck.Quantity).filter_by(PenguinID=self.user.ID)}
 
     self.cards = [self.server.cards[cardId] for cardId, quantity in self.deck.iteritems() for _ in xrange(quantity)]
 
-    self.igloos = [iglooId for iglooId, in self.session.query(IglooInventory.IglooID).filter_by(PenguinID=self.user.ID)]
-    self.igloo = self.session.query(Igloo).filter_by(PenguinID=self.user.ID).first()
+    self.iglooInventory = [iglooId for iglooId, in self.session.query(IglooInventory.IglooID)
+        .filter_by(PenguinID=self.user.ID)]
+
+    self.igloos = {iglooId: igloo for iglooId, igloo in
+                   self.session.query(Igloo.ID, Igloo).filter_by(PenguinID=self.user.ID)}
+    map(self.session.add, self.igloos.values())
+
+    self.igloo = self.session.query(Igloo).filter_by(ID=self.user.Igloo).first()
+
+    # Triggered after something like a server restart
+    if self.igloo.Locked == 0 and self.user.ID not in self.server.openIgloos:
+        externalIglooId = self.user.ID + 1000
+        if externalIglooId not in self.server.rooms:
+            iglooFieldKeywords = RoomFieldKeywords.copy()
+            iglooFieldKeywords["Id"] = externalIglooId
+            iglooFieldKeywords["InternalId"] = self.user.ID
+            iglooFieldKeywords["IglooId"] = self.session.query(Penguin.Igloo).filter_by(ID=self.user.ID).scalar()
+
+            self.server.rooms[externalIglooId] = Room(**iglooFieldKeywords)
+
+        self.server.openIgloos[self.user.ID] = self.user.Username
+
+    self.locations = [locationId for locationId, in self.session.query(LocationInventory.LocationID)
+        .filter_by(PenguinID=self.user.ID)]
 
     self.puffles = {puffle.ID: puffle for puffle in self.session.query(Puffle).filter_by(PenguinID=self.user.ID)}
