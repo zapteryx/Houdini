@@ -2,7 +2,7 @@ import time
 from beaker.cache import region_invalidate as Invalidate
 
 from Houdini.Spheniscidae import Spheniscidae
-from Houdini.Data.Penguin import Inventory, IglooInventory, FurnitureInventory
+from Houdini.Data.Penguin import Inventory, IglooInventory, FurnitureInventory, LocationInventory
 from Houdini.Data.Puffle import Puffle
 from Houdini.Data.Postcard import Postcard
 from Houdini.Data.Stamp import Stamp
@@ -46,14 +46,24 @@ class Penguin(Spheniscidae):
             self.sendXt("ai", itemId, self.user.Coins)
 
     def addIgloo(self, iglooId, iglooCost=0):
-        if iglooId in self.igloos:
+        if iglooId in self.iglooInventory:
             return False
 
-        self.igloos.append(iglooId)
+        self.iglooInventory.append(iglooId)
         self.session.add(IglooInventory(PenguinID=self.user.ID, IglooID=iglooId))
         self.user.Coins -= iglooCost
 
         self.sendXt("au", iglooId, self.user.Coins)
+
+    def addLocation(self, locationId, locationCost=0):
+        if locationId in self.locations:
+            return False
+
+        self.iglooInventory.append(locationId)
+        self.session.add(LocationInventory(PenguinID=self.user.ID, LocationID=locationId))
+        self.user.Coins -= locationCost
+
+        self.sendXt("aloc", locationId, self.user.Coins)
 
     def addFurniture(self, furnitureId, furnitureCost=0):
         furnitureQuantity = 1
@@ -187,3 +197,5 @@ class Penguin(Spheniscidae):
             self.server.redis.decr("%s.population" % self.server.serverName)
 
         super(Penguin, self).connectionLost(reason)
+        # After the data has been committed; to ensure that the data was saved.
+        map(self.session.expunge, self.igloos.values())
