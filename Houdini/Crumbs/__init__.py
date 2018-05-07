@@ -51,6 +51,7 @@ from Houdini.Crumbs.Stamp import StampSchema, StampGroupSchema,\
     StampGroupCollection, StampCollection
 from Houdini.Crumbs.Card import CardSchema, CardCollection
 from Houdini.Crumbs.Dance import SongSchema, DanceCollection
+from Houdini.Crumbs.Location import LocationSchema, LocationCollection
 
 def retrieveItemCollection(crumbsFile="crumbs/paper_items.json"):
     assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
@@ -186,3 +187,18 @@ def retrieveDanceCollection(crumbsFile="crumbs/dance.json"):
         logger.info("%d dance tracks loaded", len(danceCollection))
 
         return danceCollection
+
+def retrieveLocationCollection(crumbsFile="crumbs/igloo_locations.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as fileHandle:
+        locations = json.load(fileHandle)
+
+        schema = LocationSchema(many=True)
+        result = schema.load(locations)
+
+        locationCollection = LocationCollection(result.data)
+
+        logger.info("%d locations items loaded", len(locationCollection))
+
+        return locationCollection
