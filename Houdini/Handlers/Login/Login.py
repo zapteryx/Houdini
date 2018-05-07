@@ -4,7 +4,7 @@ from Houdini.Data.Ban import Ban
 from Houdini.Crypto import Crypto
 from Houdini.Data import retryableTransaction
 
-import bcrypt, time
+import bcrypt, time, os
 
 from datetime import datetime
 
@@ -89,6 +89,7 @@ def handleLogin(self, data):
 
     self.user = user
     self.user.LoginKey = loginKey
+    self.user.ConfirmationHash = Crypto.hash(os.urandom(24))
 
     self.session.commit()
 
@@ -120,4 +121,6 @@ def handleLogin(self, data):
                     buddyWorlds.append(serversConfig[serverName]["Id"])
                     break
 
-    self.sendXt("l", user.ID, loginKey, "|".join(buddyWorlds), "|".join(worldPopulations))
+    rawLoginData = "|".join([str(user.ID), str(user.ID), user.Username,
+                             user.LoginKey, str(user.Approval), str(0 if bool(user.Approval) else 1)])
+    self.sendXt("l", rawLoginData, user.ConfirmationHash, "friendsKey", "|".join(worldPopulations), "email@address.org")
