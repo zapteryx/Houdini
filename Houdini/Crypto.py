@@ -9,7 +9,7 @@ class Crypto:
 		if isinstance(string, (int, long)):
 			string = str(string)
 
-		return hashlib.md5(string.encode("utf-8")).hexdigest()
+		return hashlib.md5(string).hexdigest()
 
 	@staticmethod
 	def generateRandomKey():
@@ -30,7 +30,7 @@ class Crypto:
 	def getLoginHash(password, rndK):
 		key = Crypto.encryptPassword(password, False)
 		key += rndK
-		key += "Y(02.>'H}t\":E1"
+		key += "a1ebe00441f5aecb185d0ec178ca2305Y(02.>'H}t\":E1_root"
 
 		hash = Crypto.encryptPassword(key)
 
