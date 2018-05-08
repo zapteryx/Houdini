@@ -266,16 +266,6 @@ class XT:
         "Data": [XTData("Id", int), XTData("RoomType", str)]
     }
 
-    GetOwnedIgloos = {
-        "Handler": "g#go",
-        "Data": []
-    }
-
-    UpdateIglooMusic = {
-        "Handler": "g#um",
-        "Data": [XTData("MusicId", int)]
-    }
-
     UpdateFloor = {
         "Handler": "g#ag",
         "Data": [XTData("FloorId", int)]
@@ -289,11 +279,6 @@ class XT:
     BuyFurniture = {
         "Handler": "g#af",
         "Data": [XTData("FurnitureId", int)]
-    }
-
-    SendActivateIgloo = {
-        "Handler": "g#ao",
-        "Data": [XTData("TypeId", int)]
     }
 
     GetOpenIglooList = {
