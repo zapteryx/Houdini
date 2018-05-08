@@ -1,8 +1,6 @@
 # Houdini
 A Club Penguin private server written in Python for the AS2 protocol.
 
-### Not ready for production.
-
 ## Prerequisites
 * Python 2.7+
 * Twisted
