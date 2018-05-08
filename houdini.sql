@@ -30,7 +30,7 @@ CREATE TABLE buddy_list (
 
 CREATE TABLE cover_stamps (
   PenguinID int(10) UNSIGNED NOT NULL COMMENT 'Unique penguin ID',
-  Stamp smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Cover stamp or item ID',
+  Stamp mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Cover stamp or item ID',
   X smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Cover X position',
   Y smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Cover Y position',
   Type smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Cover item type',
@@ -40,7 +40,7 @@ CREATE TABLE cover_stamps (
 
 CREATE TABLE deck (
   PenguinID int(10) UNSIGNED NOT NULL COMMENT 'Owner penguin ID',
-  CardID smallint(5) UNSIGNED NOT NULL COMMENT 'Card type ID',
+  CardID mediumint(6) UNSIGNED NOT NULL COMMENT 'Card type ID',
   Quantity tinyint(3) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Quantity owned'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin card jitsu decks';
 
@@ -58,10 +58,10 @@ CREATE TABLE furniture_inventory (
 CREATE TABLE igloo (
   ID int(10) UNSIGNED NOT NULL COMMENT 'Unique igloo ID',
   PenguinID int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Owner penguin ID',
-  Type smallint(5) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Igloo type ID',
-  Floor smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Igloo flooring ID',
-  Music smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Igloo music ID',
-  Location smallint(5) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Igloo location ID',
+  Type mediumint(6) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Igloo type ID',
+  Floor mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Igloo flooring ID',
+  Music mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Igloo music ID',
+  Location mediumint(6) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Igloo location ID',
   Locked tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is igloo locked?'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin igloo settings';
 
@@ -94,7 +94,7 @@ CREATE TABLE ignore_list (
 
 CREATE TABLE inventory (
   PenguinID int(10) UNSIGNED NOT NULL COMMENT 'Owner penguin ID',
-  ItemID smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Clothing item ID'
+  ItemID mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Clothing item ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin owned clothing items';
 
 CREATE TABLE location_inventory (
@@ -124,17 +124,17 @@ CREATE TABLE penguin (
   LastPaycheck datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'EPF previous paycheck',
   MinutesPlayed int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Total minutes connected',
   Moderator tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is user moderator?',
-  MascotStamp smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Mascot stamp ID',
+  MascotStamp mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Mascot stamp ID',
   Coins mediumint(8) UNSIGNED NOT NULL DEFAULT '500' COMMENT 'Penguin coins',
   Color tinyint(3) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Penguin color ID',
-  Head smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin head item ID',
-  Face smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin face item ID',
-  Neck smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin neck item ID',
-  Body smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin body item ID',
-  Hand smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin hand item ID',
-  Feet smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin feet item ID',
-  Photo smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin background ID',
-  Flag smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin pin ID',
+  Head mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin head item ID',
+  Face mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin face item ID',
+  Neck mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin neck item ID',
+  Body mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin body item ID',
+  Hand mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin hand item ID',
+  Feet mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin feet item ID',
+  Photo mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin background ID',
+  Flag mediumint(6) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin pin ID',
   Permaban tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is penguin banned forever?',
   BookModified tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is book cover modified?',
   BookColor tinyint(3) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Stampbook cover color',
@@ -167,7 +167,7 @@ CREATE TABLE postcard (
   ID int(10) UNSIGNED NOT NULL COMMENT 'Unique postcard ID',
   SenderID int(10) UNSIGNED DEFAULT NULL COMMENT 'Sender penguin ID',
   RecipientID int(10) UNSIGNED NOT NULL COMMENT 'Recipient penguin ID',
-  Type smallint(5) UNSIGNED NOT NULL COMMENT 'Postcard type ID',
+  Type mediumint(6) UNSIGNED NOT NULL COMMENT 'Postcard type ID',
   SendDate datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date sent',
   Details char(255) NOT NULL DEFAULT '',
   HasRead tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is read?'
@@ -187,7 +187,7 @@ CREATE TABLE puffle (
 
 CREATE TABLE redemption_award (
   CodeID int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique code ID',
-  Award smallint(5) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Award item ID'
+  Award mediumint(6) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Award item ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Redemption code awards';
 
 CREATE TABLE redemption_code (
@@ -200,7 +200,7 @@ CREATE TABLE redemption_code (
 
 CREATE TABLE stamp (
   PenguinID int(10) UNSIGNED NOT NULL COMMENT 'Stamp penguin ID',
-  Stamp smallint(5) UNSIGNED NOT NULL COMMENT 'Stamp ID',
+  Stamp mediumint(6) UNSIGNED NOT NULL COMMENT 'Stamp ID',
   Recent tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is recently earned?'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin earned stamps';
 
