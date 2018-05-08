@@ -1,5 +1,5 @@
 # Houdini
-A Club Penguin private server written in Python for the AS2 protocol.
+A Club Penguin private server written in Python for the AS3 protocol.
 
 ### Not ready for production.
 
