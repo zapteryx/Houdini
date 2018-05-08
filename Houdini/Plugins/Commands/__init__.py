@@ -55,7 +55,7 @@ class Commands(object):
 
         self.server = server
 
-        self.bot = self.server.plugins["Bot"]
+        #self.bot = self.server.plugins["Bot"]
 
         Handlers.Message += self.handleMessage
 
