@@ -117,7 +117,7 @@ def handleLogin(self, data):
             iglooFieldKeywords = RoomFieldKeywords.copy()
             iglooFieldKeywords["Id"] = externalIglooId
             iglooFieldKeywords["InternalId"] = self.user.ID
-            iglooFieldKeywords["IglooId"] = self.session.query(Penguin.Igloo).filter_by(ID=self.user.ID).scalar()
+            iglooFieldKeywords["IglooId"] = self.igloo.ID
 
             self.server.rooms[externalIglooId] = Room(**iglooFieldKeywords)
 
