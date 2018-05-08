@@ -24,8 +24,3 @@ If you're on Windows you'll need to download and install MySQL Connector C 6.0.2
 
 ## Configuration
 All configuration settings are located in Houdini.conf.
-
-## Status
-The server is currently incomplete and likely to be unstable **as well as buggy**. More handlers and bug fixes will be implemented as development continues.
-
-You can find a comprehensive to-do list [here](https://trello.com/b/IM8STj1S).
