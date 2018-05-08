@@ -55,6 +55,16 @@ CREATE TABLE furniture_inventory (
   Quantity tinyint(3) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Quantity owned'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin owned furniture';
 
+INSERT INTO furniture_inventory (PenguinID, FurnitureID, Quantity) VALUES
+(101, 536, 1),
+(101, 596, 1),
+(101, 616, 1),
+(101, 632, 1),
+(101, 653, 1),
+(101, 662, 1),
+(101, 961, 1),
+(101, 2053, 1);
+
 CREATE TABLE igloo (
   ID int(10) UNSIGNED NOT NULL COMMENT 'Unique igloo ID',
   PenguinID int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Owner penguin ID',
@@ -65,6 +75,11 @@ CREATE TABLE igloo (
   Locked tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is igloo locked?'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin igloo settings';
 
+INSERT INTO igloo (ID, PenguinID, `Type`, `Floor`, Music, Location, Locked) VALUES
+(1, 101, 23, 0, 3, 8, 1),
+(10, 101, 63, 0, 0, 8, 1),
+(11, 101, 69, 0, 0, 8, 1);
+
 CREATE TABLE igloo_furniture (
   IglooID int(10) UNSIGNED NOT NULL COMMENT 'Furniture igloo ID',
   FurnitureID mediumint(8) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Furniture item ID',
@@ -74,10 +89,33 @@ CREATE TABLE igloo_furniture (
   Rotation tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Furniture rotation ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Furniture placed inside igloos';
 
+INSERT INTO igloo_furniture (IglooID, FurnitureID, `X`, `Y`, Frame, Rotation) VALUES
+(1, 536, 604, 225, 1, 2),
+(1, 653, 398, 170, 1, 1),
+(1, 662, 607, 147, 1, 2),
+(1, 961, 218, 323, 1, 2),
+(11, 616, 395, 176, 1, 2);
+
 CREATE TABLE igloo_inventory (
   PenguinID int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Owner penguin ID',
   IglooID mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Igloo ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin owned igloos';
+
+INSERT INTO igloo_inventory (PenguinID, IglooID) VALUES
+(101, 23),
+(101, 57),
+(101, 61),
+(101, 62),
+(101, 63),
+(101, 65),
+(101, 66),
+(101, 68),
+(101, 69),
+(101, 70),
+(101, 71),
+(101, 73),
+(101, 75),
+(101, 84);
 
 CREATE TABLE igloo_likes (
   IglooID int(10) UNSIGNED NOT NULL COMMENT 'Igloo''s unique ID',
@@ -86,6 +124,11 @@ CREATE TABLE igloo_likes (
   Count int(11) NOT NULL COMMENT 'Amount of likes',
   Date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of like'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO igloo_likes (IglooID, OwnerID, PlayerID, `Count`, `Date`) VALUES
+(1, 101, 101, 1, '2018-05-08 15:07:32'),
+(10, 101, 101, 1, '2018-05-08 15:07:28'),
+(11, 101, 101, 1, '2018-05-08 15:07:24');
 
 CREATE TABLE ignore_list (
   PenguinID int(10) UNSIGNED NOT NULL,
@@ -97,10 +140,34 @@ CREATE TABLE inventory (
   ItemID smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Clothing item ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin owned clothing items';
 
+INSERT INTO inventory (PenguinID, ItemID) VALUES
+(101, 4),
+(101, 114),
+(101, 251),
+(101, 323),
+(101, 352),
+(101, 357),
+(101, 501),
+(101, 652),
+(101, 843),
+(101, 929),
+(101, 1597),
+(101, 2101),
+(101, 3032),
+(101, 3064),
+(101, 4107),
+(101, 5108),
+(101, 5126),
+(101, 9298),
+(101, 24318);
+
 CREATE TABLE location_inventory (
   PenguinID int(10) UNSIGNED NOT NULL COMMENT 'Owner penguin ID',
   LocationID int(10) UNSIGNED NOT NULL COMMENT 'Location ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO location_inventory (PenguinID, LocationID) VALUES
+(101, 8);
 
 CREATE TABLE login (
   ID int(10) UNSIGNED NOT NULL COMMENT 'Unique login ID',
@@ -158,6 +225,9 @@ CREATE TABLE penguin (
   Rank tinyint(1) DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguins';
 
+INSERT INTO penguin (ID, Username, Nickname, Approval, `Password`, LoginKey, ConfirmationHash, Email, RegistrationDate, Active, Igloo, LastPaycheck, MinutesPlayed, Moderator, MascotStamp, Coins, Color, Head, Face, Neck, Body, Hand, Feet, Photo, Flag, Permaban, BookModified, BookColor, BookHighlight, BookPattern, BookIcon, AgentStatus, FieldOpStatus, CareerMedals, AgentMedals, LastFieldOp, NinjaRank, NinjaProgress, FireNinjaRank, FireNinjaProgress, WaterNinjaRank, WaterNinjaProgress, NinjaMatchesWon, FireMatchesWon, WaterMatchesWon, Rank) VALUES
+(101, 'Houdini', 'Houdini', 1, '$2y$12$dBWhLSF76Xw6RMxOXCByAunyj7boiz2nVxQ2PNlXVT7dXYp/gSo0u', '', '10119168331e3f04c5a8f569b56b0658', '', '2018-05-08 10:19:15', 1, 1, '2018-05-01 00:00:00', 77, 0, 0, 14125, 4, 652, 114, 0, 4107, 5108, 352, 9298, 501, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, '2018-05-08 10:19:15', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+
 CREATE TABLE penguin_redemption (
   PenguinID int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique penguin ID',
   CodeID int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique code ID'
@@ -172,6 +242,9 @@ CREATE TABLE postcard (
   Details char(255) NOT NULL DEFAULT '',
   HasRead tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is read?'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Sent postcards';
+
+INSERT INTO postcard (ID, SenderID, RecipientID, `Type`, SendDate, Details, HasRead) VALUES
+(4, NULL, 101, 112, '2018-05-08 15:03:32', '', 1);
 
 CREATE TABLE puffle (
   ID int(10) UNSIGNED NOT NULL COMMENT 'Unique puffle ID',
@@ -289,16 +362,16 @@ ALTER TABLE stamp
 
 
 ALTER TABLE igloo
-  MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique igloo ID';
+  MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique igloo ID', AUTO_INCREMENT=12;
 
 ALTER TABLE login
-  MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique login ID';
+  MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique login ID', AUTO_INCREMENT=24;
 
 ALTER TABLE penguin
-  MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique penguin ID', AUTO_INCREMENT=101;
+  MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique penguin ID', AUTO_INCREMENT=102;
 
 ALTER TABLE postcard
-  MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique postcard ID';
+  MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique postcard ID', AUTO_INCREMENT=5;
 
 ALTER TABLE puffle
   MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique puffle ID';
