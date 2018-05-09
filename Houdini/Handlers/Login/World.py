@@ -6,7 +6,7 @@ from Houdini.Data.Ban import Ban
 from Houdini.Data.Stamp import Stamp
 from Houdini.Data.Penguin import Penguin, BuddyList, IgnoreList, IglooInventory, \
     FurnitureInventory, FloorInventory, LocationInventory, Inventory
-from Houdini.Data.Igloo import Igloo
+from Houdini.Data.Igloo import Igloo, IglooLike
 from Houdini.Data.Puffle import Puffle
 from Houdini.Data.Deck import Deck
 from Houdini.Crypto import Crypto
@@ -109,6 +109,8 @@ def handleLogin(self, data):
     map(self.session.add, self.igloos.values())
 
     self.igloo = self.session.query(Igloo).filter_by(ID=self.user.Igloo).first()
+    self.likeTimers = {iglooId: likeTime for iglooId, likeTime in
+                       self.session.query(IglooLike.IglooID, IglooLike.Date).filter_by(PlayerID=self.user.ID)}
 
     # Triggered after something like a server restart
     if self.igloo.Locked == 0 and self.user.ID not in self.server.openIgloos:
@@ -117,7 +119,7 @@ def handleLogin(self, data):
             iglooFieldKeywords = RoomFieldKeywords.copy()
             iglooFieldKeywords["Id"] = externalIglooId
             iglooFieldKeywords["InternalId"] = self.user.ID
-            iglooFieldKeywords["IglooId"] = self.session.query(Penguin.Igloo).filter_by(ID=self.user.ID).scalar()
+            iglooFieldKeywords["IglooId"] = self.igloo.ID
 
             self.server.rooms[externalIglooId] = Room(**iglooFieldKeywords)
 
