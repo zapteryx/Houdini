@@ -105,7 +105,7 @@ class HoudiniFactory(Factory):
                 }
             })
 
-            self.spawnRooms = (100, 300, 400, 800, 809, 230, 130)
+            #self.spawnRooms = (100, 300, 400, 800, 809, 230, 130)
 
             self.rooms = retrieveRoomCollection()
             self.items = retrieveItemCollection()

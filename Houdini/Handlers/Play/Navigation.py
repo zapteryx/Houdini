@@ -53,7 +53,7 @@ def handleJoinWorld(self, data):
         if buddyId in self.server.players:
             self.server.players[buddyId].sendXt("bon", self.user.ID)
 
-    randomRoomId = random.choice(self.server.spawnRooms)
+    randomRoomId = 100
     self.server.rooms[randomRoomId].add(self)
 
 @Handlers.Handle(XT.JoinRoom)
