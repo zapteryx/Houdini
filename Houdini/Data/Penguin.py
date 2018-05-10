@@ -18,6 +18,7 @@ class Penguin(Base):
     ConfirmationHash = Column(String(255), server_default=text("''"))
     Email = Column(String(255), nullable=False, index=True)
     RegistrationDate = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
+    Member = Column(SmallInteger, nullable=False, server_default=text("1"))
     Active = Column(SmallInteger, nullable=False, server_default=text("0"))
     Igloo = Column(Integer, nullable=False, server_default=text("0"))
     LastPaycheck = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
