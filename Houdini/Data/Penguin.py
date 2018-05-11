@@ -20,6 +20,7 @@ class Penguin(Base):
     RegistrationDate = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     Member = Column(SmallInteger, nullable=False, server_default=text("1"))
     Active = Column(SmallInteger, nullable=False, server_default=text("0"))
+    MembershipDays = Column(SmallInteger, nullable=False, server_default=text("0"))
     Igloo = Column(Integer, nullable=False, server_default=text("0"))
     LastPaycheck = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     MinutesPlayed = Column(Integer, nullable=False, server_default=text("0"))
