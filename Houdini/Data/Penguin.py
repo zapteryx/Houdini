@@ -54,9 +54,12 @@ class Penguin(Base):
     FireNinjaProgress = Column(SmallInteger, nullable=False, server_default=text("0"))
     WaterNinjaRank = Column(SmallInteger, nullable=False, server_default=text("0"))
     WaterNinjaProgress = Column(SmallInteger, nullable=False, server_default=text("0"))
+    SnowNinjaRank = Column(SmallInteger, nullable=False, server_default=text("0"))
+    SnowNinjaProgress = Column(SmallInteger, nullable=False, server_default=text("0"))
     NinjaMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
     FireMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
     WaterMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
+    SnowMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
 
     parents = relationship(
         u'Penguin',

@@ -222,9 +222,12 @@ CREATE TABLE penguin (
   FireNinjaProgress tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Fire ninja progress',
   WaterNinjaRank tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Water ninja rank',
   WaterNinjaProgress tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Water ninja progress',
+  SnowNinjaRank tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Snow ninja rank',
+  SnowNinjaProgress tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Snow ninja progress',
   NinjaMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'CardJitsu matches won',
   FireMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuFire matches won',
-  WaterMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuWater matces won',
+  WaterMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuSnow matces won',
+  SnowMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuSnow matces won',
   Rank tinyint(1) DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguins';
 

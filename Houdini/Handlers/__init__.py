@@ -582,6 +582,11 @@ class XT:
         "Data": []
     }
 
+    GetNinjaSnowLevel = {
+        "Handler": "ni#gwl",
+        "Data": []
+    }
+
     GetCards = {
         "Handler": "ni#gcd",
         "Data": []
