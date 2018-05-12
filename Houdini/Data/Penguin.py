@@ -26,6 +26,7 @@ class Penguin(Base):
     MinutesPlayed = Column(Integer, nullable=False, server_default=text("0"))
     Moderator = Column(SmallInteger, nullable=False, server_default=text("0"))
     MascotStamp = Column(Integer, nullable=False, server_default=text("0"))
+    Avatar = Column(SmallInteger, nullable=False, server_default=text("0"))
     Coins = Column(Integer, nullable=False, server_default=text("1000000"))
     Color = Column(Integer, nullable=False, server_default=text("1"))
     Head = Column(Integer, nullable=False, server_default=text("0"))

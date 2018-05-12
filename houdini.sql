@@ -194,6 +194,7 @@ CREATE TABLE penguin (
   MinutesPlayed int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Total minutes connected',
   Moderator tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is user moderator?',
   MascotStamp mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Mascot stamp ID',
+  Avatar tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin avatar ID',
   Coins mediumint(8) UNSIGNED NOT NULL DEFAULT '1000000' COMMENT 'Penguin coins',
   Color mediumint(8) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Penguin color ID',
   Head mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Penguin head item ID',

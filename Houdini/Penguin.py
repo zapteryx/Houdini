@@ -166,7 +166,8 @@ class Penguin(Spheniscidae):
             self.x, self.y,
             self.frame,
             self.user.Member,
-            self.user.MembershipDays
+            self.user.MembershipDays,
+            self.user.Avatar
         )
 
         playerStringArray = map(str, playerArray)
