@@ -15,27 +15,28 @@ def handleStartMailEngine(self, data):
                                 Details="", Type=112)
             self.session.add(postcard)
 
-    lastPaycheck = self.user.LastPaycheck.date()
-    if lastPaycheck == 0:
-        lastPaycheck = datetime.date.today()
-    today = datetime.date.today()
-    firstDayOfMonth = today.replace(day=1)
-    lastPaycheck = lastPaycheck.replace(day=1)
-    while lastPaycheck < firstDayOfMonth:
-        lastPaycheck = lastPaycheck + datetime.timedelta(days=32)
+    if self.user.ID >= 500:
+        lastPaycheck = self.user.LastPaycheck.date()
+        if lastPaycheck == 0:
+            lastPaycheck = datetime.date.today()
+        today = datetime.date.today()
+        firstDayOfMonth = today.replace(day=1)
         lastPaycheck = lastPaycheck.replace(day=1)
-        sendDate = lastPaycheck + datetime.timedelta(days=1)
-        if 428 in self.inventory:
-            postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
-                                Details="", SendDate=sendDate, Type=172)
-            self.session.add(postcard)
-            self.user.Coins += 250
-        if self.user.AgentStatus:
-            postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
-                                Details="", SendDate=sendDate, Type=184)
-            self.session.add(postcard)
-            self.user.Coins += 350
-    self.user.LastPaycheck = lastPaycheck
+        while lastPaycheck < firstDayOfMonth:
+            lastPaycheck = lastPaycheck + datetime.timedelta(days=32)
+            lastPaycheck = lastPaycheck.replace(day=1)
+            sendDate = lastPaycheck + datetime.timedelta(days=1)
+            if 428 in self.inventory:
+                postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
+                                    Details="", SendDate=sendDate, Type=172)
+                self.session.add(postcard)
+                self.user.Coins += 250
+            if self.user.AgentStatus:
+                postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
+                                    Details="", SendDate=sendDate, Type=184)
+                self.session.add(postcard)
+                self.user.Coins += 350
+        self.user.LastPaycheck = lastPaycheck
 
     totalMail = self.session.query(Postcard). \
         filter(Postcard.RecipientID == self.user.ID).count()
