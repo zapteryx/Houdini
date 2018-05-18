@@ -40,7 +40,7 @@ def handleJoinWorld(self, data):
     penguinStandardTime = currentTime * 1000
     serverTimeOffset = 7
 
-    self.sendXt("lp", self.getPlayerString(), self.user.Coins, 0, 1440,
+    self.sendXt("lp", self.getPlayerString(), self.user.Coins, self.user.SafeChat, 1440,
                 penguinStandardTime, self.age, 0, self.user.MinutesPlayed, None, serverTimeOffset, 1, 0, 211843)
 
     self.sendXt("gps", self.user.ID, getStampsString(self, self.user.ID))

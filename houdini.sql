@@ -189,6 +189,7 @@ CREATE TABLE penguin (
   Active tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Email activated',
   Member tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is user a member?',
   MembershipDays smallint(4) NOT NULL DEFAULT '0' COMMENT 'Number of cumulative days the user has had membership',
+  SafeChat tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is user in safe chat mode?',
   Igloo int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Player''s active igloo',
   LastPaycheck datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'EPF previous paycheck',
   MinutesPlayed int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Total minutes connected',
