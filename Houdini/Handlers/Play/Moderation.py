@@ -26,15 +26,15 @@ def cheatKick(self, targetPlayer):
     if targetPlayer in self.server.players:
         self.server.players[targetPlayer].sendErrorAndDisconnect(800)
 
-def cheatBan(self, targetPlayer, banDuration=24, comment=""):
+def cheatBan(self, targetPlayer, banDuration=72, comment=""):
     if targetPlayer in self.server.players:
         target = self.server.players[targetPlayer]
         numberOfBans = self.session.query(Ban).\
-            filter(Ban.PenguinID == targetPlayer).count()
+            filter(Ban.PenguinID == targetPlayer).filter(Ban.Reason == 1).count()
 
         dateIssued = datetime.now()
         dateExpires = dateIssued + timedelta(hours=banDuration)
-        if numberOfBans < 3:
+        if numberOfBans < 1:
             ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
                       ModeratorID=None, Reason=1, Comment=comment)
         else:
