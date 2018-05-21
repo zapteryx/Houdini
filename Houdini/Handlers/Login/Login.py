@@ -71,7 +71,7 @@ def handleLogin(self, data):
         .filter(Ban.Expires >= datetime.now()).first()
 
     if activeBan is not None:
-        hoursLeft = (activeBan.Expires - datetime.now()).seconds / 60 / 60
+        hoursLeft = round((activeBan.Expires - datetime.now()).total_seconds() / 60 / 60)
 
         if hoursLeft == 0:
             return self.sendErrorAndDisconnect(602)
