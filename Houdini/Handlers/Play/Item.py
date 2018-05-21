@@ -15,7 +15,6 @@ boosterDecks = {
 }
 
 @Handlers.Handle(XT.BuyInventory)
-@Handlers.Throttle()
 def handleBuyInventory(self, data):
     if data.ItemId not in self.server.items:
         return self.sendError(402)

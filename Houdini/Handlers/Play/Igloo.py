@@ -27,8 +27,10 @@ def getActiveIgloo(self, penguinId):
 
     furnitureString = getLayoutFurniture(self, igloo.ID)
 
-    return "{}:1:0:{}:{}:{}:{}:{}:{}:{}".format(igloo.ID, igloo.Locked, igloo.Music, igloo.Floor, igloo.Location,
-                                                igloo.Type, getLayoutLikeCount(self, igloo.ID), furnitureString)
+    return "{}:1:0:{}:{}:{}:{}:{}:{}:{}"\
+        .format(igloo.ID, igloo.Locked, igloo.Music, igloo.Floor,
+                igloo.Location, igloo.Type,
+                getLayoutLikeCount(self, igloo.ID), furnitureString)
 
 @Cache("houdini", "igloo_layouts")
 def getAllIglooLayouts(self, playerId):
@@ -55,16 +57,10 @@ def getLayoutLikeCount(self, layoutId):
     layoutLikeCount = self.session.query(func.sum(IglooLike.Count)).filter_by(IglooID=layoutId).scalar()
     return layoutLikeCount if layoutLikeCount is not None else 0
 
-@Cache("houdini", "total_likes")
-def getTotalLikes(self, playerId):
-    return self.session.query(func.sum(IglooLike.Count)).filter_by(OwnerID=playerId).scalar()
-
 @Cache("houdini", "all_layout_likes")
 def getAllLayoutLikes(self, playerId):
-    return ",".join("{}|{}".format(layoutId, likeCount) for layoutId, likeCount in
-                    self.session.query(IglooLike.IglooID, func.sum(IglooLike.Count))
-                    .filter_by(OwnerID=playerId)
-                    .group_by(IglooLike.IglooID))
+    return self.session.query(IglooLike.IglooID, func.sum(IglooLike.Count))\
+        .filter_by(OwnerID=playerId).group_by(IglooLike.IglooID)
 
 @Handlers.Handle(XT.BuyIglooLocation)
 def handleBuyIglooLocation(self, data):
@@ -90,37 +86,46 @@ def handleCanLikeIgloo(self, data):
     lastUpdated = self.session.query(IglooLike.Date)\
         .filter_by(IglooID=self.room.IglooId, PlayerID=self.user.ID).scalar()
 
+    if lastUpdated is not None:
+        timeElapsed = datetime.now() - lastUpdated
+
     canLike = json.dumps({"canLike": True, "periodicity": "ScheduleDaily", "nextLike_msecs": 0})
 
-    if lastUpdated is None:
-        return self.sendXt("cli", self.room.IglooId, 200, canLike)
-
-    timeElapsed = datetime.now() - lastUpdated
-
-    if timeElapsed > timedelta(1):
+    if lastUpdated is None or timeElapsed > timedelta(1):
         self.sendXt("cli", self.room.IglooId, 200, canLike)
-
     else:
         self.sendXt("cli", self.room.IglooId, 200,
                     json.dumps({"canLike": False, "periodicity": "ScheduleDaily",
                                 "nextLike_msecs": (timedelta(1) - timeElapsed).total_seconds() * 1000}))
 
-# TODO: Check if in igloo
 @Handlers.Handle(XT.LikeIgloo)
-@Handlers.Throttle()
 def handleLikeIgloo(self, data):
-    playerId = self.room.InternalId # TODO: Check if exists
+    if not hasattr(self.room, "IglooId"):
+        return self.transport.loseConnection()
+
+    if not self.session.query(Penguin.ID) \
+        .filter_by(ID=self.room.InternalId).first():
+        return self.transport.loseConnection()
+
+    currentDateTime = datetime.now()
+
+    if self.room.IglooId in self.likeTimers:
+        lastUpdated = self.likeTimers[self.room.IglooId]
+        timeElapsed = currentDateTime - lastUpdated
+
+        if timeElapsed < timedelta(1):
+            return self.transport.loseConnection()
+
     # ORM doesn't have support for ON DUPLICATE KEY as of writing this
     likeInsert = insert(IglooLike).values(IglooID=self.room.IglooId,
-                                          OwnerID=playerId, PlayerID=self.user.ID, Count=1)
-    onDuplicateKey = likeInsert.on_duplicate_key_update(Count=IglooLike.Count + 1, Date=datetime.now())
+                                          OwnerID=self.room.InternalId, PlayerID=self.user.ID, Count=1)
+    onDuplicateKey = likeInsert.on_duplicate_key_update(Count=IglooLike.Count + 1, Date=currentDateTime)
     self.server.databaseEngine.execute(onDuplicateKey)
 
     self.session.commit()
 
     Invalidate(getLayoutLikeCount, "houdini", "layout_likes", self.room.IglooId)
     Invalidate(getAllLayoutLikes, "houdini", "all_layout_likes", self.room.InternalId)
-    Invalidate(getTotalLikes, "houdini", "total_likes", self.room.InternalId)
 
     if len(self.room.players) > 1:
         likeCount = getLayoutLikeCount(self, self.room.IglooId)
@@ -128,6 +133,8 @@ def handleLikeIgloo(self, data):
         for player in self.room.players:
             if player.user.ID != self.user.ID:
                 player.sendXt("lue", self.user.ID, likeCount)
+
+    self.likeTimers[self.room.IglooId] = currentDateTime
 
 # TODO: Maybe cache the JSON collection in a way that allows us to paginate without having to query (.all())
 # TODO: Definitely cache
@@ -226,11 +233,10 @@ def handleUpdateIglooConfiguration(self, data):
     Invalidate(getAllIglooLayouts, 'houdini', 'igloo_layouts', self.user.ID)
     Invalidate(getLayoutFurniture, "houdini", "layout_furniture", self.igloo.ID)
 
-    self.room.sendXt("uvi", self.user.ID, "{}:1:0:{}:{}:{}:{}:{}:{}:{}".format(self.igloo.ID, self.igloo.Locked,
-                                                                               self.igloo.Music, self.igloo.Floor,
-                                                                               self.igloo.Location, self.igloo.Type,
-                                                                               getLayoutLikeCount(self, self.igloo.ID),
-                                                                               data.FurnitureList))
+    self.room.sendXt("uvi", self.user.ID, "{}:1:0:{}:{}:{}:{}:{}:{}:{}"
+                     .format(self.igloo.ID, self.igloo.Locked, self.igloo.Music, self.igloo.Floor,
+                             self.igloo.Location, self.igloo.Type, getLayoutLikeCount(self, self.igloo.ID),
+                             data.FurnitureList))
 
 @Handlers.Handle(XT.GetIglooDetails)
 def handleGetIglooDetails(self, data):
@@ -278,9 +284,7 @@ def handleBuyFurniture(self, data):
 @Handlers.Handle(XT.UpdateIglooSlotSummary)
 @Handlers.Throttle()
 def handleUpdateIglooSlotSummary(self, data):
-    # Checks if they're even in an igloo, and if they are.. Check if it's THEIR igloo
-    if not hasattr(self.room, "IglooId") or hasattr(self.room, "IglooId") \
-            and self.room.IglooId not in self.igloos:
+    if not hasattr(self.room, "IglooId"):
         return self.transport.loseConnection()
 
     if data.LayoutId not in self.igloos:
@@ -328,18 +332,20 @@ def handleGetOpenIglooList(self, data):
 # Even though the player's ID is sent in the packet, it is irrelevant.
 @Handlers.Handle(XT.GetFurnitureInventory)
 def handleGetFurnitureInventory(self, data):
-    furnitureString = ",".join(["{}|0000000000|{}".format(furnitureId, quantity)
+    furniture = ",".join(["{}|0000000000|{}".format(furnitureId, quantity)
                                 for furnitureId, quantity in self.furniture.items()])
-    floorString = ",".join(["{}|0000000000".format(floorId) for floorId in self.floors])
-    igloosString = ",".join(["{}|0000000000".format(iglooId) for iglooId in self.iglooInventory])
-    locationString = ",".join(["{}|0000000000".format(locationId) for locationId in self.locations])
+    floor = ",".join(["{}|0000000000".format(floorId) for floorId in self.floors])
+    igloos = ",".join(["{}|0000000000".format(iglooId) for iglooId in self.iglooInventory])
+    location = ",".join(["{}|0000000000".format(locationId) for locationId in self.locations])
 
-    self.sendXt("gii", furnitureString, floorString, igloosString, locationString)
+    self.sendXt("gii", furniture, floor, igloos, location)
 
 @Handlers.Handle(XT.GetAllIglooLayouts)
 def handleGetAllIglooLayouts(self, data):
     self.sendXt("gail", self.user.ID, self.igloo.ID, getAllIglooLayouts(self, self.user.ID))
 
-    totalLikes = getTotalLikes(self, self.user.ID)
-    layoutLikes = getAllLayoutLikes(self, self.user.ID)
-    self.sendXt("gaili", totalLikes, layoutLikes)
+    allLayoutLikes = getAllLayoutLikes(self, self.user.ID)
+    layoutLikes = ",".join("{}|{}".format(layoutId, likeCount)
+                           for layoutId, likeCount in allLayoutLikes)
+    likeCount = sum(likeCount for layoutId, likeCount in allLayoutLikes)
+    self.sendXt("gaili", likeCount, layoutLikes)
