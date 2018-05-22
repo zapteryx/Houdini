@@ -1,4 +1,5 @@
-import zope.interface, logging
+import zope.interface, logging, time
+from datetime import datetime
 from sqlalchemy import Column, Integer, text
 from sqlalchemy.exc import OperationalError
 
@@ -30,6 +31,7 @@ class Rank(object):
                 self.logger.warn(opError.message)
 
         Handlers.Login += self.adjustMembershipDays
+        Handlers.JoinWorld += self.handleJoinWorld
 
     def adjustMembershipDays(self, player, data):
         playerRank = player.session.query(Penguin.Rank). \
@@ -39,6 +41,16 @@ class Rank(object):
             playerRank = 4
 
         player.age = Rank.membershipDaysByRank[playerRank]
+
+    def handleJoinWorld(self, player, data):
+        currentTime = int(time.time())
+        penguinStandardTime = currentTime * 1000
+        serverTimeOffset = 7
+        currentDateTime = datetime.now()
+
+        age = (currentDateTime - player.user.RegistrationDate).days
+        player.sendXt("lp", player.getPlayerString(), player.user.Coins, 0, 1440,
+                    penguinStandardTime, age, 0, player.user.MinutesPlayed, None, serverTimeOffset)
 
     def ready(self):
         self.logger.info("Rank plugin is ready!")
