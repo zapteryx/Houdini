@@ -23,7 +23,14 @@ def getActiveIgloo(self, penguinId):
         .join(Penguin, Penguin.Igloo == Igloo.ID).filter(Igloo.PenguinID == penguinId).first()
 
     if igloo is None:
-        return str()
+        igloo = Igloo(PenguinID=penguinId)
+        self.session.add(igloo)
+        self.session.commit()
+
+        if penguinId in self.server.players:
+            playerObject = self.server.players[penguinId]
+            playerObject.igloos[igloo.ID] = igloo
+            playerObject.user.Igloo = igloo.ID
 
     furnitureString = getLayoutFurniture(self, igloo.ID)
 
