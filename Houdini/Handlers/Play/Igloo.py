@@ -10,7 +10,9 @@ def getIglooString(self, penguinId):
         .filter_by(PenguinID=penguinId).first()
 
     if igloo is None:
-        return str()
+        igloo = Igloo(PenguinID=penguinId)
+        self.session.add(igloo)
+        self.session.commit()
 
     iglooFurniture = self.session.query(IglooFurniture).join(Igloo, Igloo.PenguinID == penguinId)\
         .filter(IglooFurniture.IglooID == Igloo.ID)
