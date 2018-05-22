@@ -31,6 +31,7 @@ def getActiveIgloo(self, penguinId):
             playerObject = self.server.players[penguinId]
             playerObject.igloos[igloo.ID] = igloo
             playerObject.user.Igloo = igloo.ID
+            playerObject.igloo = igloo
 
     furnitureString = getLayoutFurniture(self, igloo.ID)
 
