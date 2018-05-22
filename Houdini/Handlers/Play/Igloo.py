@@ -13,6 +13,7 @@ def getIglooString(self, penguinId):
         igloo = Igloo(PenguinID=penguinId)
         self.session.add(igloo)
         self.session.commit()
+        self.igloo = igloo
 
     iglooFurniture = self.session.query(IglooFurniture).join(Igloo, Igloo.PenguinID == penguinId)\
         .filter(IglooFurniture.IglooID == Igloo.ID)
