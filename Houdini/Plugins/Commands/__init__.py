@@ -148,7 +148,13 @@ class Commands(object):
     def handleItemCommand(self, player, arguments):
         self.logger.debug("%s is trying to add an item (id: %d)" % (player.user.Username, arguments.ItemId))
 
-        if not self.server.items.isBait(arguments.ItemId):
+        if self.server.items.isBait(arguments.ItemId):
+            return player.sendError(402)
+        elif not self.patchedItems.blacklistEnabled and arguments.ItemId not in self.patchedItems.patchableClothing:
+            return player.sendError(402)
+        elif self.patchedItems.blacklistEnabled and arguments.ItemId not in self.patchedItems.patchableClothing:
+            return player.sendError(402)
+        else:
             reactor.callFromThread(handleBuyInventory, player, arguments)
 
     @Command("ping")
@@ -219,6 +225,8 @@ class Commands(object):
                 .addErrback(self.handleCommandError)
 
     def ready(self):
+        self.patchedItems = self.server.plugins["PatchedItems"]
+
         self.logger.info("Commands plugin has been loaded!")
 
 class CommandData:
