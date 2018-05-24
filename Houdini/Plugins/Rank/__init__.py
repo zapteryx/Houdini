@@ -1,7 +1,7 @@
 import zope.interface, logging, time
 from datetime import datetime
 from sqlalchemy import Column, Integer, text
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import SQLAlchemyError
 
 from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
@@ -22,13 +22,12 @@ class Rank(object):
         self.server = server
 
         Penguin.Rank = Column(Integer, nullable=False, server_default=text("'1'"))
-
         try:
             self.server.databaseEngine.execute("ALTER TABLE penguin add Rank TINYINT(1) DEFAULT 1;")
 
-        except OperationalError as opError:
-            if "Duplicate column name" not in opError.message:
-                self.logger.warn(opError.message)
+        except SQLAlchemyError as exception:
+            if "Duplicate column name" not in exception.message:
+                self.logger.warn(exception.message)
 
         Handlers.Login += self.adjustMembershipDays
         Handlers.JoinWorld += self.handleJoinWorld
