@@ -1,4 +1,4 @@
 from Houdini.HoudiniFactory import HoudiniFactory
 
-server = HoudiniFactory("houdini.conf", server="Login")
+server = HoudiniFactory(server="Login")
 server.start()
