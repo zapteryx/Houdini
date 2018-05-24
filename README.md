@@ -17,8 +17,5 @@ A Club Penguin private server written in Python for the AS2 protocol.
 ## Installation
 After you've installed the latest version of Python 2, navigate to the Houdini directory and run `pip install -r requirements.txt` in your command prompt or terminal.
 
-### Windows
-If you're on Windows you'll need to download and install MySQL Connector C 6.0.2 from [here](http://dev.mysql.com/downloads/connector/c/6.0.html#downloads) prior to installing the mysql module. __Be sure to check the extra binaries option through the custom installation.__
-
 ## Configuration
-All configuration settings are located in Houdini.conf.
+All configuration settings are located in config.py.
