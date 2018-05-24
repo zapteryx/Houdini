@@ -1,15 +1,17 @@
-{
+import sys
+config = {
 	"Database": {
 		"Address": "localhost",
 		"Username": "root",
 		"Password": "",
-		"Name": "Houdini"
+		"Name": "Houdini",
+		"Driver": "PyMySQL" if sys.platform == "win32" else "MySQLdb"
 	},
 	"Servers": {
 		"Login": {
 			"Address": "127.0.0.1",
 			"Port": 6112,
-			"World": false,
+			"World": False,
 			"Plugins": [
 			    "Example"
 			],
@@ -25,7 +27,7 @@
 		    "Id": "100",
 			"Address": "127.0.0.1",
 			"Port": 9875,
-			"World": true,
+			"World": True,
 			"Capacity": 200,
 			"CacheExpiry": 3600,
 			"Plugins": [
