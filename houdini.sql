@@ -120,7 +120,7 @@ INSERT INTO igloo_inventory (PenguinID, IglooID) VALUES
 CREATE TABLE igloo_likes (
   IglooID int(10) UNSIGNED NOT NULL COMMENT 'Igloo''s unique ID',
   OwnerID int(10) UNSIGNED NOT NULL COMMENT 'Owner''s player ID',
-  PlayerID int(10) UNSIGNED NOT NULL COMMENT 'Liker''s playeer ID',
+  PlayerID int(10) UNSIGNED NOT NULL COMMENT 'Liker''s player ID',
   Count int(11) NOT NULL COMMENT 'Amount of likes',
   Date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of like'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -227,9 +227,8 @@ CREATE TABLE penguin (
   SnowNinjaProgress tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Snow ninja progress',
   NinjaMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'CardJitsu matches won',
   FireMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuFire matches won',
-  WaterMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuSnow matces won',
-  SnowMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuSnow matces won',
-  Rank tinyint(1) DEFAULT '1'
+  WaterMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuWater matches won',
+  SnowMatchesWon mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuSnow matches won',
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguins';
 
 INSERT INTO penguin (ID, Username, Nickname, Approval, `Password`, LoginKey, ConfirmationHash, Email, RegistrationDate, Active, Igloo, LastPaycheck, MinutesPlayed, Moderator, MascotStamp, Coins, Color, Head, Face, Neck, Body, Hand, Feet, Photo, Flag, Permaban, BookModified, BookColor, BookHighlight, BookPattern, BookIcon, AgentStatus, FieldOpStatus, CareerMedals, AgentMedals, LastFieldOp, NinjaRank, NinjaProgress, FireNinjaRank, FireNinjaProgress, WaterNinjaRank, WaterNinjaProgress, NinjaMatchesWon, FireMatchesWon, WaterMatchesWon, Rank) VALUES
