@@ -55,8 +55,6 @@ class Commands(object):
 
         self.server = server
 
-        #self.bot = self.server.plugins["Bot"]
-
         Handlers.Message += self.handleMessage
 
     @staticmethod
@@ -65,34 +63,6 @@ class Commands(object):
             filter_by(Username=playerUsername).scalar()
 
         return player
-
-    def botRandomize(self, player, arguments):
-        if player.user.Moderator:
-            self.logger.debug("Bot randomization command used by {}".format(player.user.Username))
-
-            self.bot.randomizeClothing()
-            self.bot.randomizeName()
-            self.bot.updateString()
-            reactor.callFromThread(self.bot.removeFromRoom, player)
-            reactor.callFromThread(self.bot.addToRoom, player)
-
-    def botAnnounce(self, player, arguments):
-        if player.user.Moderator:
-            announcementMessage = " ".join(arguments)
-
-            for otherPlayer in self.server.players.values():
-                self.bot.sendMessage(otherPlayer, announcementMessage)
-
-    @Command("bot", VariableCommandArgument("Action"))
-    def handleBotCommand(self, player, arguments):
-        if player.user.Moderator:
-            subCommand = arguments.Action[0].lower().title()
-
-            commandMethod = getattr(self, "bot" + subCommand, lambda x, y: "Invalid sub-command.")
-            if not commandMethod:
-                return
-
-            commandMethod(player, arguments.Action[1:])
 
     @Command("kick", VariableCommandArgument("Username"))
     def handleKickCommand(self, player, arguments):
@@ -127,41 +97,40 @@ class Commands(object):
     @Command("jr", CommandArgument("RoomId", int))
     def handleJoinRoomCommand(self, player, arguments):
         if arguments.RoomId in self.server.rooms:
-            player.x = 0
-            player.y = 0
-            player.frame = 1
+            if player.user.Moderator == 1:
+                player.x = 0
+                player.y = 0
+                player.frame = 1
 
-            reactor.callFromThread(player.joinRoom, arguments.RoomId)
-
-            if self.bot.isStationary:
-                reactor.callFromThread(self.bot.addToRoom, player)
+                reactor.callFromThread(player.joinRoom, arguments.RoomId)
+            else:
+                self.logger.debug("Denied %s from joining room %s - not Moderator" % (player.user.Username, arguments.RoomId))
 
     @Command("ac", CommandArgument("Coins", int))
     def handleCoinsCommand(self, player, arguments):
         self.logger.debug("%s is trying to add %d coins" % (player.user.Username, arguments.Coins))
+        if player.user.Moderator == 1:
+            newAmount = max(min(self.coinLimit, player.user.Coins + arguments.Coins), 1)
 
-        newAmount = max(min(self.coinLimit, player.user.Coins + arguments.Coins), 1)
-
-        reactor.callFromThread(player.sendCoins, newAmount)
+            reactor.callFromThread(player.sendCoins, newAmount)
+        else:
+            self.logger.debug("Denied %s from adding %d coins - not Moderator" % (player.user.Username, arguments.Coins))
 
     @Command("ai", CommandArgument("ItemId", int))
     def handleItemCommand(self, player, arguments):
         self.logger.debug("%s is trying to add an item (id: %d)" % (player.user.Username, arguments.ItemId))
 
         if self.server.items.isBait(arguments.ItemId):
+            self.logger.debug("Denied %s from adding item (id: %d) - item is bait" % (player.user.Username, arguments.ItemId))
             return player.sendError(402)
         elif not self.patchedItems.blacklistEnabled and arguments.ItemId not in self.patchedItems.patchableClothing:
+            self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Username, arguments.ItemId))
             return player.sendError(402)
         elif self.patchedItems.blacklistEnabled and arguments.ItemId not in self.patchedItems.patchableClothing:
+            self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Username, arguments.ItemId))
             return player.sendError(402)
         else:
             reactor.callFromThread(handleBuyInventory, player, arguments)
-
-    @Command("ping")
-    def handlePingCommand(self, player, arguments):
-        self.logger.debug("Received ping command from %s" % player.user.Username)
-
-        self.bot.sendMessage(player, "Pong!")
 
     # Do not edit below this line.
     def processCommand(self, messageDetails):
