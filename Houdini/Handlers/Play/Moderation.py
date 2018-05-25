@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 from Houdini.Data.Ban import Ban
+from Houdini.Data.Warnings import Warnings
 
 @Handlers.Handle(XT.BanPlayer)
 def handleBanPlayer(self, data):
@@ -45,6 +46,50 @@ def cheatBan(self, targetPlayer, banDuration=72, comment=""):
         self.session.add(ban)
 
         target.sendXt("ban", "611", targetPlayer, "72")
+        target.transport.loseConnection()
+
+def languageWarn(self, targetPlayer):
+    if targetPlayer in self.server.players:
+        target = self.server.players[targetPlayer]
+
+        dateIssued = datetime.now()
+        dateExpires = dateIssued + timedelta(days=7)
+
+        warn = Warnings(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                      Type=1)
+
+        target.session.add(warn)
+        target.session.commit()
+
+        target.sendXt("moderatormessage", "2", targetPlayer)
+
+def languageBan(self, targetPlayer, banDuration=24, comment="Bad language"):
+    if targetPlayer in self.server.players:
+        target = self.server.players[targetPlayer]
+
+        numberOfActiveLanguageWarns = target.session.query(Warnings).\
+            filter(Warnings.PenguinID == targetPlayer).filter(Warnings.Type == 1).filter(Warnings.Expires >= datetime.now()).count()
+
+        if numberOfActiveLanguageWarns == 0:
+            return languageWarn(self, targetPlayer)
+
+        numberOfBans = target.session.query(Ban).\
+            filter(Ban.PenguinID == targetPlayer).count()
+
+        dateIssued = datetime.now()
+        dateExpires = dateIssued + timedelta(hours=banDuration)
+
+        if numberOfBans >= 3:
+            target.user.Permaban = True
+            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                      ModeratorID=None, Reason=3, Comment=comment)
+        else:
+            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                      ModeratorID=None, Reason=3, Comment=comment)
+
+        target.session.add(ban)
+
+        target.sendXt("ban", "610", None, banDuration, targetPlayer)
         target.transport.loseConnection()
 
 def moderatorKick(self, targetPlayer):

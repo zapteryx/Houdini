@@ -284,6 +284,12 @@ CREATE TABLE stamp (
   Recent tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is recently earned?'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin earned stamps';
 
+CREATE TABLE warning (
+  PenguinID int(10) UNSIGNED NOT NULL COMMENT 'Warned penguin ID',
+  Issued datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Issue date',
+  Expires datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Expiry date',
+  Type tinyint(3) UNSIGNED NOT NULL COMMENT 'Type of warning'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin warn records';
 
 ALTER TABLE activation_key
   ADD PRIMARY KEY (PenguinID,ActivationKey);
@@ -367,6 +373,8 @@ ALTER TABLE redemption_code
 ALTER TABLE stamp
   ADD PRIMARY KEY (PenguinID,Stamp);
 
+ALTER TABLE warning
+  ADD PRIMARY KEY (PenguinID,Issued,Expires);
 
 ALTER TABLE igloo
   MODIFY ID int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique igloo ID', AUTO_INCREMENT=12;
@@ -450,6 +458,9 @@ ALTER TABLE redemption_award
 
 ALTER TABLE stamp
   ADD CONSTRAINT stamp_penguin_ID_fk FOREIGN KEY (PenguinID) REFERENCES penguin (ID) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE warning
+  ADD CONSTRAINT warning_penguin_ID_fk FOREIGN KEY (PenguinID) REFERENCES penguin (ID) ON DELETE CASCADE ON UPDATE CASCADE,
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
