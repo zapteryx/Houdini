@@ -113,7 +113,7 @@ def handleLogin(self, data):
                        self.session.query(IglooLike.IglooID, IglooLike.Date).filter_by(PlayerID=self.user.ID)}
 
     # Triggered after something like a server restart
-    if self.igloo.Locked == 0 and self.user.ID not in self.server.openIgloos:
+    if self.igloo is not None and self.igloo.Locked == 0 and self.user.ID not in self.server.openIgloos:
         externalIglooId = self.user.ID + 1000
         if externalIglooId not in self.server.rooms:
             iglooFieldKeywords = RoomFieldKeywords.copy()

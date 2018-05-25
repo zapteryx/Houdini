@@ -1,5 +1,4 @@
 import importlib
-import json
 import logging
 import os
 import pkgutil
@@ -14,6 +13,7 @@ from twisted.internet import reactor, task
 from twisted.internet.protocol import Factory
 from watchdog.observers import Observer
 
+from config import config
 import Houdini.Handlers as Handlers
 import Houdini.Plugins as Plugins
 from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection, \
@@ -30,6 +30,7 @@ from Houdini.Handlers.Games.Dance import DanceFloor
 from Houdini.Penguin import Penguin
 from Houdini.Spheniscidae import Spheniscidae
 
+
 """Deep debug
 from twisted.python import log
 log.startLogging(sys.stdout)
@@ -37,12 +38,10 @@ log.startLogging(sys.stdout)
 
 class HoudiniFactory(Factory):
 
-    def __init__(self, *kw, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.logger = logging.getLogger("Houdini")
 
-        configFile = kw[0]
-        with open(configFile, "r") as fileHandle:
-            self.config = json.load(fileHandle)
+        self.config = config
 
         self.serverName = kwargs["server"]
         self.server = self.config["Servers"][self.serverName]
@@ -68,10 +67,12 @@ class HoudiniFactory(Factory):
         errorHandler.setLevel(logging.ERROR)
         self.logger.addHandler(errorHandler)
 
-        engineString = "mysql://{0}:{1}@{2}/{3}".format(self.config["Database"]["Username"],
-                                                        self.config["Database"]["Password"],
-                                                        self.config["Database"]["Address"],
-                                                        self.config["Database"]["Name"])
+        engineString = "mysql+{0}://{1}:{2}@{3}/{4}".format(
+            self.config["Database"]["Driver"].lower(),
+            self.config["Database"]["Username"],
+            self.config["Database"]["Password"],
+            self.config["Database"]["Address"],
+            self.config["Database"]["Name"])
 
         self.databaseEngine = create_engine(engineString, pool_recycle=3600, pool_pre_ping=True)
         self.createSession = sessionmaker(bind=self.databaseEngine)
