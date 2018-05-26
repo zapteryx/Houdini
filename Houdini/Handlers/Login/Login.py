@@ -1,12 +1,14 @@
 from Houdini.Handlers import Handlers, XML
 from Houdini.Data.Penguin import Penguin, BuddyList
 from Houdini.Data.Ban import Ban
+from Houdini.Data.Login import Login
+from Houdini.Data.Timer import Timer
 from Houdini.Crypto import Crypto
 from Houdini.Data import retryableTransaction
 
 import bcrypt, time, os
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 @Handlers.Handle(XML.Login)
 @retryableTransaction()
@@ -78,6 +80,34 @@ def handleLogin(self, data):
 
         else:
             self.sendXt("e", 601, hoursLeft)
+            return self.transport.loseConnection()
+
+    loginsToday = self.session.query(Login).filter(Login.PenguinID == user.ID).order_by(Login.Date.desc()).first()
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    timer = self.session.query(Timer).filter(Timer.PenguinID == user.ID).first()
+
+    if timer is not None and timer.TimerActive == 1:
+        # Reset minutes played today to zero if it's their first login of the day
+        if str(today) not in str(loginsToday.Date):
+            minutesToday = 0
+            self.session.query(Timer.MinutesToday).filter(Timer.PenguinID == user.ID).update({"MinutesToday": minutesToday})
+            self.session.commit()
+        else:
+            minutesToday = timer.MinutesToday
+        if timer.TotalDailyTime != 0:
+            if timer.MinutesToday >= timer.TotalDailyTime:
+                dailyHours = int(timer.TotalDailyTime / 60)
+                dailyMins = timer.TotalDailyTime - (dailyHours * 60)
+                total = str(dailyHours) + ":" + str(dailyMins)
+                self.sendXt("e", 910, total)
+                return self.transport.loseConnection()
+
+        if timer.PlayHourStart >= datetime.utcnow().time() or timer.PlayHourEnd <= datetime.utcnow().time():
+            startHours = datetime.strptime(str(timer.PlayHourStart), "%H:%M:%S")
+            endHours = datetime.strptime(str(timer.PlayHourEnd), "%H:%M:%S")
+            offsetStartHours = format(startHours + timedelta(hours=timer.UTCOffset), "%H:%M:%S")
+            offsetEndHours = format(endHours + timedelta(hours=timer.UTCOffset), "%H:%M:%S")
+            self.sendXt("e", 911, offsetStartHours, offsetEndHours)
             return self.transport.loseConnection()
 
     self.logger.info("{} logged in successfully".format(username))

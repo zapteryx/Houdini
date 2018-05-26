@@ -283,6 +283,16 @@ CREATE TABLE stamp (
   Recent tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is recently earned?'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin earned stamps';
 
+CREATE TABLE `timer` (
+  `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Penguin ID',
+  `TimerActive` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Is the timer currently enabled?',
+  `PlayHourStart` time NOT NULL DEFAULT '00:00:00' COMMENT 'Allowed hours of play - start, stored in UTC',
+  `PlayHourEnd` time NOT NULL DEFAULT '23:59:59' COMMENT 'Allowed hours of play - end, stored in UTC',
+  `UTCOffset` tinyint(2) NOT NULL DEFAULT 0 COMMENT 'Offset of the allowed hours from UTC for error messages in local times',
+  `TotalDailyTime` smallint(4) NOT NULL DEFAULT 0 COMMENT 'Total minutes allowed per day',
+  `MinutesToday` smallint(4) NOT NULL DEFAULT 0 COMMENT 'Minutes played today'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Parental timers';
+
 CREATE TABLE warning (
   PenguinID int(10) UNSIGNED NOT NULL COMMENT 'Warned penguin ID',
   Issued datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Issue date',
@@ -372,6 +382,9 @@ ALTER TABLE redemption_code
 ALTER TABLE stamp
   ADD PRIMARY KEY (PenguinID,Stamp);
 
+ALTER TABLE timer
+  ADD PRIMARY KEY (PenguinID);
+
 ALTER TABLE warning
   ADD PRIMARY KEY (PenguinID,Issued,Expires);
 
@@ -457,6 +470,9 @@ ALTER TABLE redemption_award
 
 ALTER TABLE stamp
   ADD CONSTRAINT stamp_penguin_ID_fk FOREIGN KEY (PenguinID) REFERENCES penguin (ID) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE timer
+  ADD CONSTRAINT timer_penguin_ID_fk FOREIGN KEY (PenguinID) REFERENCES penguin (ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE warning
   ADD CONSTRAINT warning_penguin_ID_fk FOREIGN KEY (PenguinID) REFERENCES penguin (ID) ON DELETE CASCADE ON UPDATE CASCADE,

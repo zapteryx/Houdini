@@ -4,6 +4,8 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Crumbs.Room import Room
 from Houdini.Handlers.Play.Stampbook import getStampsString
 from Houdini.Data.Penguin import Penguin
+from Houdini.Data.Timer import Timer
+from Houdini.Handlers.Play.Timer import updateEggTimer, checkHours
 
 RoomFieldKeywords = {
     "Id": None,
@@ -40,7 +42,25 @@ def handleJoinWorld(self, data):
     penguinStandardTime = currentTime * 1000
     serverTimeOffset = 7
 
-    self.sendXt("lp", self.getPlayerString(), self.user.Coins, self.user.SafeChat, 1440,
+    timer = self.session.query(Timer).filter(Timer.PenguinID == self.user.ID).first()
+
+    if timer is not None and timer.TimerActive == 1:
+        if timer.TotalDailyTime != 0:
+            timeLeft = timer.TotalDailyTime - timer.MinutesToday
+            if timer.MinutesToday >= timer.TotalDailyTime:
+                return self.sendErrorAndDisconnect(910)
+            else:
+                updateEggTimer(self, timeLeft + 1, timer.TotalDailyTime)
+        else:
+            timeLeft = 1440
+
+        if str(timer.PlayHourStart) != "00:00:00" and str(timer.PlayHourEnd) != "23:59:59":
+            checkHours(self, timer.PlayHourStart, timer.PlayHourEnd, 1)
+
+    else:
+        timeLeft = 1440
+
+    self.sendXt("lp", self.getPlayerString(), self.user.Coins, self.user.SafeChat, timeLeft,
                 penguinStandardTime, self.age, 0, self.user.MinutesPlayed, None, serverTimeOffset, 1, 0, 211843)
 
     self.sendXt("gps", self.user.ID, getStampsString(self, self.user.ID))
