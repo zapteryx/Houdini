@@ -120,13 +120,16 @@ class Commands(object):
     def handleItemCommand(self, player, arguments):
         self.logger.debug("%s is trying to add an item (id: %d)" % (player.user.Username, arguments.ItemId))
 
-        if self.server.items.isBait(arguments.ItemId):
+        if arguments.ItemId not in self.server.items:
+            self.logger.debug("Item (id: %d) does not exist" % (arguments.ItemId))
+            return player.sendError(402)
+        elif self.server.items.isBait(arguments.ItemId):
             self.logger.debug("Denied %s from adding item (id: %d) - item is bait" % (player.user.Username, arguments.ItemId))
             return player.sendError(402)
-        elif not self.patchedItems.blacklistEnabled and arguments.ItemId not in self.patchedItems.patchableClothing:
+        elif not self.patchedItems.blacklistEnabled and arguments.ItemId not in self.patchedItems.patchedClothing:
             self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Username, arguments.ItemId))
             return player.sendError(402)
-        elif self.patchedItems.blacklistEnabled and arguments.ItemId not in self.patchedItems.patchableClothing:
+        elif self.patchedItems.blacklistEnabled and arguments.ItemId in self.patchedItems.patchedClothing:
             self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Username, arguments.ItemId))
             return player.sendError(402)
         else:
