@@ -26,6 +26,7 @@ def getActiveIgloo(self, penguinId):
         igloo = Igloo(PenguinID=penguinId)
         self.session.add(igloo)
         self.session.commit()
+        self.igloo = igloo
 
         if penguinId in self.server.players:
             playerObject = self.server.players[penguinId]
