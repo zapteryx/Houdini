@@ -28,7 +28,7 @@ from Houdini.Handlers.Games.MatchMaking import MatchMaking
 from Houdini.Handlers.Games.Dance import DanceFloor
 from Houdini.Penguin import Penguin
 from Houdini.Spheniscidae import Spheniscidae
-
+from Houdini.Data import wrap_engine
 
 """Deep debug
 from twisted.python import log
@@ -73,6 +73,8 @@ class HoudiniFactory(Factory):
             self.config["Database"]["Address"],
             self.config["Database"]["Name"])
 
+        self.databaseEngine = wrap_engine(reactor, create_engine(engineString, pool_recycle=3600, pool_pre_ping=True,
+                                                                 pool_size=50, max_overflow=20))
 
         self.redis = redis.StrictRedis()
         self.redis.delete("%s.players" % self.serverName)
