@@ -15,8 +15,11 @@ def handleAddIgnore(self, data):
     if data.PlayerId in self.ignore:
         return
 
-
-    self.ignore[data.PlayerId] = ignoreUser.Username
+    if data.PlayerId in self.server.players:
+        ignoreUser = self.server.players[data.PlayerId]
+        self.ignore[data.PlayerId] = ignoreUser.user.Nickname
+    else:
+        self.ignore[data.PlayerId] = 1
 
 
 @Handlers.Handle(XT.RemoveIgnore)
