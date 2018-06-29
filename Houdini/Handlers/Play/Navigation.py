@@ -4,6 +4,8 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Crumbs.Room import Room
 from Houdini.Handlers.Play.Stampbook import getStampsString
 
+from twisted.internet.defer import inlineCallbacks, returnValue
+
 RoomFieldKeywords = {
     "Id": None,
     "InternalId": None,
@@ -21,16 +23,17 @@ RoomFieldKeywords = {
 
 @Handlers.Handle(XT.JoinWorld)
 @Handlers.Throttle(-1)
+@inlineCallbacks
 def handleJoinWorld(self, data):
     if int(data.ID) != self.user.ID:
-        return self.transport.loseConnection()
+        returnValue(self.transport.loseConnection())
 
     if data.LoginKey == "":
-        return self.transport.loseConnection()
+        returnValue(self.transport.loseConnection())
 
     if data.LoginKey != self.user.LoginKey:
         self.user.LoginKey = ""
-        return self.sendErrorAndDisconnect(101)
+        returnValue(self.sendErrorAndDisconnect(101))
 
     self.sendXt("js", self.user.AgentStatus, 0, self.user.Moderator, self.user.BookModified)
 
@@ -41,7 +44,8 @@ def handleJoinWorld(self, data):
     self.sendXt("lp", self.getPlayerString(), self.user.Coins, 0, 1440,
                 penguinStandardTime, self.age, 0, self.user.MinutesPlayed, None, serverTimeOffset)
 
-    self.sendXt("gps", self.user.ID, getStampsString(self, self.user.ID))
+    stampsString = yield getStampsString(self, self.user.ID)
+    self.sendXt("gps", self.user.ID, stampsString)
 
     self.user.LoginKey = ""
 

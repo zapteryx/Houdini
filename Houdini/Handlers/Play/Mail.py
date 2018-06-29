@@ -3,16 +3,21 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Postcard import Postcard
 from Houdini.Data.Penguin import Penguin, IgnoreList
 
+from twisted.internet.defer import inlineCallbacks, returnValue
+
+from sqlalchemy.sql import select, func
+
 @Handlers.Handle(XT.StartMailEngine)
 @Handlers.Throttle(-1)
+@inlineCallbacks
 def handleStartMailEngine(self, data):
+    postcards = []
     if not self.user.AgentStatus and random.random() < 0.4:
-        epfInvited = self.session.query(Postcard).filter(Postcard.RecipientID == self.user.ID). \
-            filter((Postcard.Type == '112') | (Postcard.Type == '47')).first()
+        epfInvited = yield self.engine.first(Postcard.select(
+            (Postcard.c.RecipientID == self.user.ID) &
+            ((Postcard.c.Type == '112') | (Postcard.c.Type == '47'))))
         if not epfInvited:
-            postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
-                                Details="", Type=112)
-            self.session.add(postcard)
+            postcards.append({"RecipientID": self.user.ID, "SenderID": None, "Details": "", "Type": 112})
 
     lastPaycheck = self.user.LastPaycheck.date()
     if lastPaycheck == 0:
@@ -25,101 +30,98 @@ def handleStartMailEngine(self, data):
         lastPaycheck = lastPaycheck.replace(day=1)
         sendDate = lastPaycheck + datetime.timedelta(days=1)
         if 428 in self.inventory:
-            postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
-                                Details="", SendDate=sendDate, Type=172)
-            self.session.add(postcard)
+            postcards.append({"RecipientID": self.user.ID, "SenderID": None, "Details": "",
+                              "SendDate": sendDate, "Type": 172})
             self.user.Coins += 250
         if self.user.AgentStatus:
-            postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
-                                Details="", SendDate=sendDate, Type=184)
-            self.session.add(postcard)
+            postcards.append({"RecipientID": self.user.ID, "SenderID": None, "Details": "",
+                              "SendDate": sendDate, "Type": 184})
             self.user.Coins += 350
     self.user.LastPaycheck = lastPaycheck
 
-    totalMail = self.session.query(Postcard). \
-        filter(Postcard.RecipientID == self.user.ID).count()
-    unreadMail = self.session.query(Postcard). \
-        filter(Postcard.RecipientID == self.user.ID). \
-        filter(Postcard.HasRead == 0).count()
+    if postcards:
+        yield self.engine.execute(Postcard.insert(), postcards)
+
+    totalMail = yield self.engine.scalar(select([func.count()]).select_from(
+        Postcard).where(Postcard.c.RecipientID == self.user.ID))
+    unreadMail = yield self.engine.scalar(select([func.count()]).select_from(Postcard).where(
+        (Postcard.c.RecipientID == self.user.ID) & (Postcard.c.HasRead == 0)))
 
     self.sendXt("mst", unreadMail, totalMail)
 
 
 @Handlers.Handle(XT.GetMail)
 @Handlers.Throttle(-1)
+@inlineCallbacks
 def handleGetMail(self, data):
-    mailbox = self.session.query(Postcard, Penguin.Nickname) \
-        .join(Penguin, Penguin.ID == Postcard.SenderID, isouter=True) \
-        .filter(Postcard.RecipientID == self.user.ID)\
-        .order_by(Postcard.SendDate.desc())
+    mailbox = yield self.engine.fetchall(select([Postcard, Penguin.c.Nickname]).select_from(
+        Postcard.join(Penguin, Penguin.c.ID == Postcard.c.SenderID, isouter=True)).where(
+        Postcard.c.RecipientID == self.user.ID).order_by(Postcard.c.SendDate.desc()))
+
     postcardArray = []
-    for postcard, penguinName in mailbox:
-        penguinName, senderId = ("sys", 0) if postcard.SenderID is None else (penguinName, postcard.SenderID)
-        unixSendDate = int(time.mktime(postcard.SendDate.timetuple()))
+    for postcardId, senderId, recipientId, type, sendDate, details, hasRead, penguinName in mailbox:
+        penguinName, senderId = ("sys", 0) if senderId is None else (penguinName, senderId)
+        unixSendDate = int(time.mktime(sendDate.timetuple()))
         postcardArray.append("|".join([penguinName, str(senderId),
-                                       str(postcard.Type), postcard.Details, str(unixSendDate),
-                                       str(postcard.ID), str(int(postcard.HasRead))]))
+                                       str(type), details, str(unixSendDate),
+                                       str(postcardId), str(int(hasRead))]))
     postcardString = "%".join(postcardArray)
     self.sendXt("mg", postcardString)
-    self.session.commit()
 
 
 @Handlers.Handle(XT.SendMail)
 @Handlers.Throttle(2)
+@inlineCallbacks
 def handleSendMail(self, data):
     if self.user.Coins < 10:
         self.sendXt("ms", self.user.Coins, 2)
         self.logger.info("%d tried to send postcard with insufficient funds.", self.user.ID)
-        return
+        returnValue(False)
     if data.RecipientId not in self.server.players:
-        Ignored = self.session.query(IgnoreList) \
-            .filter_by(PenguinID=data.RecipientId, IgnoreID=self.user.ID).scalar()
-        if Ignored is not None:
-            return self.sendXt("ms", self.user.Coins, 1)
-        player = self.session.query(Penguin).filter_by(ID=data.RecipientId).scalar()
+        ignored = yield self.engine.scalar(IgnoreList.select(
+            (IgnoreList.c.PenguinID == data.RecipientId) & (IgnoreList.c.IgnoreID == self.user.ID)))
+        if ignored is not None:
+            returnValue(self.sendXt("ms", self.user.Coins, 1))
+        player = yield self.engine.scalar(Penguin.select(Penguin.c.ID == data.RecipientId))
         if player is None:
-            return
+            returnValue(False)
     elif self.user.ID in self.server.players[data.RecipientId].ignore:
-        return self.sendXt("ms", self.user.Coins, 1)
-    recipientMailCount = self.session.query(Postcard). \
-        filter(Postcard.RecipientID == data.RecipientId).count()
+        returnValue(self.sendXt("ms", self.user.Coins, 1))
+    recipientMailCount = yield self.engine.scalar(select([func.count()]).select_from(
+        Postcard).where(Postcard.c.RecipientID == data.RecipientId))
     if recipientMailCount >= 100:
         self.sendXt("ms", self.user.Coins, 0)
     self.user.Coins -= 10
     currentTimestamp = int(time.time())
-    postcard = Postcard(RecipientID=data.RecipientId, SenderID=self.user.ID,
+    result = yield self.engine.execute(Postcard.insert(), RecipientID=data.RecipientId, SenderID=self.user.ID,
                         Details="", Type=data.PostcardId)
-    self.session.add(postcard)
-    self.session.commit()
     self.sendXt("ms", self.user.Coins, 1)
     if data.RecipientId in self.server.players:
         recipientObject = self.server.players[data.RecipientId]
         recipientObject.sendXt("mr", self.user.Username, self.user.ID, data.PostcardId,
-                               "", currentTimestamp, postcard.ID)
+                               "", currentTimestamp, result.inserted_primary_key[0])
     self.logger.info("%d sent %d a postcard (%d).", self.user.ID, data.RecipientId,
                      data.PostcardId)
 
 
 @Handlers.Handle(XT.MailChecked)
 def handleMailChecked(self, data):
-    self.session.query(Postcard). \
-        filter(Postcard.RecipientID == self.user.ID). \
-        update({"HasRead": True})
+    self.engine.execute(Postcard.update().where(
+        Postcard.c.RecipientID == self.user.ID).values(HasRead=True))
 
 
 @Handlers.Handle(XT.DeleteMail)
 def handleDeleteMail(self, data):
-    self.session.query(Postcard). \
-        filter(Postcard.RecipientID == self.user.ID). \
-        filter(Postcard.ID == data.PostcardId).delete()
+    self.engine.execute(Postcard.delete().where(
+        (Postcard.c.RecipientID == self.user.ID) & (Postcard.c.ID == data.PostcardId)))
 
 
 @Handlers.Handle(XT.DeleteMailFromUser)
+@inlineCallbacks
 def handleDeleteMailFromUser(self, data):
     senderId = None if data.SenderId == 0 else data.SenderId
-    self.session.query(Postcard). \
-        filter(Postcard.RecipientID == self.user.ID). \
-        filter(Postcard.SenderID == senderId).delete()
-    totalMail = self.session.query(Postcard). \
-        filter(Postcard.RecipientID == self.user.ID).count()
+    self.engine.execute(Postcard.delete().where(
+        (Postcard.c.RecipientID == self.user.ID) & (Postcard.c.SenderID == senderId)))
+    totalMail = yield self.engine.scalar(select([func.count()]).select_from(
+        Postcard).where(Postcard.c.RecipientID == self.user.ID))
     self.sendXt("mdp", totalMail)

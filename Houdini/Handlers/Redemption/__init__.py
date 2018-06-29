@@ -3,6 +3,9 @@ from datetime import datetime
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Redemption import RedemptionCode, RedemptionAward, PenguinRedemption
 
+from twisted.internet.defer import inlineCallbacks, returnValue
+
+from sqlalchemy.sql import select
 
 @Handlers.Handle(XT.JoinRedemption)
 @Handlers.Throttle(-1)
@@ -22,21 +25,26 @@ def handleJoinRedemption(self, data):
 
 @Handlers.Handle(XT.SendCode)
 @Handlers.Throttle(2)
+@inlineCallbacks
 def handleSendCode(self, data):
+    code = yield self.engine.first(RedemptionCode.select(RedemptionCode.c.Code == data.Code))
 
     if code is None:
-        return self.sendError(720)
+        returnValue(self.sendError(720))
+    redeemed = yield self.engine.scalar(PenguinRedemption.select((PenguinRedemption.c.PenguinID == self.user.ID)
+                                                                 & (PenguinRedemption.c.CodeID == code.ID)))
     if redeemed is not None:
-        return self.sendError(721)
+        returnValue(self.sendError(721))
 
     if code.Expires is not None and code.Expires < datetime.now():
-        return self.sendError(726)
+        returnValue(self.sendError(726))
 
+    awards = yield self.engine.fetchall(select([RedemptionAward.c.Award]).where(RedemptionAward.c.CodeID == code.ID))
     awardIds = [awardId for awardId, in awards]
 
     if code.Type == "GOLDEN":
-        return self.sendXt("rsc", "GOLDEN", self.user.NinjaRank, self.user.FireNinjaRank, self.user.WaterNinjaRank,
-                           int(self.user.FireNinjaRank > 0), int(self.user.WaterNinjaRank > 0))
+        returnValue(self.sendXt("rsc", "GOLDEN", self.user.NinjaRank, self.user.FireNinjaRank, self.user.WaterNinjaRank,
+                           int(self.user.FireNinjaRank > 0), int(self.user.WaterNinjaRank > 0)))
 
     if code.Type == "CARD":
         self.addCards(*awardIds)
@@ -44,24 +52,30 @@ def handleSendCode(self, data):
         for itemId in awardIds:
             self.addItem(itemId)
 
+    self.engine.execute(PenguinRedemption.insert(), PenguinID=self.user.ID, CodeID=code.ID)
     self.user.Coins += code.Coins
     self.sendXt("rsc", code.Type, ",".join(map(str, awardIds)), code.Coins)
 
 
 @Handlers.Handle(XT.SendGoldenChoice)
 @Handlers.Throttle(2)
+@inlineCallbacks
 def handleSendGoldenChoice(self, data):
+    awards = yield self.engine.fetchall(select[RedemptionCode.c.Code, RedemptionAward.c.Award].select_from(
+        RedemptionCode.join(RedemptionAward, RedemptionAward.c.CodeID == RedemptionCode.c.ID))
+                                        .where(RedemptionCode.c.Code == data.Code))
 
     if awards is None:
-        return self.transport.loseConnection()
+        returnValue(self.transport.loseConnection())
     if awards.count() < 6:
-        return self.transport.loseConnection()
+        returnValue(self.transport.loseConnection())
 
     cardIds = [awardId for code, awardId in awards]
 
+    redeemed = yield self.engine.scalar(PenguinRedemption.select(PenguinRedemption.c.CodeID == code.ID))
 
     if redeemed is not None:
-        return self.transport.loseConnection()
+        returnValue(self.transport.loseConnection())
 
     if data.Choice == 1:
         cardIds = cardIds[:4]
@@ -71,3 +85,4 @@ def handleSendGoldenChoice(self, data):
         self.sendXt("rsgc", ",".join(map(str, cardIds[:4])) + "|" + ",".join(map(str, cardIds[-2:])))
     self.addCards(*cardIds)
 
+    self.engine.execute(PenguinRedemption.insert(), PenguinID=self.user.ID, CodeID=code.ID)

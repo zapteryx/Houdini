@@ -1,8 +1,10 @@
-import time, random
+import random
 
 from Houdini.Handlers import Handlers, XT
-from Houdini.Data.Puffle import Puffle
+from Houdini.Data.Puffle import Puffle, PuffleRowProxy
 from Houdini.Data.Postcard import Postcard
+
+from twisted.internet.defer import inlineCallbacks, returnValue
 
 puffleStatistics = {
     0: (100, 100, 100),
@@ -28,7 +30,9 @@ runPostcards = {
     8: 109
 }
 
+@inlineCallbacks
 def decreaseStats(server):
+    wildPuffleIds = []
     for (playerId, player) in server.players.items():
         if player.room.Id == player.user.ID + 1000:
             continue
@@ -47,10 +51,16 @@ def decreaseStats(server):
                 runPostcard = runPostcards[puffle.Type]
                 player.receiveSystemPostcard(runPostcard, puffle.Name)
                 del player.puffles[puffle.ID]
+                wildPuffleIds.append(puffle.ID)
             elif puffle.Hunger < 10:
+                result = yield server.databaseEngine.execute(
+                    Postcard.select((Postcard.c.RecipientID == player.user.ID) & (Postcard.c.Type == 110) &
+                                    (Postcard.c.Details == puffle.Name)))
+                notificationAware = yield result.scalar()
                 if not notificationAware:
                     player.receiveSystemPostcard(110, puffle.Name)
         handleGetMyPlayerPuffles(player, [])
+    server.databaseEngine.execute(Puffle.delete().where(Puffle.c.ID.in_(wildPuffleIds)))
 
 def getStatistics(puffleType, puffleHealth, puffleHunger, puffleRest):
     maxHealth, maxHunger, maxRest = puffleStatistics[puffleType]
@@ -60,7 +70,9 @@ def getStatistics(puffleType, puffleHealth, puffleHunger, puffleRest):
     return "{}|{}|{}".format(puffleHealth, puffleHunger, puffleRest)
 
 @Handlers.Handle(XT.GetPlayerPuffles)
+@inlineCallbacks
 def handleGetPuffles(self, data):
+    ownedPuffles = yield self.engine.fetchall(Puffle.select(Puffle.c.PenguinID == data.PlayerId))
     playerPuffles = ["{}|{}|{}|{}|100|100|100|0|0|0|{}".format(puffle.ID, puffle.Name, puffle.Type,
                                                                getStatistics(puffle.Type, puffle.Health,
                                                                              puffle.Hunger, puffle.Rest), puffle.Walking)
@@ -82,24 +94,29 @@ def handleGetMyPlayerPuffles(self, data):
     self.sendXt("pgu", myPufflesString)
 
 @Handlers.Handle(XT.AdoptPuffle)
+@inlineCallbacks
 def handleSendAdoptPuffle(self, data):
     if not data.TypeId in puffleStatistics:
-        return self.transport.loseConnection()
+        returnValue(self.transport.loseConnection())
 
     if not 16 > len(data.Name) >= 3:
-        return self.sendError(441)
+        returnValue(self.sendError(441))
 
     if self.user.Coins < 800:
-        return self.sendError(401)
+        returnValue(self.sendError(401))
 
     if len(self.puffles) >= 19:
-        return self.sendError(440)
+        returnValue(self.sendError(440))
 
     self.user.Coins -= 800
 
     maxHealth, maxHunger, maxRest = puffleStatistics[data.TypeId]
 
-    self.puffles[puffle.ID] = puffle
+    result = yield self.engine.execute(Puffle.insert(),
+        PenguinID=self.user.ID, Name=data.Name, Type=data.TypeId,
+        Health=maxHealth, Hunger=maxHunger, Rest=maxRest)
+    puffle = yield self.engine.first(Puffle.select(Puffle.c.ID == result.inserted_primary_key[0]))
+    self.puffles[puffle.ID] = PuffleRowProxy(self.engine, puffle)
 
     puffleString = "{}|{}|{}|100|100|100|100|100|100".format(puffle.ID, data.Name, data.TypeId)
     self.sendXt("pn", self.user.Coins, puffleString)

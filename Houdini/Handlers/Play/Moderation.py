@@ -4,6 +4,10 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 from Houdini.Data.Ban import Ban
 
+from sqlalchemy.sql import select, func
+
+from twisted.internet.defer import inlineCallbacks
+
 @Handlers.Handle(XT.BanPlayer)
 def handleBanPlayer(self, data):
     if self.user.Moderator:
@@ -26,23 +30,20 @@ def cheatKick(self, targetPlayer):
     if targetPlayer in self.server.players:
         self.server.players[targetPlayer].sendErrorAndDisconnect(800)
 
+@inlineCallbacks
 def cheatBan(self, targetPlayer, banDuration=24, comment=""):
     if targetPlayer in self.server.players:
         target = self.server.players[targetPlayer]
-        numberOfBans = self.session.query(Ban).\
-            filter(Ban.PenguinID == targetPlayer).count()
+        result = yield self.engine.execute(select([func.count()]).select_from(
+            Ban).where(Ban.c.PenguinID == targetPlayer))
+        numberOfBans = yield result.scalar()
 
         dateIssued = datetime.now()
         dateExpires = dateIssued + timedelta(hours=banDuration)
-        if numberOfBans < 3:
-            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
-                      ModeratorID=None, Reason=1, Comment=comment)
-        else:
+        self.engine.execute(Ban.insert(), PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                  ModeratorID=None, Reason=1, Comment=comment)
+        if numberOfBans >= 3:
             target.user.Permaban = True
-            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
-                      ModeratorID=None, Reason=1, Comment=comment)
-
-        self.session.add(ban)
 
         target.sendXt("e", 611, comment)
         target.transport.loseConnection()
@@ -56,29 +57,25 @@ def moderatorKick(self, targetPlayer):
                     player.sendXt("ma", "k", targetPlayer, target.user.Username)
             target.sendErrorAndDisconnect(5)
 
+@inlineCallbacks
 def moderatorBan(self, targetPlayer, banDuration=24, comment=""):
-    target = self.session.query(Penguin).\
-        filter_by(ID=targetPlayer).first()
+    target = yield self.engine.first(Penguin.select(Penguin.c.ID == targetPlayer))
 
     if not target.Moderator:
         for (playerId, player) in self.server.players.items():
             if player.user.Moderator:
                 player.sendXt("ma", "b", targetPlayer, target.Username)
 
-        numberOfBans = self.session.query(Ban).\
-            filter(Ban.PenguinID == targetPlayer).count()
+        result = yield self.engine.execute(select([func.count()]).select_from(
+            Ban).where(Ban.c.PenguinID == targetPlayer))
+        numberOfBans = yield result.scalar()
 
         dateIssued = datetime.now()
         dateExpires = dateIssued + timedelta(hours=banDuration)
-        if numberOfBans < 3:
-            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
-                      ModeratorID=self.user.ID, Reason=2, Comment=comment)
-        else:
+        self.engine.execute(Ban.insert(), PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                  ModeratorID=self.user.ID, Reason=2, Comment=comment)
+        if numberOfBans >= 3:
             target.Permaban = True
-            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
-                      ModeratorID=self.user.ID, Reason=2, Comment=comment)
-
-        self.session.add(ban)
 
         if targetPlayer in self.server.players:
             self.server.players[targetPlayer].sendXt("e", 610, comment)

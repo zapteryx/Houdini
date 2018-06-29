@@ -1,7 +1,8 @@
 from Houdini import Cache
 from Houdini.Handlers import Handlers, XT
-from Houdini.Data.Igloo import Igloo, IglooFurniture
+from Houdini.Data.Igloo import Igloo, IglooFurniture, IglooRowProxy
 
+from twisted.internet.defer import inlineCallbacks, returnValue
 
 @Cache("houdini.igloo")
 def getIglooString(self, penguinId, iglooString = None):
@@ -11,8 +12,16 @@ def getIglooString(self, penguinId, iglooString = None):
 
 @inlineCallbacks
 def createIglooString(self, penguinId):
-    if igloo is None:
+    igloo = self.server.players[penguinId].igloo if penguinId in self.server.players else \
+        (yield self.engine.first(Igloo.select(Igloo.c.PenguinID == penguinId)))
 
+    if igloo is None:
+        yield self.engine.execute(Igloo.insert(), PenguinID=penguinId)
+        igloo = yield self.engine.first(Igloo.select(Igloo.c.PenguinID == penguinId))
+        if penguinId in self.server.players:
+            self.server.players[penguinId].igloo = IglooRowProxy(self.engine, igloo)
+
+    iglooFurniture = yield self.engine.fetchall(IglooFurniture.select(IglooFurniture.c.IglooID == igloo.ID))
     furnitureString = ",".join(["{}|{}|{}|{}|{}".format(furniture.FurnitureID, furniture.X, furniture.Y,
                                                         furniture.Rotation, furniture.Frame)
                                 for furniture in iglooFurniture])
@@ -105,10 +114,13 @@ def handleBuyFurniture(self, data):
 
 @Handlers.Handle(XT.SaveIglooFurniture)
 @Handlers.Throttle()
+@inlineCallbacks
 def handleSaveIglooFurniture(self, data):
     furnitureTracker = {}
+    yield self.engine.execute(IglooFurniture.delete().where(IglooFurniture.c.IglooID == self.igloo.ID))
     if len(data.FurnitureList) > 100:
         return
+    iglooFurniture = []
     for furnitureItem in set(data.FurnitureList[0:100]):
         itemArray = furnitureItem.split("|")
         if len(itemArray) > 5:
@@ -126,6 +138,11 @@ def handleSaveIglooFurniture(self, data):
         if not (0 <= int(posX) <= 700 and 0 <= int(posY) <= 700
                 and 1 <= int(rotation) <= 8 and 1 <= int(frame) <= 10):
             return
+        iglooFurniture.append({"IglooID":self.igloo.ID, "FurnitureID":itemId, "X":posX, "Y":posY,
+                               "Rotation":rotation, "Frame":frame})
+    if iglooFurniture:
+        yield self.engine.execute(IglooFurniture.insert(), iglooFurniture)
+    getIglooString.invalidate(self, self.user.ID)
 
 
 @Handlers.Handle(XT.LoadPlayerIglooList)

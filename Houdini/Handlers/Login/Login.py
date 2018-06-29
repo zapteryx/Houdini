@@ -7,10 +7,16 @@ import bcrypt, time
 
 from datetime import datetime
 
+from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet import threads
+
+from sqlalchemy.sql import select
+
 @Handlers.Handle(XML.Login)
+@inlineCallbacks
 def handleLogin(self, data):
     if self.randomKey is None:
-        return self.transport.loseConnection()
+        returnValue(self.transport.loseConnection())
 
     if not hasattr(self.server, "loginAttempts"):
         self.server.loginAttempts = {}
@@ -21,13 +27,16 @@ def handleLogin(self, data):
 
     self.logger.info("{0} is attempting to login..".format(username))
 
+    user = yield self.engine.first(Penguin.select(Penguin.c.Username == username))
 
     if user is None:
-        return self.sendErrorAndDisconnect(100)
+        returnValue(self.sendErrorAndDisconnect(100))
 
     ipAddr = self.transport.getPeer().host
 
     passwordCorrect = yield threads.deferToThread(bcrypt.checkpw, password, user.Password)
+
+    if not passwordCorrect:
         self.logger.info("{} failed to login.".format(username))
 
         if ipAddr in self.server.loginAttempts:
@@ -39,12 +48,12 @@ def handleLogin(self, data):
             self.server.loginAttempts[ipAddr] = [loginTimestamp, failureCount]
 
             if failureCount >= self.server.server["LoginFailureLimit"]:
-                return self.sendErrorAndDisconnect(150)
+                returnValue(self.sendErrorAndDisconnect(150))
 
         else:
             self.server.loginAttempts[ipAddr] = [loginTimestamp, 1]
 
-        return self.sendErrorAndDisconnect(101)
+        returnValue(self.sendErrorAndDisconnect(101))
 
     if ipAddr in self.server.loginAttempts:
         previousAttempt, failureCount = self.server.loginAttempts[ipAddr]
@@ -53,26 +62,27 @@ def handleLogin(self, data):
         timerSurpassed = (loginTimestamp - previousAttempt) > self.server.server["LoginFailureTimer"]
 
         if maxAttemptsExceeded and not timerSurpassed:
-            return self.sendErrorAndDisconnect(150)
+            returnValue(self.sendErrorAndDisconnect(150))
         else:
             del self.server.loginAttempts[ipAddr]
 
     if not user.Active:
-        return self.sendErrorAndDisconnect(900)
+        returnValue(self.sendErrorAndDisconnect(900))
 
     if user.Permaban:
-        return self.sendErrorAndDisconnect(603)
+        returnValue(self.sendErrorAndDisconnect(603))
 
+    activeBan = yield self.engine.first(Ban.select((Ban.c.PenguinID == user.ID) & (Ban.c.Expires >= datetime.now())))
 
     if activeBan is not None:
         hoursLeft = round((activeBan.Expires - datetime.now()).total_seconds() / 60 / 60)
 
         if hoursLeft == 0:
-            return self.sendErrorAndDisconnect(602)
+            returnValue(self.sendErrorAndDisconnect(602))
 
         else:
             self.sendXt("e", 601, hoursLeft)
-            return self.transport.loseConnection()
+            returnValue(self.transport.loseConnection())
 
     self.logger.info("{} logged in successfully".format(username))
 
@@ -80,8 +90,7 @@ def handleLogin(self, data):
     loginKey = Crypto.hash(randomKey[::-1])
 
     self.user = user
-    self.user.LoginKey = loginKey
-
+    self.engine.execute(Penguin.update(Penguin.c.ID == user.ID).values(LoginKey=loginKey))
 
     buddyWorlds = []
     worldPopulations = []
@@ -104,6 +113,8 @@ def handleLogin(self, data):
             if not len(serverPlayers) > 0:
                 self.logger.debug("Skipping buddy iteration for %s " % serverName)
                 continue
+
+            buddies = yield self.engine.fetchall(select([BuddyList.c.BuddyID]).where(BuddyList.c.PenguinID == self.user.ID))
 
             for buddyId, in buddies:
                 if str(buddyId) in serverPlayers:

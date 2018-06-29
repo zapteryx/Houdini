@@ -3,6 +3,10 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Handlers.Play.Moderation import cheatBan
 from Houdini.Data.Penguin import Inventory
 
+from twisted.internet.defer import inlineCallbacks, returnValue
+
+from sqlalchemy.sql import select
+
 cardStarterDeckId = 821
 fireBoosterDeckId = 8006
 waterBoosterDeckId = 8010
@@ -79,6 +83,8 @@ def getAwardsString(self, penguinId, inventory = None):
 
 @inlineCallbacks
 def createItemString(self, penguinId, cacheBuilder):
+    inventory = [itemId for itemId, in (yield self.engine.fetchall(select(
+        [Inventory.c.ItemID]).where(Inventory.c.PenguinID == penguinId)))]
 
     cacheBuilder.invalidate(self, penguinId)
     cachedItemString = cacheBuilder(self, penguinId, inventory)

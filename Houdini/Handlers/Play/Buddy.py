@@ -48,6 +48,9 @@ def handleBuddyAccept(self, data):
 
     buddyBuddies[self.user.ID] = self.user.Username
 
+    self.engine.execute(BuddyList.insert(),
+                        { "PenguinID": self.user.ID, "BuddyID": data.Id },
+                        { "PenguinID": data.Id, "BuddyID": self.user.ID })
 
     del self.buddyRequests[data.Id]
 
@@ -67,6 +70,9 @@ def handleRemoveBuddy(self, data):
 
     del self.buddies[data.Id]
 
+    self.engine.execute(BuddyList.delete().where(
+        ((BuddyList.c.PenguinID == self.user.ID) & (BuddyList.c.BuddyID == data.Id)) |
+        ((BuddyList.c.PenguinID == data.Id) & (BuddyList.c.BuddyID == self.user.ID))))
 
     try:
         buddyObject = self.server.players[data.Id]

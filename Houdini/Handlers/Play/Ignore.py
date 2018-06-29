@@ -21,6 +21,7 @@ def handleAddIgnore(self, data):
     else:
         self.ignore[data.PlayerId] = 1
 
+    self.engine.execute(IgnoreList.insert(), PenguinID=self.user.ID, IgnoreID=data.PlayerId)
 
 @Handlers.Handle(XT.RemoveIgnore)
 def handleRemoveIgnore(self, data):
@@ -29,3 +30,5 @@ def handleRemoveIgnore(self, data):
 
     del self.ignore[data.PlayerId]
 
+    self.engine.execute(IgnoreList.delete().where(
+        (Penguin.c.PenguinID == self.user.ID) & (Penguin.c.IgnoreID == data.PlayerId)))

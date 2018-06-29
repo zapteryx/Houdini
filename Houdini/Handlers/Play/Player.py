@@ -2,6 +2,11 @@ from Houdini import Cache
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 
+from twisted.internet.defer import inlineCallbacks, returnValue
+
+from sqlalchemy.sql import select
+
+
 @Cache("houdini.player")
 def getPlayerString(self, penguinId, playerTuple = None):
     if penguinId in self.server.players:

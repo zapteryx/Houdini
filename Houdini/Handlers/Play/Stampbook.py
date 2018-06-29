@@ -3,6 +3,9 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 from Houdini.Data.Stamp import Stamp, CoverStamp
 
+from twisted.internet.defer import inlineCallbacks, returnValue
+
+from sqlalchemy.sql import select
 
 @Cache("houdini.book")
 def getBookCoverString(self, penguinId, coverString = None):
@@ -24,6 +27,7 @@ def createBookCoverString(self, penguinId):
         returnValue(str())
 
     bookColor, bookHighlight, bookPattern, bookIcon = coverDetails
+    coverStamps = yield self.engine.fetchall(CoverStamp.select(CoverStamp.c.PenguinID == penguinId))
 
     stampsString = "%".join(["{}|{}|{}|{}|{}|{}".format(stamp.Type, stamp.Stamp, stamp.X, stamp.Y, stamp.Rotation,
                                                        stamp.Depth) for stamp in coverStamps])
@@ -85,14 +89,18 @@ def handleGetStamps(self, data):
 def handleGetRecentStamps(self, data):
     self.sendXt("gmres", "|".join(map(str, self.recentStamps)))
     self.recentStamps = []
+    self.engine.execute(Stamp.update().where(
+        (Stamp.c.PenguinID == self.user.ID) & (Stamp.c.Recent == 1)).values(Recent=False))
 
 
 @Handlers.Handle(XT.UpdateBookCover)
 @Handlers.Throttle()
+@inlineCallbacks
 def handleUpdateBookCover(self, data):
     if not 4 <= len(data.StampCover) <= 10:
         return
 
+    yield self.engine.execute(CoverStamp.delete().where(CoverStamp.c.PenguinID == self.user.ID))
     bookCover = data.StampCover[0:4]
     color, highlight, pattern, icon = bookCover
     if not(1 <= int(color) <= 6 and 1 <= int(highlight) <= 18 and
@@ -101,6 +109,7 @@ def handleUpdateBookCover(self, data):
 
     stampTracker = []
     inventoryTracker = []
+    coverStamps = []
     for stamp in data.StampCover[4:10]:
         stampArray = stamp.split("|")
         if len(stampArray) != 6:
@@ -120,7 +129,11 @@ def handleUpdateBookCover(self, data):
         if not (0 <= stampType <= 2 and 0 <= posX <= 600 and 0 <= posY <= 600 and
                 0 <= rotation <= 360 and 0 <= depth <= 100):
             return
+        coverStamps.append({"PenguinID":self.user.ID, "Stamp":stampId, "Type":stampType, "X":posX,
+                            "Y":posY, "Rotation":rotation, "Depth":depth})
 
+    if coverStamps:
+        yield self.engine.execute(CoverStamp.insert(), coverStamps)
 
     self.user.BookColor = color
     self.user.BookHighlight = highlight
