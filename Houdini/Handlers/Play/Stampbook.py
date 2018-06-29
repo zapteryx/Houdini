@@ -1,27 +1,53 @@
+from Houdini import Cache
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 from Houdini.Data.Stamp import Stamp, CoverStamp
 
 
+@Cache("houdini.book")
+def getBookCoverString(self, penguinId, coverString = None):
+    if coverString is not None:
+        return coverString
+    return createBookCoverString(self, penguinId)
+
+@inlineCallbacks
+def createBookCoverString(self, penguinId):
     if penguinId in self.server.players:
         player = self.server.players[penguinId]
         coverDetails = (player.user.BookColor, player.user.BookHighlight, player.user.BookPattern, player.user.BookIcon)
     else:
+        coverDetails = yield self.engine.first(select([Penguin.c.BookColor, Penguin.c.BookHighlight,
+                                                        Penguin.c.BookPattern, Penguin.c.BookIcon])
+                                   .where(Penguin.c.ID == penguinId))
 
     if coverDetails is None:
-        return str()
+        returnValue(str())
 
     bookColor, bookHighlight, bookPattern, bookIcon = coverDetails
 
-    coverString = "%".join(["{}|{}|{}|{}|{}|{}".format(stamp.Type, stamp.Stamp, stamp.X, stamp.Y, stamp.Rotation,
+    stampsString = "%".join(["{}|{}|{}|{}|{}|{}".format(stamp.Type, stamp.Stamp, stamp.X, stamp.Y, stamp.Rotation,
                                                        stamp.Depth) for stamp in coverStamps])
 
-    return "%".join(map(str, [bookColor, bookHighlight, bookPattern, bookIcon, coverString]))
+    coverString =  "%".join(map(str, [bookColor, bookHighlight, bookPattern, bookIcon, stampsString]))
+    getBookCoverString.invalidate(self, penguinId)
+    cachedCoverString = getBookCoverString(self, penguinId, coverString)
+    returnValue(cachedCoverString)
 
+@Cache("houdini.stamps")
+def getStampsString(self, penguinId, stamps = None):
+    if penguinId in self.server.players:
+        stamps = self.server.players[penguinId].stamps
+    if stamps is not None:
+        return "|".join(map(str, stamps))
+    return createStampsString(self, penguinId)
 
-    stamps = self.stamps if penguinId == self.user.ID else \
-        [stampId for stampId, in self.session.query(Stamp.Stamp).filter_by(PenguinID=penguinId)]
-    return "|".join(map(str, stamps))
+@inlineCallbacks
+def createStampsString(self, penguinId):
+    stamps = [stampId for stampId, in (yield self.engine.fetchall(select([Stamp.c.Stamp])
+                                                      .where(Stamp.c.PenguinID == penguinId)))]
+    getStampsString.invalidate(self, penguinId)
+    cachedStampsString = getStampsString(self, penguinId, stamps)
+    returnValue(cachedStampsString)
 
 
 def giveMascotStamp(self):
@@ -42,13 +68,17 @@ def handleStampAdd(self, data):
 
 
 @Handlers.Handle(XT.GetBookCover)
+@inlineCallbacks
 def handleGetBookCover(self, data):
-    self.sendXt("gsbcd", getBookCoverString(self, data.PlayerId))
+    coverString = yield getBookCoverString(self, data.PlayerId)
+    self.sendXt("gsbcd", coverString)
 
 
 @Handlers.Handle(XT.GetStamps)
+@inlineCallbacks
 def handleGetStamps(self, data):
-    self.sendXt("gps", data.PlayerId, getStampsString(self, data.PlayerId))
+    stampsString = yield getStampsString(self, data.PlayerId)
+    self.sendXt("gps", data.PlayerId, stampsString)
 
 
 @Handlers.Handle(XT.GetRecentStamps)
@@ -98,3 +128,4 @@ def handleUpdateBookCover(self, data):
     self.user.BookIcon = icon
     self.user.BookModified = 1
 
+    getBookCoverString.invalidate(self, self.user.ID)

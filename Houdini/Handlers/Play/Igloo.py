@@ -1,15 +1,26 @@
+from Houdini import Cache
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Igloo import Igloo, IglooFurniture
 
 
+@Cache("houdini.igloo")
+def getIglooString(self, penguinId, iglooString = None):
+    if iglooString is not None:
+        return iglooString
+    return createIglooString(self, penguinId)
 
+@inlineCallbacks
+def createIglooString(self, penguinId):
     if igloo is None:
 
     furnitureString = ",".join(["{}|{}|{}|{}|{}".format(furniture.FurnitureID, furniture.X, furniture.Y,
                                                         furniture.Rotation, furniture.Frame)
                                 for furniture in iglooFurniture])
+    iglooString = "%".join(map(str, [penguinId, igloo.Type, igloo.Music, igloo.Floor, furnitureString]))
 
-    return "%".join(map(str, [penguinId, igloo.Type, igloo.Music, igloo.Floor, furnitureString]))
+    getIglooString.invalidate(self, penguinId)
+    cachedIglooString = getIglooString(self, penguinId, iglooString)
+    returnValue(cachedIglooString)
 
 
 @Handlers.Handle(XT.SendActivateIgloo)
@@ -22,8 +33,10 @@ def handleSendActivateIgloo(self, data):
 
 
 @Handlers.Handle(XT.GetIglooDetails)
+@inlineCallbacks
 def handleGetIglooDetails(self, data):
-    self.sendXt("gm", getIglooString(self, data.Id))
+    iglooString = yield getIglooString(self, data.Id)
+    self.sendXt("gm", iglooString)
 
 
 @Handlers.Handle(XT.GetOwnedIgloos)

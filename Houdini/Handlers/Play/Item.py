@@ -1,3 +1,4 @@
+from Houdini import Cache
 from Houdini.Handlers import Handlers, XT
 from Houdini.Handlers.Play.Moderation import cheatBan
 from Houdini.Data.Penguin import Inventory
@@ -41,39 +42,60 @@ def handleBuyInventory(self, data):
 
     self.addItem(data.ItemId, itemCost)
 
+    getPinString.invalidate(self, self.user.ID)
+    getAwardsString.invalidate(self, self.user.ID)
 
 @Handlers.Handle(XT.GetInventory)
 @Handlers.Throttle(-1)
 def handleGetInventory(self, data):
     self.sendXt("gi", "%".join(map(str, self.inventory)))
 
+@Cache("houdini.pins")
+def getPinString(self, penguinId, inventory = None):
     def getString(pinId):
         isMember = int(self.server.items[pinId].Member)
         timestamp = self.server.pins.getUnixTimestamp(pinId)
         return "|".join(map(str, [pinId, timestamp, isMember]))
 
     if penguinId in self.server.players:
-        pinsArray = [getString(itemId) for itemId in self.server.players[penguinId].inventory
-                     if self.server.items.isItemPin(itemId)]
-    else:
-    return "%".join(pinsArray)
+        inventory = self.server.players[penguinId].inventory
 
+    if inventory is not None:
+        pins = [getString(itemId) for itemId in inventory if self.server.items.isItemPin(itemId)]
+        return "%".join(pins)
 
+    return createItemString(self, penguinId, getPinString)
+
+@Cache("houdini.awards")
+def getAwardsString(self, penguinId, inventory = None):
     if penguinId in self.server.players:
-        awardsArray = [str(itemId) for itemId in self.server.players[penguinId].inventory
-                       if self.server.items.isItemAward(itemId)]
-    else:
+        inventory = self.server.players[penguinId].inventory
 
-    return "|".join(awardsArray)
+    if inventory is not None:
+        pins = [str(itemId) for itemId in inventory if self.server.items.isItemAward(itemId)]
+        return "%".join(pins)
+
+    return createItemString(self, penguinId, getAwardsString)
+
+@inlineCallbacks
+def createItemString(self, penguinId, cacheBuilder):
+
+    cacheBuilder.invalidate(self, penguinId)
+    cachedItemString = cacheBuilder(self, penguinId, inventory)
+    returnValue(cachedItemString)
 
 
 @Handlers.Handle(XT.GetPlayerPins)
 @Handlers.Throttle()
+@inlineCallbacks
 def handleGetPlayerPins(self, data):
-    self.sendXt("qpp", getPinString(self, data.PlayerId))
+    pinString = yield getPinString(self, data.PlayerId)
+    self.sendXt("qpp", pinString)
 
 
 @Handlers.Handle(XT.GetPlayerAwards)
 @Handlers.Throttle()
+@inlineCallbacks
 def handleGetPlayerAwards(self, data):
-    self.sendXt("qpa", data.PlayerId, getAwardsString(self, data.PlayerId))
+    awardsString = yield getAwardsString(self, data.PlayerId)
+    self.sendXt("qpa", data.PlayerId, awardsString)

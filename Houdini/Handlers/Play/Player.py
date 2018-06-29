@@ -1,16 +1,30 @@
+from Houdini import Cache
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 
+@Cache("houdini.player")
+def getPlayerString(self, penguinId, playerTuple = None):
     if penguinId in self.server.players:
         player = self.server.players[penguinId]
         playerTuple = (player.user.ID, player.user.Nickname, player.user.Approval, player.user.Color, player.user.Head,
                        player.user.Face, player.user.Neck, player.user.Body, player.user.Hand,
                        player.user.Feet, player.user.Flag, player.user.Photo)
-    else:
     if playerTuple is not None:
         playerData = [str(playerDetail) for playerDetail in playerTuple]
         return "|".join(playerData)
-    return str()
+    return createPlayerString(self, penguinId)
+
+@inlineCallbacks
+def createPlayerString(self, penguinId):
+    playerTuple = yield self.engine.first(select(
+        [Penguin.c.ID, Penguin.c.Nickname, Penguin.c.Approval, Penguin.c.Color, Penguin.c.Head,
+         Penguin.c.Face, Penguin.c.Neck, Penguin.c.Body, Penguin.c.Hand, Penguin.c.Feet, Penguin.c.Flag,
+         Penguin.c.Photo]).where(Penguin.c.ID == penguinId))
+    getPlayerString.invalidate(self, penguinId)
+    if playerTuple is not None:
+        cachedPlayerString = getPlayerString(self, penguinId, playerTuple)
+        returnValue(cachedPlayerString)
+    returnValue(str())
 
 @Handlers.Handle(XT.Heartbeat)
 @Handlers.Throttle(60)
@@ -80,5 +94,7 @@ def handleGetLatestRevision(self, data):
 
 @Handlers.Handle(XT.GetPlayer)
 @Handlers.Throttle()
+@inlineCallbacks
 def handleLoadPlayerObject(self, data):
-    self.sendXt("gp", getPlayerString(self, data.Id))
+    playerString = yield getPlayerString(self, data.Id)
+    self.sendXt("gp", playerString)
