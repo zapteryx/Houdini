@@ -811,10 +811,8 @@ class Handlers:
                 if time.time() < lastSent + Handlers.Throttles[function]:
                     return function
 
-                function(penguin, data)
                 penguin.throttle[function] = time.time()
-
-                return function
+                return function(penguin, data)
             return handler
         return handlerFunction
 
