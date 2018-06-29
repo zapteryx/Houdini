@@ -8,4 +8,5 @@ pypiwin32; sys_platform == 'win32'
 pymysql; sys_platform == 'win32'
 six >= 1.10.0
 marshmallow == 2.14.0
-beaker == 1.9.0
+alchimia == 0.8.1
+dogpile.cache == 0.6.5
