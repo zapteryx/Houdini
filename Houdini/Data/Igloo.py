@@ -24,3 +24,8 @@ IglooFurniture = Table(
     Column('Rotation', Integer, primary_key=True, nullable=False, server_default=text("0"))
 )
 
+class IglooRowProxy(RowProxyDictionary):
+
+    def __setattr__(self, key, value):
+        super(IglooRowProxy, self).__setattr__(key, value)
+        self.engine.execute(Igloo.update(Igloo.c.ID == self.ID).values(**{key: value}))

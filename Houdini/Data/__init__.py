@@ -5,6 +5,23 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 from alchimia.engine import TwistedEngine
 
 metadata = MetaData()
+
+class RowProxyDictionary(dict):
+
+    def __init__(self, engine, *args, **kwargs):
+        super(RowProxyDictionary, self).__init__(*args, **kwargs)
+        dict.__setattr__(self, "engine", engine)
+
+    def __getattr__(self, attr):
+        return self.get(attr)
+
+    def __setattr__(self, key, value):
+        self.__setitem__(key, value)
+
+    def __setitem__(self, key, value):
+        super(RowProxyDictionary, self).__setitem__(key, value)
+        self.__dict__.update({key: value})
+
 def ResultProxyMethod(resultProxyMethod):
     @inlineCallbacks
     def actualMethod(engine, query, *args, **kwargs):

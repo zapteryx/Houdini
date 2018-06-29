@@ -16,4 +16,8 @@ Puffle = Table(
     Column('Walking', Integer, server_default=text("0"))
 )
 
+class PuffleRowProxy(RowProxyDictionary):
 
+    def __setattr__(self, key, value):
+        super(PuffleRowProxy, self).__setattr__(key, value)
+        self.engine.execute(Puffle.update(Puffle.c.ID == self.ID).values(**{key: value}))

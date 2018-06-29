@@ -85,3 +85,9 @@ FurnitureInventory = Table(
     Column('FurnitureID', Integer, primary_key=True, nullable=False, server_default=text("0")),
     Column('Quantity', Integer, nullable=False, server_default=text("1"))
 )
+
+class PenguinRowProxy(RowProxyDictionary):
+
+    def __setattr__(self, key, value):
+        super(PenguinRowProxy, self).__setattr__(key, value)
+        self.engine.execute(Penguin.update(Penguin.c.ID == self.ID).values(**{key: value}))
