@@ -7,6 +7,11 @@ from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
 from Houdini.Data.Penguin import Penguin
 
+from sqlalchemy.sql import select
+
+from twisted.internet.defer import inlineCallbacks
+
+
 class Rank(object):
     zope.interface.implements(Plugin)
 
@@ -21,20 +26,21 @@ class Rank(object):
 
         self.server = server
 
-        Penguin.Rank = Column(Integer, nullable=False, server_default=text("'1'"))
-        try:
-            self.server.databaseEngine.execute("ALTER TABLE penguin add Rank TINYINT(1) DEFAULT 1;")
+        Penguin.append_column(Column("Rank", Integer, nullable=False, server_default=text("'1'")))
 
-        except SQLAlchemyError as exception:
-            if "Duplicate column name" not in exception.message:
-                self.logger.warn(exception.message)
+        def tableAltered(err):
+            if "Duplicate column name" not in err.getErrorMessage():
+                self.logger.warn(err)
+
+        self.server.databaseEngine.execute("ALTER TABLE penguin add Rank TINYINT(1) DEFAULT 1;").addErrback(
+            tableAltered)
 
         Handlers.Login += self.adjustMembershipDays
         Handlers.JoinWorld += self.handleJoinWorld
 
+    @inlineCallbacks
     def adjustMembershipDays(self, player, data):
-        playerRank = player.session.query(Penguin.Rank). \
-            filter(Penguin.ID == player.user.ID).scalar() - 1
+        playerRank = yield player.engine.scalar(select([Penguin.c.Rank]).where(Penguin.c.ID == player.user.ID))
 
         if playerRank >= 5:
             playerRank = 4
