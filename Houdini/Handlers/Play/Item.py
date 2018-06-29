@@ -12,6 +12,10 @@ boosterDecks = {
     waterBoosterDeckId: [202, 204, 305, 15, 13, 312, 218, 220, 29, 90]
 }
 
+rankAwards = [4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 104]
+beltPostcards = {1: 177, 5: 178, 9: 179}
+beltStamps = {1: 230, 5: 232, 9: 234, 10: 236}
+
 @Handlers.Handle(XT.BuyInventory)
 @Handlers.Throttle()
 def handleBuyInventory(self, data):

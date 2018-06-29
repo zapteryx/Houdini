@@ -10,6 +10,7 @@ from Houdini.Data.Deck import Deck
 from Houdini.Handlers.Games.Table import leaveTable
 from Houdini.Handlers.Games.Waddle import leaveWaddle
 from Houdini.Handlers.Play.Stampbook import getStampsString
+from Houdini.Handlers.Play.Item import rankAwards, beltPostcards, beltStamps
 
 
 class Penguin(Spheniscidae):
@@ -107,9 +108,6 @@ class Penguin(Spheniscidae):
             self.cards.append(self.server.cards[cardId])
 
     def ninjaRankUp(self, levels=1):
-        rankAwards = [4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 104]
-        beltPostcards = {1: 177, 5: 178, 9: 179}
-        beltStamps = {1: 230, 5: 232, 9: 234, 10: 236}
         for i in xrange(levels):
             if self.user.NinjaRank == 10:
                 return False
