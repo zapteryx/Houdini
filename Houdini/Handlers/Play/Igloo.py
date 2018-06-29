@@ -33,8 +33,13 @@ def handleSendActivateIgloo(self, data):
 
 
 @Handlers.Handle(XT.GetIglooDetails)
+@Handlers.Throttle()
 @inlineCallbacks
 def handleGetIglooDetails(self, data):
+    if data.Id != self.user.ID and data.Id not in self.buddies \
+            and data.Id not in self.server.openIgloos:
+        returnValue(self.transport.loseConnection())
+
     iglooString = yield getIglooString(self, data.Id)
     self.sendXt("gm", iglooString)
 
