@@ -1,114 +1,87 @@
 # coding: utf-8
-from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, SmallInteger, String, Table, text
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, SmallInteger, String, Table, text
 
-from Houdini.Data import Base
-metadata = Base.metadata
+from Houdini.Data import metadata, RowProxyDictionary
 
-
-class Penguin(Base):
-    __tablename__ = 'penguin'
-
-    ID = Column(Integer, primary_key=True)
-    Username = Column(String(12), nullable=False, unique=True)
-    Nickname = Column(String(12), nullable=False)
-    Approval = Column(Integer, nullable=False, server_default=text("0"))
-    Password = Column(String(255), nullable=False)
-    LoginKey = Column(String(255), server_default=text("''"))
-    Email = Column(String(255), nullable=False, index=True)
-    RegistrationDate = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
-    Active = Column(Integer, nullable=False, server_default=text("0"))
-    LastPaycheck = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
-    MinutesPlayed = Column(Integer, nullable=False, server_default=text("0"))
-    Moderator = Column(Integer, nullable=False, server_default=text("0"))
-    MascotStamp = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Coins = Column(Integer, nullable=False, server_default=text("500"))
-    Color = Column(Integer, nullable=False, server_default=text("1"))
-    Head = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Face = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Neck = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Body = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Hand = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Feet = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Photo = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Flag = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Permaban = Column(Integer, nullable=False, server_default=text("0"))
-    BookModified = Column(Integer, nullable=False, server_default=text("0"))
-    BookColor = Column(Integer, nullable=False, server_default=text("1"))
-    BookHighlight = Column(Integer, nullable=False, server_default=text("1"))
-    BookPattern = Column(Integer, nullable=False, server_default=text("0"))
-    BookIcon = Column(Integer, nullable=False, server_default=text("1"))
-    AgentStatus = Column(Integer, nullable=False, server_default=text("0"))
-    FieldOpStatus = Column(Integer, nullable=False, server_default=text("0"))
-    CareerMedals = Column(Integer, nullable=False, server_default=text("0"))
-    AgentMedals = Column(Integer, nullable=False, server_default=text("0"))
-    LastFieldOp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
-    NinjaRank = Column(Integer, nullable=False, server_default=text("0"))
-    NinjaProgress = Column(Integer, nullable=False, server_default=text("0"))
-    FireNinjaRank = Column(Integer, nullable=False, server_default=text("0"))
-    FireNinjaProgress = Column(Integer, nullable=False, server_default=text("0"))
-    WaterNinjaRank = Column(Integer, nullable=False, server_default=text("0"))
-    WaterNinjaProgress = Column(Integer, nullable=False, server_default=text("0"))
-    NinjaMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
-    FireMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
-    WaterMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
-
-    parents = relationship(
-        u'Penguin',
-        secondary='buddy_list',
-        primaryjoin=u'Penguin.ID == buddy_list.c.BuddyID',
-        secondaryjoin=u'Penguin.ID == buddy_list.c.PenguinID'
-    )
-    parents1 = relationship(
-        u'Penguin',
-        secondary='ignore_list',
-        primaryjoin=u'Penguin.ID == ignore_list.c.IgnoreID',
-        secondaryjoin=u'Penguin.ID == ignore_list.c.PenguinID'
-    )
+Penguin = Table(
+    'penguin', metadata,
+    Column('ID', Integer, primary_key=True),
+    Column('Username', String(12), nullable=False, unique=True),
+    Column('Nickname', String(12), nullable=False),
+    Column('Approval', Integer, nullable=False, server_default=text("0")),
+    Column('Password', String(255), nullable=False),
+    Column('LoginKey', String(255), server_default=text("''")),
+    Column('Email', String(255), nullable=False, index=True),
+    Column('RegistrationDate', DateTime, nullable=False, server_default=text("current_timestamp()")),
+    Column('Active', Integer, nullable=False, server_default=text("0")),
+    Column('LastPaycheck', DateTime, nullable=False, server_default=text("current_timestamp()")),
+    Column('MinutesPlayed', Integer, nullable=False, server_default=text("0")),
+    Column('Moderator', Integer, nullable=False, server_default=text("0")),
+    Column('MascotStamp', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Coins', Integer, nullable=False, server_default=text("500")),
+    Column('Color', Integer, nullable=False, server_default=text("1")),
+    Column('Head', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Face', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Neck', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Body', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Hand', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Feet', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Photo', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Flag', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Permaban', Integer, nullable=False, server_default=text("0")),
+    Column('BookModified', Integer, nullable=False, server_default=text("0")),
+    Column('BookColor', Integer, nullable=False, server_default=text("1")),
+    Column('BookHighlight', Integer, nullable=False, server_default=text("1")),
+    Column('BookPattern', Integer, nullable=False, server_default=text("0")),
+    Column('BookIcon', Integer, nullable=False, server_default=text("1")),
+    Column('AgentStatus', Integer, nullable=False, server_default=text("0")),
+    Column('FieldOpStatus', Integer, nullable=False, server_default=text("0")),
+    Column('CareerMedals', Integer, nullable=False, server_default=text("0")),
+    Column('AgentMedals', Integer, nullable=False, server_default=text("0")),
+    Column('LastFieldOp', DateTime, nullable=False, server_default=text("current_timestamp()")),
+    Column('NinjaRank', Integer, nullable=False, server_default=text("0")),
+    Column('NinjaProgress', Integer, nullable=False, server_default=text("0")),
+    Column('FireNinjaRank', Integer, nullable=False, server_default=text("0")),
+    Column('FireNinjaProgress', Integer, nullable=False, server_default=text("0")),
+    Column('WaterNinjaRank', Integer, nullable=False, server_default=text("0")),
+    Column('WaterNinjaProgress', Integer, nullable=False, server_default=text("0")),
+    Column('NinjaMatchesWon', Integer, nullable=False, server_default=text("0")),
+    Column('FireMatchesWon', Integer, nullable=False, server_default=text("0")),
+    Column('WaterMatchesWon', Integer, nullable=False, server_default=text("0")),
+    Column('Rank', Integer, server_default=text("1"))
+)
 
 
-class IgnoreList(Base):
-    __tablename__ = 'ignore_list'
-
-    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
-                       nullable=False)
-    IgnoreID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
-                      nullable=False, index=True)
+IgnoreList = Table(
+    'ignore_list', metadata,
+    Column('PenguinID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False),
+    Column('IgnoreID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,nullable=False, index=True)
+)
 
 
-class BuddyList(Base):
-    __tablename__ = 'buddy_list'
+BuddyList = Table(
+    'buddy_list', metadata,
+    Column('PenguinID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False),
+    Column('BuddyID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False, index=True)
+)
 
-    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
-                       nullable=False)
-    BuddyID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
-                     nullable=False, index=True)
-
-class Inventory(Base):
-    __tablename__ = 'inventory'
-
-    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False)
-    ItemID = Column(SmallInteger, primary_key=True, nullable=False, server_default=text("0"))
-
-    penguin = relationship(u'Penguin')
+Inventory = Table(
+    'inventory', metadata,
+    Column('PenguinID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False),
+    Column('ItemID', SmallInteger, primary_key=True, nullable=False, server_default=text("0"))
+)
 
 
-class IglooInventory(Base):
-    __tablename__ = 'igloo_inventory'
-
-    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
-                       nullable=False, server_default=text("0"))
-    IglooID = Column(Integer, primary_key=True, nullable=False, server_default=text("0"))
-
-    penguin = relationship(u'Penguin')
+IglooInventory = Table(
+    'igloo_inventory', metadata,
+    Column('PenguinID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False, server_default=text("0")),
+    Column('IglooID', Integer, primary_key=True, nullable=False, server_default=text("0"))
+)
 
 
-class FurnitureInventory(Base):
-    __tablename__ = 'furniture_inventory'
-
-    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
-                       nullable=False, server_default=text("0"))
-    FurnitureID = Column(Integer, primary_key=True, nullable=False, server_default=text("0"))
-    Quantity = Column(Integer, nullable=False, server_default=text("1"))
-
-    penguin = relationship(u'Penguin')
+FurnitureInventory = Table(
+    'furniture_inventory', metadata,
+    Column('PenguinID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False, server_default=text("0")),
+    Column('FurnitureID', Integer, primary_key=True, nullable=False, server_default=text("0")),
+    Column('Quantity', Integer, nullable=False, server_default=text("1"))
+)

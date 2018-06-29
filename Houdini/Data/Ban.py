@@ -1,21 +1,14 @@
 # coding: utf-8
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text, text
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text, text, Table
 
-from Houdini.Data import Base
+from Houdini.Data import metadata
 
-metadata = Base.metadata
-
-
-class Ban(Base):
-    __tablename__ = 'ban'
-
-    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False)
-    Issued = Column(DateTime, primary_key=True, nullable=False, server_default=text("current_timestamp()"))
-    Expires = Column(DateTime, primary_key=True, nullable=False, server_default=text("current_timestamp()"))
-    ModeratorID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True)
-    Reason = Column(Integer, nullable=False)
-    Comment = Column(Text)
-
-    penguin = relationship(u'Penguin', primaryjoin='Ban.ModeratorID == Penguin.ID')
-    penguin1 = relationship(u'Penguin', primaryjoin='Ban.PenguinID == Penguin.ID')
+Ban = Table(
+    'ban', metadata,
+    Column('PenguinID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False),
+    Column('Issued', DateTime, primary_key=True, nullable=False, server_default=text("current_timestamp()")),
+    Column('Expires', DateTime, primary_key=True, nullable=False, server_default=text("current_timestamp()")),
+    Column('ModeratorID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), index=True),
+    Column('Reason', Integer, nullable=False),
+    Column('Comment', Text)
+)

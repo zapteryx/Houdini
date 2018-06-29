@@ -1,36 +1,28 @@
 # coding: utf-8
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, SmallInteger, String, text, Enum
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, SmallInteger, String, text, Table
+from sqlalchemy.dialects.mysql.enumerated import ENUM
 
-from Houdini.Data import Base
-metadata = Base.metadata
+from Houdini.Data import metadata
 
-class RedemptionAward(Base):
-    __tablename__ = 'redemption_award'
-
-    CodeID = Column(ForeignKey(u'redemption_code.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
-                    nullable=False, server_default=text("0"))
-    Award = Column(SmallInteger, primary_key=True, nullable=False, server_default=text("1"))
-
-    redemption_code = relationship(u'RedemptionCode')
+RedemptionAward = Table(
+    'redemption_award', metadata,
+    Column('CodeID', ForeignKey(u'redemption_code.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False, server_default=text("0")),
+    Column('Award', SmallInteger, primary_key=True, nullable=False, server_default=text("1"))
+)
 
 
-class RedemptionCode(Base):
-    __tablename__ = 'redemption_code'
-
-    ID = Column(Integer, primary_key=True, unique=True)
-    Code = Column(String(16), nullable=False, unique=True, server_default=text("''"))
-    Type = Column(Enum(u'DS', u'BLANKET', u'CARD', u'GOLDEN', u'CAMPAIGN'), nullable=False,
-                  server_default=text("'BLANKET'"))
-    Coins = Column(Integer, nullable=False, server_default=text("0"))
-    Expires = Column(DateTime)
-
-    penguin = relationship(u'Penguin', secondary='penguin_redemption')
+RedemptionCode = Table(
+    'redemption_code', metadata,
+    Column('ID', Integer, primary_key=True, unique=True),
+    Column('Code', String(16), nullable=False, server_default=text("''")),
+    Column('Type', ENUM(u'DS', u'BLANKET', u'CARD', u'GOLDEN', u'CAMPAIGN'), nullable=False, server_default=text("'BLANKET'")),
+    Column('Coins', Integer, nullable=False, server_default=text("0")),
+    Column('Expires', DateTime)
+)
 
 
-class PenguinRedemption(Base):
-    __tablename__ = 'penguin_redemption'
-    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
-                       nullable=False, server_default=text("0"))
-    CodeID = Column(ForeignKey(u'redemption_code.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
-                    nullable=False, index=True, server_default=text("0"))
+PenguinRedemption = Table(
+    'penguin_redemption', metadata,
+    Column('PenguinID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False, server_default=text("0")),
+    Column('CodeID', ForeignKey(u'redemption_code.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False, index=True, server_default=text("0"))
+)

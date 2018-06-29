@@ -1,32 +1,26 @@
 # coding: utf-8
 from sqlalchemy import Column, ForeignKey, Integer, SmallInteger, Table, text
-from sqlalchemy.orm import relationship
 
-from Houdini.Data import Base
-metadata = Base.metadata
+from Houdini.Data import metadata, RowProxyDictionary
 
-class Igloo(Base):
-    __tablename__ = 'igloo'
-
-    ID = Column(Integer, primary_key=True)
-    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True,
-                       server_default=text("0"))
-    Type = Column(SmallInteger, nullable=False, server_default=text("1"))
-    Floor = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Music = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Locked = Column(Integer, nullable=False, server_default=text("0"))
-
-    penguin = relationship(u'Penguin')
+Igloo = Table(
+    'igloo', metadata,
+    Column('ID', Integer, primary_key=True),
+    Column('PenguinID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True, server_default=text("0")),
+    Column('Type', SmallInteger, nullable=False, server_default=text("1")),
+    Column('Floor', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Music', SmallInteger, nullable=False, server_default=text("0")),
+    Column('Locked', Integer, nullable=False, server_default=text("0"))
+)
 
 
-class IglooFurniture(Base):
-    __tablename__ = 'igloo_furniture'
+IglooFurniture = Table(
+    'igloo_furniture', metadata,
+    Column('IglooID', ForeignKey(u'igloo.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False, index=True),
+    Column('FurnitureID', Integer, primary_key=True, nullable=False, server_default=text("1")),
+    Column('X', SmallInteger, primary_key=True, nullable=False, server_default=text("0")),
+    Column('Y', SmallInteger, primary_key=True, nullable=False, server_default=text("0")),
+    Column('Frame', Integer, primary_key=True, nullable=False, server_default=text("0")),
+    Column('Rotation', Integer, primary_key=True, nullable=False, server_default=text("0"))
+)
 
-    IglooID = Column(ForeignKey(u'igloo.ID'), primary_key=True, nullable=False, index=True)
-    FurnitureID = Column(Integer, primary_key=True, nullable=False, server_default=text("1"))
-    X = Column(SmallInteger, primary_key=True, nullable=False, server_default=text("0"))
-    Y = Column(SmallInteger, primary_key=True, nullable=False, server_default=text("0"))
-    Frame = Column(Integer, primary_key=True, nullable=False, server_default=text("0"))
-    Rotation = Column(Integer, primary_key=True, nullable=False, server_default=text("0"))
-
-    igloo = relationship(u'Igloo')

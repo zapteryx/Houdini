@@ -1,21 +1,19 @@
 # coding: utf-8
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, text
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, text, Table
 
-from Houdini.Data import Base
-metadata = Base.metadata
+from Houdini.Data import metadata, RowProxyDictionary
 
-class Puffle(Base):
-    __tablename__ = 'puffle'
+Puffle = Table(
+    'puffle', metadata,
+    Column('ID', Integer, primary_key=True),
+    Column('PenguinID', ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True),
+    Column('Name', String(16), nullable=False),
+    Column('AdoptionDate', DateTime, nullable=False, server_default=text("current_timestamp()")),
+    Column('Type', Integer, nullable=False),
+    Column('Health', Integer, nullable=False),
+    Column('Hunger', Integer, nullable=False),
+    Column('Rest', Integer, nullable=False),
+    Column('Walking', Integer, server_default=text("0"))
+)
 
-    ID = Column(Integer, primary_key=True)
-    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True)
-    Name = Column(String(16), nullable=False)
-    AdoptionDate = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
-    Type = Column(Integer, nullable=False)
-    Health = Column(Integer, nullable=False)
-    Hunger = Column(Integer, nullable=False)
-    Rest = Column(Integer, nullable=False)
-    Walking = Column(Integer, server_default=text("0"))
 
-    penguin = relationship(u'Penguin')
