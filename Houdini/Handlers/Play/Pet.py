@@ -3,7 +3,6 @@ import time, random
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Puffle import Puffle
 from Houdini.Data.Postcard import Postcard
-from Houdini.Data import retryableTransaction
 
 puffleStatistics = {
     0: (100, 100, 100),
@@ -89,7 +88,6 @@ def handleGetMyPlayerPuffles(self, data):
     self.sendXt("pgu", myPufflesString)
 
 @Handlers.Handle(XT.AdoptPuffle)
-@retryableTransaction()
 def handleSendAdoptPuffle(self, data):
     if not data.TypeId in puffleStatistics:
         return self.transport.loseConnection()

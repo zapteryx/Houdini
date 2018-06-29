@@ -2,14 +2,12 @@ from Houdini.Handlers import Handlers, XML
 from Houdini.Data.Penguin import Penguin, BuddyList
 from Houdini.Data.Ban import Ban
 from Houdini.Crypto import Crypto
-from Houdini.Data import retryableTransaction
 
 import bcrypt, time
 
 from datetime import datetime
 
 @Handlers.Handle(XML.Login)
-@retryableTransaction()
 def handleLogin(self, data):
     if self.randomKey is None:
         return self.transport.loseConnection()

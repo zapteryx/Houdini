@@ -3,7 +3,6 @@ import time, random
 from Houdini.Handlers import Handlers, XT
 from Houdini.Crumbs.Room import Room
 from Houdini.Handlers.Play.Stampbook import getStampsString
-from Houdini.Data import retryableTransaction
 
 RoomFieldKeywords = {
     "Id": None,

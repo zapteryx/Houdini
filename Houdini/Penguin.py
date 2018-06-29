@@ -7,7 +7,6 @@ from Houdini.Data.Puffle import Puffle
 from Houdini.Data.Postcard import Postcard
 from Houdini.Data.Stamp import Stamp
 from Houdini.Data.Deck import Deck
-from Houdini.Data import retryableTransaction
 
 from Houdini.Handlers.Games.Table import leaveTable
 from Houdini.Handlers.Games.Waddle import leaveWaddle
@@ -128,7 +127,6 @@ class Penguin(Spheniscidae):
         self.room.remove(self)
         self.server.rooms[roomId].add(self)
 
-    @retryableTransaction()
     def receiveSystemPostcard(self, postcardId, details=""):
         postcard = Postcard(RecipientID=self.user.ID, SenderID=None, Details=details, Type=postcardId)
         self.session.add(postcard)

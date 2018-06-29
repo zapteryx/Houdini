@@ -1,7 +1,5 @@
 import inspect, os, time
 
-from Houdini.Data import retryableTransaction
-
 class Data:
     pass
 
@@ -733,7 +731,6 @@ class Handlers:
             xmlListener(clientObject, xmlData)
 
     @staticmethod
-    @retryableTransaction()
     def HandleXT(clientObject, packetId, packetData):
         xtListeners = Handlers.XTHandlers[packetId]
         xtHandlerDataStructure = xtListeners[0].handler["Data"]
