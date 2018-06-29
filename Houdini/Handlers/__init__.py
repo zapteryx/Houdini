@@ -706,6 +706,10 @@ class Handlers:
     Throttles = {}
 
     @staticmethod
+    def ExceptionErrback(handlerException, clientObject):
+        clientObject.logger.exception(handlerException.getTraceback())
+
+    @staticmethod
     def HandleXML(clientObject, actionId, bodyTag):
         xmlListeners = Handlers.XMLHandlers[actionId]
         xmlHandlerDataStructure = xmlListeners[0].handler["Data"]
@@ -728,7 +732,8 @@ class Handlers:
                     setattr(xmlData, xmlHandlerDataObject.name, str(xmlHandlerDataObjectValue))
 
         for xmlListener in xmlListeners:
-            xmlListener(clientObject, xmlData)
+            deferredHandler = clientObject.workQueue.run(xmlListener, clientObject, xmlData)
+            deferredHandler.addErrback(Handlers.ExceptionErrback, clientObject)
 
     @staticmethod
     def HandleXT(clientObject, packetId, packetData):
@@ -764,13 +769,9 @@ class Handlers:
                 xtHandlerDataObject = xtHandlerDataStructure[0]
                 setattr(xtData, xtHandlerDataObject.name, packetData[dataIndex:])
 
-        try:
-            for xtListener in xtListeners:
-                xtListener(clientObject, xtData)
-                if clientObject.session.dirty:
-                    clientObject.session.commit()
-        except StandardError:
-            clientObject.logger.exception("Uh oh! Caught potentially fatal error.")
+        for xtListener in xtListeners:
+            deferredHandler = clientObject.workQueue.run(xtListener, clientObject, xtData)
+            deferredHandler.addErrback(Handlers.ExceptionErrback, clientObject)
 
     @staticmethod
     def Handle(handler):

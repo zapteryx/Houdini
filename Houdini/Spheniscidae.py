@@ -8,6 +8,8 @@ from twisted.protocols.basic import LineOnlyReceiver
 from Houdini.Handlers import Handlers
 from Houdini.Events import Events
 
+from twisted.internet.defer import DeferredSemaphore
+
 class Spheniscidae(LineOnlyReceiver, object):
 
     delimiter = "\x00"
@@ -17,6 +19,8 @@ class Spheniscidae(LineOnlyReceiver, object):
 
         self.engine = engine
         self.server = server
+
+        self.workQueue = DeferredSemaphore(1)
 
         # Defined once the client requests it (see handleRandomKey)
         self.randomKey = None
