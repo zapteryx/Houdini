@@ -136,7 +136,7 @@ class Spheniscidae(LineOnlyReceiver, object):
         Events.Fire("Disconnected", self)
 
         try:
-            if hasattr(self, "user"):
+            if hasattr(self, "user") and self.user is not None:
                 if self.user.ID in self.server.players:
                     del self.server.players[self.user.ID]
 
