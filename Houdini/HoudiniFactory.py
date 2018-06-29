@@ -12,6 +12,7 @@ from twisted.internet.protocol import Factory
 from watchdog.observers import Observer
 
 from config import config
+from Houdini import CacheRegion
 import Houdini.Handlers as Handlers
 import Houdini.Plugins as Plugins
 from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection, \
@@ -86,6 +87,10 @@ class HoudiniFactory(Factory):
         if self.server["World"]:
             self.protocol = Penguin
 
+            CacheRegion.configure(
+                'dogpile.cache.memory',
+                expiration_time=3600
+            )
 
             self.spawnRooms = (100, 300, 400, 800, 809, 230, 130)
 
