@@ -179,6 +179,7 @@ class HoudiniFactory(Factory):
         return packageModules
 
     def buildProtocol(self, addr):
+        player = self.protocol(self.databaseEngine, self)
 
         Events.Fire("Connected", player)
 

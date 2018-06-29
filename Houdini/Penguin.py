@@ -15,6 +15,8 @@ from Houdini.Handlers.Play.Item import rankAwards, beltPostcards, beltStamps
 
 class Penguin(Spheniscidae):
 
+    def __init__(self, engine, spirit):
+        super(Penguin, self).__init__(engine, spirit)
         self.user = None
         self.throttle = {}
 

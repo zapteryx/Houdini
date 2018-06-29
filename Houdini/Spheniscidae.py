@@ -12,8 +12,10 @@ class Spheniscidae(LineOnlyReceiver, object):
 
     delimiter = "\x00"
 
+    def __init__(self, engine, server):
         self.logger = logging.getLogger("Houdini")
 
+        self.engine = engine
         self.server = server
 
         # Defined once the client requests it (see handleRandomKey)
