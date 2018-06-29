@@ -8,8 +8,6 @@ from Houdini.Data.Stamp import Stamp
 from Houdini.Data.Deck import Deck
 from Houdini.Data.Login import Login
 
-from Houdini.Handlers.Games.Table import leaveTable
-from Houdini.Handlers.Games.Waddle import leaveWaddle
 from Houdini.Handlers.Play.Stampbook import getStampsString
 from Houdini.Handlers.Play.Item import rankAwards, beltPostcards, beltStamps
 
