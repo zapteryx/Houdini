@@ -111,3 +111,4 @@ def handleLogin(self, data):
                     break
 
     self.sendXt("l", user.ID, loginKey, "|".join(buddyWorlds), "|".join(worldPopulations))
+    self.transport.loseConnection()
