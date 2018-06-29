@@ -41,7 +41,7 @@ class XMLListener(object):
         self.functionFile = getRelativeFunctionPath(self.function)
 
     def __call__(self, *args, **kwargs):
-        self.function(*args, **kwargs)
+        return self.function(*args, **kwargs)
 
 class XTListener(object):
 
@@ -52,7 +52,7 @@ class XTListener(object):
         self.functionFile = getRelativeFunctionPath(self.function)
 
     def __call__(self, *args, **kwargs):
-        self.function(*args, **kwargs)
+        return self.function(*args, **kwargs)
 
 class XTData:
     def __init__(self, arbitraryName, dataType):
