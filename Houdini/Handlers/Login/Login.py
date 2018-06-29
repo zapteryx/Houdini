@@ -27,7 +27,7 @@ def handleLogin(self, data):
 
     ipAddr = self.transport.getPeer().host
 
-    if not bcrypt.checkpw(password, user.Password):
+    passwordCorrect = yield threads.deferToThread(bcrypt.checkpw, password, user.Password)
         self.logger.info("{} failed to login.".format(username))
 
         if ipAddr in self.server.loginAttempts:
