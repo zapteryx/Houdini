@@ -90,14 +90,14 @@ def handleLogin(self, data):
 
     for serverName in serversConfig.keys():
         if serversConfig[serverName]["World"]:
-            serverPopulation = self.server.redis.get("%s.population" % serverName)
+            serverPopulation = yield threads.deferToThread(self.server.redis.get, "{}.population".format(serverName))
 
             if not serverPopulation is None:
                 serverPopulation = int(serverPopulation) / (serversConfig[serverName]["Capacity"] / 6)
             else:
                 serverPopulation = 0
 
-            serverPlayers = self.server.redis.smembers("%s.players" % serverName)
+            serverPlayers = yield threads.deferToThread(self.server.redis.smembers, "{}.players".format(serverName))
 
             worldPopulations.append("%s,%s" % (serversConfig[serverName]["Id"], serverPopulation))
 

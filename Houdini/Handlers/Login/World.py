@@ -50,10 +50,9 @@ def handleLogin(self, data):
 
 
     # Add them to the Redis set
-    self.server.redis.sadd("%s.players" % self.server.serverName, self.user.ID)
-    self.server.redis.incr("%s.population" % self.server.serverName)
-
     self.sendXt("l")
+    threads.deferToThread(self.server.redis.sadd, "{}.players".format(self.server.serverName), self.user.ID)
+    threads.deferToThread(self.server.redis.incr, "{}.population".format(self.server.serverName))
 
     self.age = (currentDateTime - self.user.RegistrationDate).days
 

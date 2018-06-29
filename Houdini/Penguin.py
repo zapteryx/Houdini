@@ -157,7 +157,8 @@ class Penguin(Spheniscidae):
             minutesPlayed = int(time.time() - loginUnix) / 60
             self.user.MinutesPlayed += minutesPlayed
 
-            self.server.redis.srem("%s.players" % self.server.serverName, self.user.ID)
-            self.server.redis.decr("%s.population" % self.server.serverName)
+            threads.deferToThread(self.server.redis.srem, "{}.players".format(self.server.serverName), self.user.ID)
+            threads.deferToThread(self.server.redis.decr, "{}.population".format(self.server.serverName))
+
 
         super(Penguin, self).connectionLost(reason)
