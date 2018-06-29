@@ -112,9 +112,6 @@ class Penguin(Spheniscidae):
         self.room.remove(self)
         self.server.rooms[roomId].add(self)
 
-    def receiveSystemPostcard(self, postcardId, details=""):
-        self.sendXt("mr", "sys", 0, postcardId, details, int(time.time()), postcard.ID)
-
     def sendCoins(self, coinAmount):
         self.user.Coins = coinAmount
         self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
