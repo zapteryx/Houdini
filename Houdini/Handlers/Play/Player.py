@@ -1,10 +1,6 @@
-from beaker.cache import cache_region as Cache
-
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 
-@Cache("houdini", "player")
-def getPlayerString(self, penguinId):
     if penguinId in self.server.players:
         player = self.server.players[penguinId]
         playerTuple = (player.user.ID, player.user.Nickname, player.user.Approval, player.user.Color, player.user.Head,

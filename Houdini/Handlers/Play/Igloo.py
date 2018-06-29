@@ -1,11 +1,7 @@
-from beaker.cache import cache_region as Cache, region_invalidate as Invalidate
-
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Igloo import Igloo, IglooFurniture
 
 
-@Cache("houdini", "igloo")
-def getIglooString(self, penguinId):
     igloo = self.igloo if self.user.ID == penguinId else self.session.query(Igloo)\
         .filter_by(PenguinID=penguinId).first()
 
@@ -123,7 +119,6 @@ def handleSaveIglooFurniture(self, data):
             return
         self.session.add(IglooFurniture(IglooID=self.igloo.ID, FurnitureID=itemId, X=posX, Y=posY,
                                         Rotation=rotation, Frame=frame))
-    Invalidate(getIglooString, 'houdini', 'igloo', self.user.ID)
 
 
 @Handlers.Handle(XT.LoadPlayerIglooList)

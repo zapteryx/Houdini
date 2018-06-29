@@ -1,5 +1,3 @@
-from beaker.cache import cache_region as Cache, region_invalidate as Invalidate
-
 from Houdini.Handlers import Handlers, XT
 from Houdini.Handlers.Play.Moderation import cheatBan
 from Houdini.Data.Penguin import Inventory
@@ -39,17 +37,12 @@ def handleBuyInventory(self, data):
 
     self.addItem(data.ItemId, itemCost)
 
-    Invalidate(getPinString, 'houdini', 'pins', self.user.ID)
-    Invalidate(getAwardsString, 'houdini', 'awards', self.user.ID)
 
 @Handlers.Handle(XT.GetInventory)
 @Handlers.Throttle(-1)
 def handleGetInventory(self, data):
     self.sendXt("gi", "%".join(map(str, self.inventory)))
 
-
-@Cache('houdini', 'pins')
-def getPinString(self, penguinId):
     def getString(pinId):
         isMember = int(self.server.items[pinId].Member)
         timestamp = self.server.pins.getUnixTimestamp(pinId)
@@ -64,8 +57,6 @@ def getPinString(self, penguinId):
     return "%".join(pinsArray)
 
 
-@Cache('houdini', 'awards')
-def getAwardsString(self, penguinId):
     if penguinId in self.server.players:
         awardsArray = [str(itemId) for itemId in self.server.players[penguinId].inventory
                        if self.server.items.isItemAward(itemId)]

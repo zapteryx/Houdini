@@ -1,12 +1,8 @@
-from beaker.cache import cache_region as Cache, region_invalidate as Invalidate
-
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 from Houdini.Data.Stamp import Stamp, CoverStamp
 
 
-@Cache("houdini", "book")
-def getBookCoverString(self, penguinId):
     if penguinId in self.server.players:
         player = self.server.players[penguinId]
         coverDetails = (player.user.BookColor, player.user.BookHighlight, player.user.BookPattern, player.user.BookIcon)
@@ -26,8 +22,6 @@ def getBookCoverString(self, penguinId):
     return "%".join(map(str, [bookColor, bookHighlight, bookPattern, bookIcon, coverString]))
 
 
-@Cache("houdini", "stamps")
-def getStampsString(self, penguinId):
     stamps = self.stamps if penguinId == self.user.ID else \
         [stampId for stampId, in self.session.query(Stamp.Stamp).filter_by(PenguinID=penguinId)]
     return "|".join(map(str, stamps))
@@ -112,4 +106,3 @@ def handleUpdateBookCover(self, data):
     self.user.BookIcon = icon
     self.user.BookModified = 1
 
-    Invalidate(getBookCoverString, 'houdini', 'book', self.user.ID)

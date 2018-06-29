@@ -1,5 +1,4 @@
 import time
-from beaker.cache import region_invalidate as Invalidate
 
 from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Data.Penguin import Inventory, IglooInventory, FurnitureInventory
@@ -90,7 +89,6 @@ class Penguin(Spheniscidae):
 
         if sendXt:
             self.sendXt("aabs", stampId)
-        Invalidate(getStampsString, 'houdini', 'stamps', self.user.ID)
 
     def addCards(self, *args):
         for cardId in args:
