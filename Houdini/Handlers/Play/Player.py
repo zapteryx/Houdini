@@ -7,9 +7,6 @@ from Houdini.Data.Penguin import Penguin
                        player.user.Face, player.user.Neck, player.user.Body, player.user.Hand,
                        player.user.Feet, player.user.Flag, player.user.Photo)
     else:
-        playerTuple = self.session.query(Penguin.ID, Penguin.Nickname, Penguin.Approval, Penguin.Color, Penguin.Head,
-                                         Penguin.Face, Penguin.Neck, Penguin.Body, Penguin.Hand, Penguin.Feet, Penguin.Flag,
-                                         Penguin.Photo).filter_by(ID=penguinId).first()
     if playerTuple is not None:
         playerData = [str(playerDetail) for playerDetail in playerTuple]
         return "|".join(playerData)

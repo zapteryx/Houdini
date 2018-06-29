@@ -2,17 +2,9 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Igloo import Igloo, IglooFurniture
 
 
-    igloo = self.igloo if self.user.ID == penguinId else self.session.query(Igloo)\
-        .filter_by(PenguinID=penguinId).first()
 
     if igloo is None:
-        igloo = Igloo(PenguinID=penguinId)
-        self.session.add(igloo)
-        self.session.commit()
-        self.igloo = igloo
 
-    iglooFurniture = self.session.query(IglooFurniture).join(Igloo, Igloo.PenguinID == penguinId)\
-        .filter(IglooFurniture.IglooID == Igloo.ID)
     furnitureString = ",".join(["{}|{}|{}|{}|{}".format(furniture.FurnitureID, furniture.X, furniture.Y,
                                                         furniture.Rotation, furniture.Frame)
                                 for furniture in iglooFurniture])
@@ -97,7 +89,6 @@ def handleBuyFurniture(self, data):
 @Handlers.Throttle()
 def handleSaveIglooFurniture(self, data):
     furnitureTracker = {}
-    self.session.query(IglooFurniture).filter_by(IglooID=self.igloo.ID).delete()
     if len(data.FurnitureList) > 100:
         return
     for furnitureItem in set(data.FurnitureList[0:100]):
@@ -117,8 +108,6 @@ def handleSaveIglooFurniture(self, data):
         if not (0 <= int(posX) <= 700 and 0 <= int(posY) <= 700
                 and 1 <= int(rotation) <= 8 and 1 <= int(frame) <= 10):
             return
-        self.session.add(IglooFurniture(IglooID=self.igloo.ID, FurnitureID=itemId, X=posX, Y=posY,
-                                        Rotation=rotation, Frame=frame))
 
 
 @Handlers.Handle(XT.LoadPlayerIglooList)

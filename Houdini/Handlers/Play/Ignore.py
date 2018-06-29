@@ -15,13 +15,9 @@ def handleAddIgnore(self, data):
     if data.PlayerId in self.ignore:
         return
 
-    ignoreUser = self.session.query(Penguin.Username, Penguin.ID).\
-        filter(Penguin.ID == data.PlayerId).first()
 
     self.ignore[data.PlayerId] = ignoreUser.Username
 
-    ignore = IgnoreList(PenguinID=self.user.ID, IgnoreID=ignoreUser.ID)
-    self.session.add(ignore)
 
 @Handlers.Handle(XT.RemoveIgnore)
 def handleRemoveIgnore(self, data):
@@ -30,4 +26,3 @@ def handleRemoveIgnore(self, data):
 
     del self.ignore[data.PlayerId]
 
-    self.session.query(IgnoreList).filter_by(PenguinID=self.user.ID, IgnoreID=data.PlayerId).delete()

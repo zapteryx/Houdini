@@ -21,8 +21,6 @@ def handleLogin(self, data):
 
     self.logger.info("{0} is attempting to login..".format(username))
 
-    self.session.commit()
-    user = self.session.query(Penguin).filter_by(Username=username).first()
 
     if user is None:
         return self.sendErrorAndDisconnect(100)
@@ -65,8 +63,6 @@ def handleLogin(self, data):
     if user.Permaban:
         return self.sendErrorAndDisconnect(603)
 
-    activeBan = self.session.query(Ban).filter(Ban.PenguinID == user.ID)\
-        .filter(Ban.Expires >= datetime.now()).first()
 
     if activeBan is not None:
         hoursLeft = round((activeBan.Expires - datetime.now()).total_seconds() / 60 / 60)
@@ -83,12 +79,9 @@ def handleLogin(self, data):
     randomKey = Crypto.generateRandomKey()
     loginKey = Crypto.hash(randomKey[::-1])
 
-    self.session.add(user)
-
     self.user = user
     self.user.LoginKey = loginKey
 
-    self.session.commit()
 
     buddyWorlds = []
     worldPopulations = []
@@ -112,7 +105,6 @@ def handleLogin(self, data):
                 self.logger.debug("Skipping buddy iteration for %s " % serverName)
                 continue
 
-            buddies = self.session.query(BuddyList.BuddyID).filter(BuddyList.PenguinID == self.user.ID)
             for buddyId, in buddies:
                 if str(buddyId) in serverPlayers:
                     buddyWorlds.append(serversConfig[serverName]["Id"])

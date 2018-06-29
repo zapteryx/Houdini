@@ -56,7 +56,6 @@ def handleBuyEpfItem(self, data):
 
         self.inventory.append(data.ItemId)
 
-        self.session.add(Inventory(PenguinID=self.user.ID, ItemID=data.ItemId))
 
         self.user.AgentMedals -= itemCost
         self.sendXt("epfai", self.user.AgentMedals)

@@ -12,10 +12,8 @@ class Spheniscidae(LineOnlyReceiver, object):
 
     delimiter = "\x00"
 
-    def __init__(self, session, server):
         self.logger = logging.getLogger("Houdini")
 
-        self.session = session
         self.server = server
 
         # Defined once the client requests it (see handleRandomKey)
@@ -132,13 +130,9 @@ class Spheniscidae(LineOnlyReceiver, object):
         Events.Fire("Disconnected", self)
 
         try:
-            self.session.commit()
-
             if hasattr(self, "user"):
                 if self.user.ID in self.server.players:
                     del self.server.players[self.user.ID]
-
-                self.session.expunge(self.user)
 
         except InvalidRequestError:
             self.logger.info("There aren't any transactions in progress")

@@ -47,11 +47,7 @@ def decreaseStats(server):
                 runPostcard = runPostcards[puffle.Type]
                 player.receiveSystemPostcard(runPostcard, puffle.Name)
                 del player.puffles[puffle.ID]
-                player.session.query(Puffle).filter_by(ID=puffle.ID).delete()
             elif puffle.Hunger < 10:
-                notificationAware = player.session.query(Postcard).filter(Postcard.RecipientID == player.user.ID). \
-                    filter(Postcard.Type == 110). \
-                    filter(Postcard.Details == Puffle.Name).scalar()
                 if not notificationAware:
                     player.receiveSystemPostcard(110, puffle.Name)
         handleGetMyPlayerPuffles(player, [])
@@ -65,8 +61,6 @@ def getStatistics(puffleType, puffleHealth, puffleHunger, puffleRest):
 
 @Handlers.Handle(XT.GetPlayerPuffles)
 def handleGetPuffles(self, data):
-    ownedPuffles = self.session.query(Puffle).filter(Puffle.PenguinID == data.PlayerId)
-
     playerPuffles = ["{}|{}|{}|{}|100|100|100|0|0|0|{}".format(puffle.ID, puffle.Name, puffle.Type,
                                                                getStatistics(puffle.Type, puffle.Health,
                                                                              puffle.Hunger, puffle.Rest), puffle.Walking)
@@ -105,11 +99,6 @@ def handleSendAdoptPuffle(self, data):
 
     maxHealth, maxHunger, maxRest = puffleStatistics[data.TypeId]
 
-    puffle = Puffle(PenguinID=self.user.ID, Name=data.Name, Type=data.TypeId,
-                    Health=maxHealth, Hunger=maxHunger, Rest=maxRest)
-    self.session.add(puffle)
-    self.session.commit()
-
     self.puffles[puffle.ID] = puffle
 
     puffleString = "{}|{}|{}|100|100|100|100|100|100".format(puffle.ID, data.Name, data.TypeId)
@@ -133,8 +122,6 @@ def handleSendPuffleWalk(self, data):
             return # Client shouldn't have been allowed to send this packet
 
         puffle.Walking = 1 if not puffle.Walking else 0
-
-        self.session.add(puffle)
 
         # Blame Club Penguin and not me!
         puffleData = [data.PuffleId]

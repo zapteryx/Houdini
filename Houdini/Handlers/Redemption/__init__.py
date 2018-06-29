@@ -23,19 +23,15 @@ def handleJoinRedemption(self, data):
 @Handlers.Handle(XT.SendCode)
 @Handlers.Throttle(2)
 def handleSendCode(self, data):
-    code = self.session.query(RedemptionCode).filter(RedemptionCode.Code == data.Code).first()
 
     if code is None:
         return self.sendError(720)
-
-    redeemed = self.session.query(PenguinRedemption).filter_by(PenguinID=self.user.ID, CodeID=code.ID).scalar()
     if redeemed is not None:
         return self.sendError(721)
 
     if code.Expires is not None and code.Expires < datetime.now():
         return self.sendError(726)
 
-    awards = self.session.query(RedemptionAward.Award).filter_by(CodeID=code.ID)
     awardIds = [awardId for awardId, in awards]
 
     if code.Type == "GOLDEN":
@@ -48,7 +44,6 @@ def handleSendCode(self, data):
         for itemId in awardIds:
             self.addItem(itemId)
 
-    self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
     self.user.Coins += code.Coins
     self.sendXt("rsc", code.Type, ",".join(map(str, awardIds)), code.Coins)
 
@@ -56,9 +51,6 @@ def handleSendCode(self, data):
 @Handlers.Handle(XT.SendGoldenChoice)
 @Handlers.Throttle(2)
 def handleSendGoldenChoice(self, data):
-    awards = self.session.query(RedemptionCode, RedemptionAward.Award)\
-        .join(RedemptionAward, RedemptionAward.CodeID == RedemptionCode.ID)\
-        .filter(RedemptionCode.Code == data.Code)
 
     if awards is None:
         return self.transport.loseConnection()
@@ -67,7 +59,6 @@ def handleSendGoldenChoice(self, data):
 
     cardIds = [awardId for code, awardId in awards]
 
-    redeemed = self.session.query(PenguinRedemption).filter_by(CodeID=code.ID).scalar()
 
     if redeemed is not None:
         return self.transport.loseConnection()
@@ -80,4 +71,3 @@ def handleSendGoldenChoice(self, data):
         self.sendXt("rsgc", ",".join(map(str, cardIds[:4])) + "|" + ",".join(map(str, cardIds[-2:])))
     self.addCards(*cardIds)
 
-    self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))

@@ -7,14 +7,11 @@ from Houdini.Data.Stamp import Stamp, CoverStamp
         player = self.server.players[penguinId]
         coverDetails = (player.user.BookColor, player.user.BookHighlight, player.user.BookPattern, player.user.BookIcon)
     else:
-        coverDetails = self.session.query(Penguin.BookColor, Penguin.BookHighlight, Penguin.BookPattern,
-                                          Penguin.BookIcon).filter_by(ID=penguinId).first()
 
     if coverDetails is None:
         return str()
 
     bookColor, bookHighlight, bookPattern, bookIcon = coverDetails
-    coverStamps = self.session.query(CoverStamp).filter_by(PenguinID=penguinId)
 
     coverString = "%".join(["{}|{}|{}|{}|{}|{}".format(stamp.Type, stamp.Stamp, stamp.X, stamp.Y, stamp.Rotation,
                                                        stamp.Depth) for stamp in coverStamps])
@@ -58,8 +55,6 @@ def handleGetStamps(self, data):
 def handleGetRecentStamps(self, data):
     self.sendXt("gmres", "|".join(map(str, self.recentStamps)))
     self.recentStamps = []
-    self.session.query(Stamp).filter_by(PenguinID=self.user.ID, Recent=1)\
-        .update({"Recent": False})
 
 
 @Handlers.Handle(XT.UpdateBookCover)
@@ -68,7 +63,6 @@ def handleUpdateBookCover(self, data):
     if not 4 <= len(data.StampCover) <= 10:
         return
 
-    self.session.query(CoverStamp).filter_by(PenguinID=self.user.ID).delete()
     bookCover = data.StampCover[0:4]
     color, highlight, pattern, icon = bookCover
     if not(1 <= int(color) <= 6 and 1 <= int(highlight) <= 18 and
@@ -97,8 +91,6 @@ def handleUpdateBookCover(self, data):
                 0 <= rotation <= 360 and 0 <= depth <= 100):
             return
 
-        self.session.add(CoverStamp(PenguinID=self.user.ID, Stamp=stampId, Type=stampType, X=posX,
-                                    Y=posY, Rotation=rotation, Depth=depth))
 
     self.user.BookColor = color
     self.user.BookHighlight = highlight

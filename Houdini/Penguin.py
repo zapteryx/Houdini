@@ -15,8 +15,6 @@ from Houdini.Handlers.Play.Item import rankAwards, beltPostcards, beltStamps
 
 class Penguin(Spheniscidae):
 
-    def __init__(self, session, spirit):
-        super(Penguin, self).__init__(session, spirit)
         self.user = None
         self.throttle = {}
 
@@ -37,7 +35,6 @@ class Penguin(Spheniscidae):
             return False
 
         self.inventory.append(itemId)
-        self.session.add(Inventory(PenguinID=self.user.ID, ItemID=itemId))
 
         self.user.Coins -= itemCost
 
@@ -49,7 +46,6 @@ class Penguin(Spheniscidae):
             return False
 
         self.igloos.append(iglooId)
-        self.session.add(IglooInventory(PenguinID=self.user.ID, IglooID=iglooId))
         self.user.Coins -= iglooCost
 
         self.sendXt("au", iglooId, self.user.Coins)
@@ -64,10 +60,7 @@ class Penguin(Spheniscidae):
             if furnitureQuantity >= 100:
                 return False
 
-            self.session.query(FurnitureInventory).filter_by(PenguinID=self.user.ID, FurnitureID=furnitureId) \
-                .update({"Quantity": furnitureQuantity})
         else:
-            self.session.add(FurnitureInventory(PenguinID=self.user.ID, FurnitureID=furnitureId))
 
         self.furniture[furnitureId] = furnitureQuantity
         self.user.Coins -= furnitureCost
@@ -86,7 +79,6 @@ class Penguin(Spheniscidae):
 
         self.stamps.append(stampId)
         self.recentStamps.append(stampId)
-        self.session.add(Stamp(PenguinID=self.user.ID, Stamp=stampId))
 
         if sendXt:
             self.sendXt("aabs", stampId)
@@ -99,10 +91,7 @@ class Penguin(Spheniscidae):
                 cardQuantity = self.deck[cardId]
                 cardQuantity += 1
 
-                self.session.query(Deck).filter_by(PenguinID=self.user.ID, CardID=cardId) \
-                    .update({"Quantity": cardQuantity})
             else:
-                self.session.add(Deck(PenguinID=self.user.ID, CardID=cardId))
 
             self.deck[cardId] = cardQuantity
             self.cards.append(self.server.cards[cardId])
@@ -124,9 +113,6 @@ class Penguin(Spheniscidae):
         self.server.rooms[roomId].add(self)
 
     def receiveSystemPostcard(self, postcardId, details=""):
-        postcard = Postcard(RecipientID=self.user.ID, SenderID=None, Details=details, Type=postcardId)
-        self.session.add(postcard)
-        self.session.commit()
         self.sendXt("mr", "sys", 0, postcardId, details, int(time.time()), postcard.ID)
 
     def sendCoins(self, coinAmount):
@@ -161,21 +147,15 @@ class Penguin(Spheniscidae):
         if hasattr(self, "room") and self.room is not None:
             self.room.remove(self)
 
-            puffleId = self.session.query(Puffle.ID) \
-                .filter(Puffle.PenguinID == self.user.ID, Puffle.Walking == 1).scalar()
-
             if puffleId is not None:
                 self.user.Hand = 0
-                self.session.query(Puffle.ID == puffleId).update({"Walking": 0})
 
             for buddyId in self.buddies.keys():
                 if buddyId in self.server.players:
                     self.server.players[buddyId].sendXt("bof", self.user.ID)
 
-            loginUnix = time.mktime(self.login.Date.timetuple())
             minutesPlayed = int(time.time() - loginUnix) / 60
             self.user.MinutesPlayed += minutesPlayed
-            self.session.add(self.login)
 
             self.server.redis.srem("%s.players" % self.server.serverName, self.user.ID)
             self.server.redis.decr("%s.population" % self.server.serverName)

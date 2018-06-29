@@ -56,8 +56,6 @@ def handleGetInventory(self, data):
         pinsArray = [getString(itemId) for itemId in self.server.players[penguinId].inventory
                      if self.server.items.isItemPin(itemId)]
     else:
-        pinsArray = [getString(itemId) for itemId, in self.session.query(Inventory.ItemID)
-            .filter_by(PenguinID=penguinId) if self.server.items.isItemPin(itemId)]
     return "%".join(pinsArray)
 
 
@@ -65,8 +63,6 @@ def handleGetInventory(self, data):
         awardsArray = [str(itemId) for itemId in self.server.players[penguinId].inventory
                        if self.server.items.isItemAward(itemId)]
     else:
-        awardsArray = [str(itemId) for itemId, in self.session.query(Inventory.ItemID)
-            .filter_by(PenguinID=penguinId) if self.server.items.isItemAward(itemId)]
 
     return "|".join(awardsArray)
 

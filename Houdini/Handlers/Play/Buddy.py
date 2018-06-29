@@ -48,8 +48,6 @@ def handleBuddyAccept(self, data):
 
     buddyBuddies[self.user.ID] = self.user.Username
 
-    self.session.add(BuddyList(PenguinID=self.user.ID, BuddyID=data.Id))
-    self.session.add(BuddyList(PenguinID=data.Id, BuddyID=self.user.ID))
 
     del self.buddyRequests[data.Id]
 
@@ -69,8 +67,6 @@ def handleRemoveBuddy(self, data):
 
     del self.buddies[data.Id]
 
-    self.session.query(BuddyList).filter_by(PenguinID=self.user.ID, BuddyID=data.Id).delete()
-    self.session.query(BuddyList).filter_by(PenguinID=data.Id, BuddyID=self.user.ID).delete()
 
     try:
         buddyObject = self.server.players[data.Id]

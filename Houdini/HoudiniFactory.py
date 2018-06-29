@@ -7,7 +7,6 @@ from logging.handlers import RotatingFileHandler
 
 import redis
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from twisted.internet import reactor, task
 from twisted.internet.protocol import Factory
 from watchdog.observers import Observer
@@ -73,17 +72,6 @@ class HoudiniFactory(Factory):
             self.config["Database"]["Address"],
             self.config["Database"]["Name"])
 
-        self.databaseEngine = create_engine(engineString, pool_recycle=3600, pool_pre_ping=True)
-        self.createSession = sessionmaker(bind=self.databaseEngine)
-        self.session = None
-
-        throwawayValue, timeoutInSeconds = \
-            self.databaseEngine.execute("SHOW VARIABLES LIKE 'wait_timeout';").first()
-
-        timeoutInSeconds = int(timeoutInSeconds)
-
-        self.sessionValidator = task.LoopingCall(self.validateSession)
-        self.sessionValidator.start(timeoutInSeconds - 5)
 
         self.redis = redis.StrictRedis()
         self.redis.delete("%s.players" % self.serverName)
@@ -131,12 +119,6 @@ class HoudiniFactory(Factory):
 
         self.plugins = {}
         self.loadPlugins()
-
-    def validateSession(self):
-        if self.session is not None and len(self.players) == 0:
-            self.session.close()
-
-            self.session = None
 
     def loadPlugins(self):
         for pluginPackage in self.getPackageModules(Plugins):
@@ -190,10 +172,6 @@ class HoudiniFactory(Factory):
         return packageModules
 
     def buildProtocol(self, addr):
-        if self.session is None:
-            self.session = self.createSession()
-
-        player = self.protocol(self.session, self)
 
         Events.Fire("Connected", player)
 
