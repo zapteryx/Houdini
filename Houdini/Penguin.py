@@ -3,7 +3,7 @@ from beaker.cache import region_invalidate as Invalidate
 
 from Houdini.Spheniscidae import Spheniscidae
 from Houdini.Data.Penguin import Inventory, IglooInventory, FurnitureInventory, LocationInventory
-from Houdini.Data.Puffle import Puffle
+from Houdini.Data.Puffle import Puffle, CareInventory
 from Houdini.Data.Postcard import Postcard
 from Houdini.Data.Stamp import Stamp
 from Houdini.Data.Deck import Deck
@@ -31,7 +31,30 @@ class Penguin(Spheniscidae):
         self.waddle = None
         self.gameFinished = True
 
+        self.walkingPuffle = None
+
         self.logger.info("Penguin class instantiated")
+
+    def addCareItem(self, careItemId, additionalQuantity=1, itemCost=0, sendXt=True):
+        if careItemId in self.careInventory:
+            itemQuantity = self.careInventory[careItemId]
+            itemQuantity += additionalQuantity
+
+            # TODO: Remove this limit?
+            if itemQuantity >= 100:
+                return False
+
+            self.session.query(CareInventory).filter_by(PenguinID=self.user.ID, ItemID=careItemId) \
+                .update({"Quantity": itemQuantity})
+        else:
+            itemQuantity = additionalQuantity
+            self.session.add(CareInventory(PenguinID=self.user.ID, ItemID=careItemId, Quantity=additionalQuantity))
+
+        self.careInventory[careItemId] = itemQuantity
+        self.user.Coins -= itemCost
+
+        if sendXt:
+            self.sendXt("papi", self.user.Coins, careItemId, itemQuantity)
 
     def addItem(self, itemId, itemCost=0, sendXt=True):
         if itemId in self.inventory:
@@ -150,7 +173,7 @@ class Penguin(Spheniscidae):
         self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
 
     def getPlayerString(self):
-        playerArray = (
+        playerArray = [
             self.user.ID,
             self.user.Nickname,
             self.user.Approval,
@@ -165,8 +188,17 @@ class Penguin(Spheniscidae):
             self.user.Photo,
             self.x, self.y,
             self.frame,
-            1, self.age
-        )
+            1, self.age,
+            0, # Avatar integer, not entirely sure how this works yet
+            str(), # Unused value
+            str() # Party information
+        ]
+
+        # TODO: The zero at the end here will need to be adjusted once golden puffles are added
+        if self.walkingPuffle is not None:
+            playerArray.extend([self.walkingPuffle.ID, self.walkingPuffle.Type,
+                                self.walkingPuffle.Subtype if self.walkingPuffle.Subtype else str(),
+                                self.walkingPuffle.Hat, 0])
 
         playerStringArray = map(str, playerArray)
         self.playerString = "|".join(playerStringArray)
@@ -176,13 +208,6 @@ class Penguin(Spheniscidae):
     def connectionLost(self, reason):
         if hasattr(self, "room") and self.room is not None:
             self.room.remove(self)
-
-            puffleId = self.session.query(Puffle.ID) \
-                .filter(Puffle.PenguinID == self.user.ID, Puffle.Walking == 1).scalar()
-
-            if puffleId is not None:
-                self.user.Hand = 0
-                self.session.query(Puffle.ID == puffleId).update({"Walking": 0})
 
             for buddyId in self.buddies.keys():
                 if buddyId in self.server.players:
@@ -199,3 +224,4 @@ class Penguin(Spheniscidae):
         super(Penguin, self).connectionLost(reason)
         # After the data has been committed; to ensure that the data was saved.
         map(self.session.expunge, self.igloos.values())
+        map(self.session.expunge, self.puffles.values())
