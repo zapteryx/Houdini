@@ -19,7 +19,7 @@ import Houdini.Plugins as Plugins
 from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection, \
     retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection, \
     retrievePinCollection, retrieveStampsCollection, retrieveCardCollection, \
-    retrieveDanceCollection, retrieveLocationCollection
+    retrieveDanceCollection, retrieveLocationCollection, retrieveCareItemCollection
 from Houdini.Events import Events
 from Houdini.Events.HandlerFileEvent import HandlerFileEventHandler
 from Houdini.Events.PluginFileEvent import PluginFileEventHandler
@@ -118,6 +118,7 @@ class HoudiniFactory(Factory):
             self.cards = retrieveCardCollection()
             self.dance = retrieveDanceCollection()
             self.locations = retrieveLocationCollection()
+            self.careItems = retrieveCareItemCollection()
 
             self.openIgloos = {}
 
