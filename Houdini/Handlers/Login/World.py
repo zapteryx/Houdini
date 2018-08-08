@@ -7,7 +7,7 @@ from Houdini.Data.Stamp import Stamp
 from Houdini.Data.Penguin import Penguin, BuddyList, IgnoreList, IglooInventory, \
     FurnitureInventory, FloorInventory, LocationInventory, Inventory
 from Houdini.Data.Igloo import Igloo, IglooLike
-from Houdini.Data.Puffle import Puffle
+from Houdini.Data.Puffle import Puffle, CareInventory
 from Houdini.Data.Deck import Deck
 from Houdini.Crypto import Crypto
 from Houdini.Data import retryableTransaction
@@ -129,3 +129,10 @@ def handleLogin(self, data):
         .filter_by(PenguinID=self.user.ID)]
 
     self.puffles = {puffle.ID: puffle for puffle in self.session.query(Puffle).filter_by(PenguinID=self.user.ID)}
+    map(self.session.add, self.puffles.values())
+
+    self.walkingPuffle = self.session.query(Puffle) \
+        .filter(Puffle.PenguinID == self.user.ID, Puffle.Walking == 1).first()
+
+    self.careInventory = {itemId: quantity for itemId, quantity in self.session.query(
+        CareInventory.ItemID, CareInventory.Quantity).filter_by(PenguinID=self.user.ID)}
