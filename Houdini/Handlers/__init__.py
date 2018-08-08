@@ -342,12 +342,12 @@ class XT:
 
     GetPlayerPuffles = {
         "Handler": "p#pg",
-        "Data": [XTData("PlayerId", int)]
+        "Data": [XTData("PlayerId", int), XTData("RoomType", str)]
     }
 
     AdoptPuffle = {
         "Handler": "p#pn",
-        "Data": [XTData("TypeId", int), XTData("Name", str)]
+        "Data": [XTData("TypeId", int), XTData("Name", str), XTData("SubtypeId", int)]
     }
 
     GetMyPlayerPuffles = {
@@ -697,6 +697,56 @@ class XT:
     BuyIglooLocation = {
         "Handler": "g#aloc",
         "Data": [XTData("LocationId", int)]
+    }
+
+    CheckPuffleName = {
+        "Handler": "p#checkpufflename",
+        "Data": [XTData("Name", str)]
+    }
+
+    AddPuffleCareItem = {
+        "Handler": "p#papi",
+        "Data": [XTData("ItemId", int)]
+    }
+
+    GetMyPufflesStats = {
+        "Handler": "p#pgmps",
+        "Data": []
+    }
+
+    GetPuffleHandlerStatus = {
+        "Handler": "p#phg",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    SetPuffleHanderStatus = {
+        "Handler": "p#phs",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    PuffleCareItemDelivered = {
+        "Handler": "p#pcid",
+        "Data": [XTData("PuffleId", int), XTData("CareItemId", int)]
+    }
+
+    PuffleVisitorHatUpdate = {
+        "Handler": "p#puphi",
+        "Data": [XTData("PuffleId", int), XTData("HatId", int)]
+    }
+
+    WalkSwapPuffle = {
+        "Handler": "p#pufflewalkswap",
+        "Data": [XTData("PuffleId", int)]
+    }
+
+    PuffleTrick = {
+        "Handler": "p#puffletrick",
+        "Data": [XTData("TrickId", int)]
+    }
+
+    ChangePuffleRoom = {
+        "Handler": "p#puffleswap",
+        "Data": [XTData("PuffleId", int), XTData("RoomType", str)]
     }
 
 class HandlerEvent(object):
