@@ -1,34 +1,12 @@
-import time, random
+import time, random, json
+from datetime import datetime, timedelta
 
 from Houdini.Handlers import Handlers, XT
-from Houdini.Data.Puffle import Puffle, CareInventory
+from Houdini.Data.Puffle import Puffle, CareInventory, PuffleQuest
 from Houdini.Data.Postcard import Postcard
 from Houdini.Data import retryableTransaction
 
-# Food Play Rest Clean
-puffleStatistics = {
-    0: (100, 100, 100, 100),
-    1: (100, 100, 100, 100),
-    2: (100, 100, 100, 100),
-    3: (100, 100, 100, 100),
-    4: (100, 100, 100, 100),
-    5: (100, 100, 100, 100),
-    6: (100, 100, 100, 100),
-    7: (100, 100, 100, 100),
-    8: (100, 100, 100, 100)
-}
-
-runPostcards = {
-    0: 100,
-    1: 101,
-    2: 102,
-    3: 103,
-    4: 104,
-    5: 105,
-    6: 106,
-    7: 169,
-    8: 109
-}
+puffleTypes = range(0, 12)
 
 def decreaseStats(server):
     for (playerId, player) in server.players.items():
@@ -36,21 +14,17 @@ def decreaseStats(server):
             continue
 
         for (puffleId, puffle) in player.puffles.items():
-            maxHealth, maxHunger, maxRest, maxClean = puffleStatistics[puffle.Type]
             if int(puffle.Walking):
-                puffle.Food = max(10, min(puffle.Food - 8, maxHunger))
-                puffle.Rest = max(10, min(puffle.Rest - 8, maxRest))
+                puffle.Food = max(10, min(puffle.Food - 8, 100))
+                puffle.Rest = max(10, min(puffle.Rest - 8, 100))
+                puffle.Clean = max(10, min(puffle.Clean - 8, 100))
             else:
-                puffle.Food = max(0, min(puffle.Food - 4, maxHealth))
-                puffle.Food = max(0, min(puffle.Food - 4, maxHunger))
-                puffle.Rest = max(0, min(puffle.Rest - 4, maxRest))
+                puffle.Food = max(0, min(puffle.Food - 4, 100))
+                puffle.Play = max(0, min(puffle.Play - 4, 100))
+                puffle.Rest = max(0, min(puffle.Rest - 4, 100))
+                puffle.Clean = max(0, min(puffle.Clean - 4, 100))
 
-            if puffle.Food == 0 and puffle.Food == 0 and puffle.Rest == 0:
-                runPostcard = runPostcards[puffle.Type]
-                player.receiveSystemPostcard(runPostcard, puffle.Name)
-                del player.puffles[puffle.ID]
-                player.session.query(Puffle).filter_by(ID=puffle.ID).delete()
-            elif puffle.Food < 10:
+            if puffle.Food < 10:
                 notificationAware = player.session.query(Postcard).filter(Postcard.RecipientID == player.user.ID). \
                     filter(Postcard.Type == 110). \
                     filter(Postcard.Details == Puffle.Name).scalar()
@@ -58,41 +32,30 @@ def decreaseStats(server):
                     player.receiveSystemPostcard(110, puffle.Name)
         handleGetMyPlayerPuffles(player, [])
 
-def getStatistics(puffleType, puffleFood, pufflePlay, puffleRest, puffleClean):
-    maxFood, maxPlay, maxRest, maxClean = puffleStatistics[puffleType]
-
-    puffleFood = int(float(puffleFood) / maxFood * 100)
-    pufflePlay = int(float(pufflePlay) / maxPlay * 100)
-    puffleRest = int(float(puffleRest) / maxRest * 100)
-    puffleClean = int(float(puffleClean) / maxClean * 100)
-
-    return "{}|{}|{}|{}".format(puffleFood, pufflePlay, puffleRest, puffleClean)
-
 @Handlers.Handle(XT.GetPlayerPuffles)
 def handleGetPuffles(self, data):
     backyardBoolean = 1 if data.RoomType == "backyard" else 0
     ownedPuffles = self.session.query(Puffle).filter(Puffle.PenguinID == data.PlayerId,
                                                      Puffle.Backyard == backyardBoolean)
 
-    playerPuffles = ["{}|{}|{}|{}|undefined|{}|{}|0|0|{}".format(puffle.ID, puffle.Type,
-                                                                 puffle.Subtype if puffle.Subtype else str(),
-                                                                 puffle.Name,
-                                                                 getStatistics(puffle.Type, puffle.Food,
-                                                                               puffle.Play, puffle.Rest,
-                                                                               puffle.Clean),
-                                                                 puffle.Hat, puffle.Walking)
+    playerPuffles = ["{}|{}|{}|{}|undefined|{}|{}|{}|{}|{}|0|0|{}"
+                         .format(puffle.ID, puffle.Type,
+                                 puffle.Subtype if puffle.Subtype else str(),
+                                 puffle.Name, puffle.Food,
+                                 puffle.Play, puffle.Rest, puffle.Clean,
+                                 puffle.Hat, puffle.Walking)
                      for puffle in ownedPuffles]
 
     self.sendXt("pg", len(playerPuffles), *playerPuffles)
 
 @Handlers.Handle(XT.GetMyPlayerPuffles)
 def handleGetMyPlayerPuffles(self, data):
-    playerPuffles = ["{}|{}|{}|{}|{}|{}|{}|0".format(puffle.ID, puffle.Type,
-                                                     puffle.Subtype if puffle.Subtype else str(),
-                                                     puffle.Name, time.mktime(puffle.AdoptionDate.timetuple()),
-                                                     getStatistics(puffle.Type, puffle.Food,
-                                                                   puffle.Play, puffle.Rest, puffle.Clean),
-                                                     puffle.Hat)
+    playerPuffles = ["{}|{}|{}|{}|{}|{}|{}|{}|{}|{}|0"
+                         .format(puffle.ID, puffle.Type,
+                                 puffle.Subtype if puffle.Subtype else str(),
+                                 puffle.Name, time.mktime(puffle.AdoptionDate.timetuple()),
+                                 puffle.Food, puffle.Play, puffle.Rest, puffle.Clean,
+                                 puffle.Hat)
                      for puffle in self.puffles.values()]
 
     self.sendXt("pgu", *playerPuffles)
@@ -100,7 +63,7 @@ def handleGetMyPlayerPuffles(self, data):
 @Handlers.Handle(XT.AdoptPuffle)
 @retryableTransaction()
 def handleSendAdoptPuffle(self, data):
-    if not data.TypeId in puffleStatistics:
+    if not data.TypeId in puffleTypes:
         return self.transport.loseConnection()
 
     if not 16 > len(data.Name) >= 3:
@@ -112,13 +75,10 @@ def handleSendAdoptPuffle(self, data):
     if len(self.puffles) >= 19:
         return self.sendError(440)
 
-    self.user.Coins -= 800
-
-    maxFood, maxPlay, maxRest, maxClean = puffleStatistics[data.TypeId]
+    self.user.Coins -= 800 if data.SubtypeId else 400
 
     puffle = Puffle(PenguinID=self.user.ID, Name=data.Name, Type=data.TypeId,
-                    Subtype=data.SubtypeId, Food=maxFood, Play=maxPlay,
-                    Rest=maxRest, Clean=maxClean)
+                    Subtype=data.SubtypeId)
     self.session.add(puffle)
     self.session.commit()
 
@@ -155,25 +115,17 @@ def handleSendPufflePlay(self, data):
     if data.PuffleId in self.puffles:
         puffle = self.puffles[data.PuffleId]
 
-        maxHealth, maxHunger, maxRest, maxClean = puffleStatistics[puffle.Type]
-
         negativeHunger = random.randrange(10, 25)
         negativeRest = random.randrange(10, 25)
 
-        puffle.Food = max(0, min(puffle.Food - negativeHunger, maxHunger))
-        puffle.Rest = max(0, min(puffle.Rest - negativeRest, maxRest))
+        puffle.Food = max(0, min(puffle.Food - negativeHunger, 100))
+        puffle.Rest = max(0, min(puffle.Rest - negativeRest, 100))
 
-        maxStatistic = max(puffle.Play, puffle.Rest)
-        minStatistic = min(puffle.Play, puffle.Rest)
-        puffle.Food = random.randrange(minStatistic, maxStatistic + 1)
+        puffleStats = ",".join("{}|{}|{}|{}|{}".format(puffle.ID, puffle.Food, puffle.Play,
+                                                       puffle.Rest, puffle.Clean)
+                               for puffle in self.puffles.values())
 
-        playType = 1 if puffle.Rest > 80 else random.choice([0, 2])
-
-        playString = "{}|Hou|dini|{}".format(puffle.ID, getStatistics(puffle.Type, puffle.Food,
-                                                                      puffle.Play, puffle.Rest,
-                                                                      puffle.Clean))
-
-        self.room.sendXt("pp", playString, playType)
+        self.room.sendXt("pp", puffleStats)
 
 @Handlers.Handle(XT.PuffleInitInteractionPlay)
 def handleSendPuffleInitPlayInteraction(self, data):
@@ -223,8 +175,8 @@ def handleGetMyPufflesStats(self, data):
 def handleGetPuffleHandlerStatus(self, data):
     self.sendXt("phg", 1)
 
-@Handlers.Handle(XT.SetPuffleHanderStatus)
-def handleSetPuffleHanderStatus(self, data):
+@Handlers.Handle(XT.SetPuffleHandlerStatus)
+def handlePuffleHandlerStatus(self, data):
     pass
 
 @Handlers.Handle(XT.PuffleCareItemDelivered)
@@ -292,3 +244,101 @@ def handleChangePuffleRoom(self, data):
     puffle = self.puffles[data.PuffleId]
     puffle.Backyard = 1 if data.RoomType == "backyard" else 0
     self.room.sendXt("puffleswap", data.PuffleId, data.RoomType)
+
+@Handlers.Handle(XT.RainbowPuffleQuestCookie)
+def handleRainbowPuffleQuestCookie(self, data):
+    puffleQuests = self.puffleQuests.values()
+    questsDone = sum(1 for task in puffleQuests if task.Completed is not None)
+    lastQuestCompletionDate = self.session.query(PuffleQuest.Completed)\
+        .order_by(PuffleQuest.Completed.desc()).first()[0]
+
+    taskAvailability = lastQuestCompletionDate + timedelta(minutes=20) \
+        if lastQuestCompletionDate is not None else datetime.now()
+
+    taskAvailabilityUnix = time.mktime(taskAvailability.timetuple())
+    minutesRemaining = (taskAvailability - datetime.now()).total_seconds() / 60
+
+    tasks = {
+        "currTask": next((task.TaskID for task in puffleQuests if task.Completed is None), 3),
+        "taskAvail": int(taskAvailabilityUnix), # When the next task will be available
+        "bonus": int(questsDone > 3 and 5220 not in self.inventory), # Sending 2 doesn't matter
+        "cannon": int(questsDone > 3),
+        "questsDone": questsDone,
+        "hoursRemaining": 0,
+        "minutesRemaining": int(minutesRemaining),
+        "tasks": {
+            task.TaskID: {
+                "item": task.ItemCollected,
+                "coin": task.CoinsCollected,
+                "completed": task.Completed is not None
+            }
+            for task in puffleQuests
+        }
+    }
+
+    self.sendXt("rpqd", json.dumps(tasks))
+
+# TODO: Check if 20 minutes have passed since the last quest was completed
+@Handlers.Handle(XT.RainbowPuffleTaskComplete)
+def handleRainbowPuffleTaskComplete(self, data):
+    if data.TaskId not in self.puffleQuests:
+        return self.transport.loseConnection()
+
+    puffleTask = self.puffleQuests[data.TaskId]
+
+    if puffleTask.Completed is not None:
+        return
+
+    puffleTask.ItemCollected = 1
+    puffleTask.CoinsCollected = 1
+    puffleTask.Completed = datetime.now()
+
+@Handlers.Handle(XT.RainbowPuffleTaskCoinCollected)
+def handleRainbowPuffleTaskCoinCollected(self, data):
+    if data.TaskId not in self.puffleQuests:
+        return self.transport.loseConnection()
+
+    puffleTask = self.puffleQuests[data.TaskId]
+
+    # User has already collected coins
+    if puffleTask.CoinsCollected == 2:
+        return self.transport.loseConnection()
+
+    puffleTask.CoinsCollected = 2
+
+    self.user.Coins += (data.TaskId + 1) * 50
+    self.sendXt("rpqcc", data.TaskId, 2, self.user.Coins)
+
+@Handlers.Handle(XT.RainbowPuffleTaskItemCollected)
+def handleRainbowPuffleTaskItemCollected(self, data):
+    if data.TaskId not in self.puffleQuests:
+        return self.transport.loseConnection()
+
+    puffleTask = self.puffleQuests[data.TaskId]
+
+    if puffleTask.ItemCollected == 2:
+        return self.transport.loseConnection()
+
+    taskItems = (6158, 4809, 1560, 3159)
+
+    self.addItem(taskItems[data.TaskId], sendXt=False)
+
+    puffleTask.ItemCollected = 2
+    self.sendXt("rpqic", data.TaskId, 2)
+
+@Handlers.Handle(XT.RainbowPuffleTaskBonusCollected)
+def handleRainbowPuffleTaskBonusCollected(self, data):
+    if not self.puffleQuests[3].Completed:
+        return self.transport.loseConnection()
+
+    self.user.Coins += 500
+    self.addItem(5220)
+    # We don't respond with the packet because it's broken
+
+@Handlers.Handle(XT.RainbowPuffleCheckName)
+def handleRainbowPuffleCheckName(self, data):
+    self.sendXt("pcn")
+
+@Handlers.Handle(XT.PuffleFrame)
+def handlePuffleFrame(self, data):
+    self.sendXt("ps", data.PuffleId, data.FrameId)
