@@ -719,7 +719,7 @@ class XT:
         "Data": [XTData("PlayerId", int)]
     }
 
-    SetPuffleHanderStatus = {
+    SetPuffleHandlerStatus = {
         "Handler": "p#phs",
         "Data": [XTData("PlayerId", int)]
     }
@@ -747,6 +747,36 @@ class XT:
     ChangePuffleRoom = {
         "Handler": "p#puffleswap",
         "Data": [XTData("PuffleId", int), XTData("RoomType", str)]
+    }
+
+    RainbowPuffleQuestCookie = {
+        "Handler": "rpq#rpqd",
+        "Data": []
+    }
+
+    RainbowPuffleTaskComplete = {
+        "Handler": "rpq#rpqtc",
+        "Data": [XTData("TaskId", int)]
+    }
+
+    RainbowPuffleTaskCoinCollected = {
+        "Handler": "rpq#rpqcc",
+        "Data": [XTData("TaskId", int)]
+    }
+
+    RainbowPuffleTaskItemCollected = {
+        "Handler": "rpq#rpqic",
+        "Data": [XTData("TaskId", int)]
+    }
+
+    RainbowPuffleTaskBonusCollected = {
+        "Handler": "rpq#rpqbc",
+        "Data": []
+    }
+
+    RainbowPuffleCheckName = {
+        "Handler": "p#pcn",
+        "Data": [XTData("Name", str)]
     }
 
 class HandlerEvent(object):
