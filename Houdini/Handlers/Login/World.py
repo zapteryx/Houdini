@@ -7,7 +7,7 @@ from Houdini.Data.Stamp import Stamp
 from Houdini.Data.Penguin import Penguin, BuddyList, IgnoreList, IglooInventory, \
     FurnitureInventory, FloorInventory, LocationInventory, Inventory
 from Houdini.Data.Igloo import Igloo, IglooLike
-from Houdini.Data.Puffle import Puffle, CareInventory
+from Houdini.Data.Puffle import Puffle, CareInventory, PuffleQuest
 from Houdini.Data.Deck import Deck
 from Houdini.Crypto import Crypto
 from Houdini.Data import retryableTransaction
@@ -106,7 +106,7 @@ def handleLogin(self, data):
 
     self.igloos = {iglooId: igloo for iglooId, igloo in
                    self.session.query(Igloo.ID, Igloo).filter_by(PenguinID=self.user.ID)}
-    map(self.session.add, self.igloos.values())
+    self.session.add_all(self.igloos.values())
 
     self.igloo = self.session.query(Igloo).filter_by(ID=self.user.Igloo).first()
     self.likeTimers = {iglooId: likeTime for iglooId, likeTime in
@@ -129,10 +129,22 @@ def handleLogin(self, data):
         .filter_by(PenguinID=self.user.ID)]
 
     self.puffles = {puffle.ID: puffle for puffle in self.session.query(Puffle).filter_by(PenguinID=self.user.ID)}
-    map(self.session.add, self.puffles.values())
+    self.session.add_all(self.puffles.values())
 
     self.walkingPuffle = self.session.query(Puffle) \
         .filter(Puffle.PenguinID == self.user.ID, Puffle.Walking == 1).first()
 
     self.careInventory = {itemId: quantity for itemId, quantity in self.session.query(
         CareInventory.ItemID, CareInventory.Quantity).filter_by(PenguinID=self.user.ID)}
+
+    puffleQuests = self.session.query(PuffleQuest).filter(PuffleQuest.PenguinID == self.user.ID).all()
+
+    if not puffleQuests:
+        puffleQuests = []
+
+        for taskId in range(0, 4):
+            puffleQuests.append(PuffleQuest(PenguinID=self.user.ID, TaskID=taskId))
+
+    self.session.add_all(puffleQuests)
+
+    self.puffleQuests = {task.TaskID: task for task in puffleQuests}
