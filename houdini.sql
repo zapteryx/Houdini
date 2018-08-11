@@ -35,20 +35,10 @@ CREATE TABLE `care_inventory` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `care_inventory` (`PenguinID`, `ItemID`, `Quantity`) VALUES
-(101, 3, 8),
-(101, 21, 1),
-(101, 52, 1),
-(101, 71, 1),
-(101, 72, 1),
-(101, 77, 8),
-(101, 78, 8),
-(101, 79, 7),
-(101, 143, 9),
-(101, 145, 8),
-(101, 146, 7),
-(101, 153, 9),
-(102, 3, 10),
-(102, 79, 10);
+(101, 3, 30),
+(101, 49, 1),
+(101, 79, 30),
+(101, 143, 10);
 
 CREATE TABLE `cover_stamps` (
   `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Unique penguin ID',
@@ -77,22 +67,6 @@ CREATE TABLE `furniture_inventory` (
   `Quantity` tinyint(3) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Quantity owned'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin owned furniture';
 
-INSERT INTO `furniture_inventory` (`PenguinID`, `FurnitureID`, `Quantity`) VALUES
-(101, 201, 1),
-(101, 206, 1),
-(101, 211, 1),
-(101, 225, 1),
-(101, 226, 1),
-(101, 536, 1),
-(101, 596, 1),
-(101, 616, 1),
-(101, 617, 1),
-(101, 632, 1),
-(101, 653, 1),
-(101, 662, 1),
-(101, 961, 1),
-(101, 2053, 1);
-
 CREATE TABLE `igloo` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique igloo ID',
   `PenguinID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Owner penguin ID',
@@ -104,11 +78,7 @@ CREATE TABLE `igloo` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin igloo settings';
 
 INSERT INTO `igloo` (`ID`, `PenguinID`, `Type`, `Floor`, `Music`, `Location`, `Locked`) VALUES
-(1, 101, 23, 0, 3, 8, 0),
-(10, 101, 63, 0, 0, 8, 1),
-(11, 101, 69, 0, 0, 8, 1),
-(12, 102, 1, 0, 0, 1, 1),
-(13, 103, 1, 0, 0, 1, 1);
+(1, 101, 1, 0, 0, 1, 1);
 
 CREATE TABLE `igloo_furniture` (
   `IglooID` int(10) UNSIGNED NOT NULL COMMENT 'Furniture igloo ID',
@@ -119,38 +89,10 @@ CREATE TABLE `igloo_furniture` (
   `Rotation` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Furniture rotation ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Furniture placed inside igloos';
 
-INSERT INTO `igloo_furniture` (`IglooID`, `FurnitureID`, `X`, `Y`, `Frame`, `Rotation`) VALUES
-(1, 201, 434, 346, 1, 1),
-(1, 206, 460, 293, 1, 1),
-(1, 211, 498, 337, 1, 1),
-(1, 225, 520, 286, 1, 1),
-(1, 536, 604, 225, 1, 2),
-(1, 617, 394, 288, 1, 1),
-(1, 653, 398, 170, 1, 1),
-(1, 662, 607, 147, 1, 2),
-(1, 961, 218, 323, 1, 2),
-(11, 616, 395, 176, 1, 2);
-
 CREATE TABLE `igloo_inventory` (
   `PenguinID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Owner penguin ID',
   `IglooID` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Igloo ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin owned igloos';
-
-INSERT INTO `igloo_inventory` (`PenguinID`, `IglooID`) VALUES
-(101, 23),
-(101, 57),
-(101, 61),
-(101, 62),
-(101, 63),
-(101, 65),
-(101, 66),
-(101, 68),
-(101, 69),
-(101, 70),
-(101, 71),
-(101, 73),
-(101, 75),
-(101, 84);
 
 CREATE TABLE `igloo_likes` (
   `IglooID` int(10) UNSIGNED NOT NULL COMMENT 'Igloo''s unique ID',
@@ -159,12 +101,6 @@ CREATE TABLE `igloo_likes` (
   `Count` int(11) NOT NULL COMMENT 'Amount of likes',
   `Date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of like'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-INSERT INTO `igloo_likes` (`IglooID`, `OwnerID`, `PlayerID`, `Count`, `Date`) VALUES
-(1, 101, 101, 1, '2018-05-08 15:07:32'),
-(1, 101, 102, 1, '2018-08-07 18:23:49'),
-(10, 101, 101, 1, '2018-05-08 15:07:28'),
-(11, 101, 101, 1, '2018-05-08 15:07:24');
 
 CREATE TABLE `ignore_list` (
   `PenguinID` int(10) UNSIGNED NOT NULL,
@@ -177,33 +113,13 @@ CREATE TABLE `inventory` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin owned clothing items';
 
 INSERT INTO `inventory` (`PenguinID`, `ItemID`) VALUES
-(101, 4),
-(101, 114),
-(101, 251),
-(101, 323),
-(101, 352),
-(101, 357),
-(101, 501),
-(101, 652),
-(101, 843),
-(101, 929),
-(101, 1597),
-(101, 2101),
-(101, 3032),
-(101, 3064),
-(101, 4107),
-(101, 5108),
-(101, 5126),
-(101, 9298),
-(101, 24318);
+(101, 1),
+(101, 4);
 
 CREATE TABLE `location_inventory` (
   `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Owner penguin ID',
   `LocationID` int(10) UNSIGNED NOT NULL COMMENT 'Location ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-INSERT INTO `location_inventory` (`PenguinID`, `LocationID`) VALUES
-(101, 8);
 
 CREATE TABLE `login` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique login ID',
@@ -213,58 +129,11 @@ CREATE TABLE `login` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin login records';
 
 INSERT INTO `login` (`ID`, `PenguinID`, `Date`, `IPAddress`) VALUES
-(24, 101, '2018-08-04 12:53:50', '127.0.0.1'),
-(25, 101, '2018-08-04 13:45:08', '127.0.0.1'),
-(26, 101, '2018-08-04 13:50:42', '127.0.0.1'),
-(27, 101, '2018-08-04 14:25:18', '127.0.0.1'),
-(28, 101, '2018-08-04 14:37:03', '127.0.0.1'),
-(29, 101, '2018-08-04 14:38:14', '127.0.0.1'),
-(30, 101, '2018-08-04 16:18:13', '127.0.0.1'),
-(31, 101, '2018-08-04 16:36:21', '127.0.0.1'),
-(32, 101, '2018-08-04 16:42:00', '127.0.0.1'),
-(33, 101, '2018-08-04 16:47:41', '127.0.0.1'),
-(34, 101, '2018-08-04 16:56:20', '127.0.0.1'),
-(35, 101, '2018-08-04 16:57:35', '127.0.0.1'),
-(36, 101, '2018-08-04 18:01:26', '127.0.0.1'),
-(37, 101, '2018-08-06 12:03:40', '127.0.0.1'),
-(38, 101, '2018-08-06 12:09:44', '127.0.0.1'),
-(39, 101, '2018-08-06 12:11:38', '127.0.0.1'),
-(40, 101, '2018-08-06 12:17:07', '127.0.0.1'),
-(41, 101, '2018-08-06 15:21:33', '127.0.0.1'),
-(42, 101, '2018-08-06 16:25:06', '127.0.0.1'),
-(43, 101, '2018-08-06 16:30:03', '127.0.0.1'),
-(44, 101, '2018-08-06 16:31:20', '127.0.0.1'),
-(45, 101, '2018-08-06 16:37:09', '127.0.0.1'),
-(46, 101, '2018-08-06 17:10:01', '127.0.0.1'),
-(47, 101, '2018-08-07 14:05:41', '127.0.0.1'),
-(48, 102, '2018-08-07 14:40:22', '127.0.0.1'),
-(49, 101, '2018-08-07 14:38:35', '127.0.0.1'),
-(50, 101, '2018-08-07 15:39:32', '127.0.0.1'),
-(51, 101, '2018-08-07 15:54:15', '127.0.0.1'),
-(52, 101, '2018-08-07 15:55:50', '127.0.0.1'),
-(53, 101, '2018-08-07 16:37:39', '127.0.0.1'),
-(54, 101, '2018-08-07 16:38:26', '127.0.0.1'),
-(55, 101, '2018-08-07 16:39:24', '127.0.0.1'),
-(56, 101, '2018-08-07 16:42:42', '127.0.0.1'),
-(57, 101, '2018-08-07 17:58:11', '127.0.0.1'),
-(58, 101, '2018-08-07 18:14:34', '127.0.0.1'),
-(59, 101, '2018-08-07 18:19:40', '127.0.0.1'),
-(60, 102, '2018-08-07 18:22:19', '127.0.0.1'),
-(61, 101, '2018-08-07 18:20:15', '127.0.0.1'),
-(62, 102, '2018-08-07 18:26:23', '127.0.0.1'),
-(63, 101, '2018-08-07 18:25:09', '127.0.0.1'),
-(64, 101, '2018-08-07 18:27:48', '127.0.0.1'),
-(65, 102, '2018-08-07 18:27:46', '127.0.0.1'),
-(66, 102, '2018-08-07 18:30:02', '127.0.0.1'),
-(67, 101, '2018-08-07 18:29:59', '127.0.0.1'),
-(68, 103, '2018-08-07 18:30:53', '127.0.0.1'),
-(69, 101, '2018-08-08 10:57:14', '127.0.0.1'),
-(70, 101, '2018-08-08 11:12:01', '127.0.0.1'),
-(71, 101, '2018-08-08 11:16:26', '127.0.0.1'),
-(72, 101, '2018-08-08 11:25:41', '127.0.0.1'),
-(73, 101, '2018-08-08 11:33:30', '127.0.0.1'),
-(74, 101, '2018-08-08 12:24:46', '127.0.0.1'),
-(75, 101, '2018-08-08 12:53:44', '127.0.0.1');
+(1, 101, '2018-08-11 03:16:45', '127.0.0.1'),
+(2, 101, '2018-08-11 03:22:18', '127.0.0.1'),
+(3, 101, '2018-08-11 03:25:21', '127.0.0.1'),
+(4, 101, '2018-08-11 03:27:54', '127.0.0.1'),
+(5, 101, '2018-08-11 03:32:01', '127.0.0.1');
 
 CREATE TABLE `penguin` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique penguin ID',
@@ -312,13 +181,12 @@ CREATE TABLE `penguin` (
   `NinjaMatchesWon` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'CardJitsu matches won',
   `FireMatchesWon` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuFire matches won',
   `WaterMatchesWon` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuWater matces won',
+  `Nuggets` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Golden puffle nuggets',
   `Rank` tinyint(1) DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguins';
 
-INSERT INTO `penguin` (`ID`, `Username`, `Nickname`, `Approval`, `Password`, `LoginKey`, `ConfirmationHash`, `Email`, `RegistrationDate`, `Active`, `Igloo`, `LastPaycheck`, `MinutesPlayed`, `Moderator`, `MascotStamp`, `Coins`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Permaban`, `BookModified`, `BookColor`, `BookHighlight`, `BookPattern`, `BookIcon`, `AgentStatus`, `FieldOpStatus`, `CareerMedals`, `AgentMedals`, `LastFieldOp`, `NinjaRank`, `NinjaProgress`, `FireNinjaRank`, `FireNinjaProgress`, `WaterNinjaRank`, `WaterNinjaProgress`, `NinjaMatchesWon`, `FireMatchesWon`, `WaterMatchesWon`, `Rank`) VALUES
-(101, 'Houdini', 'Houdini', 1, '$2y$12$dBWhLSF76Xw6RMxOXCByAunyj7boiz2nVxQ2PNlXVT7dXYp/gSo0u', '', '3dd3e91dca2e8b740d1c71b9fda33c30', 'houdini@hou.dini', '2018-05-08 10:19:15', 1, 1, '2018-08-01 00:00:00', 227, 0, 0, 481010, 4, 652, 114, 0, 4107, 0, 352, 9298, 501, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, '2018-05-08 10:19:15', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
-(102, 'Basil', 'Basil', 1, '$2y$12$dBWhLSF76Xw6RMxOXCByAunyj7boiz2nVxQ2PNlXVT7dXYp/gSo0u', '', '9e9b330cc72e83673f2fe3e746c16f56', 'basil@baesel.net', '2018-08-07 14:38:28', 1, 12, '2018-08-01 00:00:00', 15, 0, 0, 49200, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, '2018-08-07 14:38:28', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
-(103, 'Arty', 'Arty', 1, '$2y$12$dBWhLSF76Xw6RMxOXCByAunyj7boiz2nVxQ2PNlXVT7dXYp/gSo0u', '', 'f6b4490235cdef77dfbe6aad8dc6d1ad', 'arty@solero.me', '2018-08-07 18:30:44', 1, 13, '2018-08-01 00:00:00', 4, 0, 0, 50000, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, '2018-08-07 18:30:44', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+INSERT INTO `penguin` (`ID`, `Username`, `Nickname`, `Approval`, `Password`, `LoginKey`, `ConfirmationHash`, `Email`, `RegistrationDate`, `Active`, `Igloo`, `LastPaycheck`, `MinutesPlayed`, `Moderator`, `MascotStamp`, `Coins`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Permaban`, `BookModified`, `BookColor`, `BookHighlight`, `BookPattern`, `BookIcon`, `AgentStatus`, `FieldOpStatus`, `CareerMedals`, `AgentMedals`, `LastFieldOp`, `NinjaRank`, `NinjaProgress`, `FireNinjaRank`, `FireNinjaProgress`, `WaterNinjaRank`, `WaterNinjaProgress`, `NinjaMatchesWon`, `FireMatchesWon`, `WaterMatchesWon`, `Nuggets`, `Rank`) VALUES
+(101, 'Houdini', 'Houdini', 1, '$2y$12$8lNgd8WTUCakhP10fq05XOcU5MGxukpca3P/dVBVq4wCpjrIBsL7i', '', '63134c9c1a294c12a091789fc67e4be5', 'houdini@solero.me', '2018-08-11 03:16:14', 1, 1, '2018-08-01 00:00:00', 10, 0, 0, 247320, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, '2018-08-11 03:16:14', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
 
 CREATE TABLE `penguin_redemption` (
   `PenguinID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique penguin ID',
@@ -336,10 +204,7 @@ CREATE TABLE `postcard` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Sent postcards';
 
 INSERT INTO `postcard` (`ID`, `SenderID`, `RecipientID`, `Type`, `SendDate`, `Details`, `HasRead`) VALUES
-(51, NULL, 102, 111, '2018-08-07 14:41:00', 'Tabby', 0),
-(55, NULL, 102, 112, '2018-08-07 18:22:20', '', 0),
-(56, NULL, 101, 112, '2018-08-08 10:53:50', '', 0),
-(57, NULL, 103, 112, '2018-08-08 12:25:42', '', 0);
+(5, NULL, 101, 112, '2018-08-11 03:25:21', '', 1);
 
 CREATE TABLE `puffle` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique puffle ID',
@@ -348,19 +213,33 @@ CREATE TABLE `puffle` (
   `AdoptionDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date of adoption',
   `Type` tinyint(3) UNSIGNED NOT NULL COMMENT 'Puffle type ID',
   `Subtype` smallint(5) UNSIGNED NOT NULL COMMENT 'Puffle subtype ID',
-  `Food` tinyint(3) UNSIGNED NOT NULL COMMENT 'Puffle food %',
-  `Play` tinyint(3) UNSIGNED NOT NULL COMMENT 'Puffle play %',
-  `Rest` tinyint(3) UNSIGNED NOT NULL COMMENT 'Puffle rest %',
-  `Clean` tinyint(3) UNSIGNED NOT NULL COMMENT 'Puffle clean %',
+  `Food` tinyint(3) UNSIGNED NOT NULL DEFAULT '100' COMMENT 'Puffle food %',
+  `Play` tinyint(3) UNSIGNED NOT NULL DEFAULT '100' COMMENT 'Puffle play %',
+  `Rest` tinyint(3) UNSIGNED NOT NULL DEFAULT '100' COMMENT 'Puffle rest %',
+  `Clean` tinyint(3) UNSIGNED NOT NULL DEFAULT '100' COMMENT 'Puffle clean %',
   `Walking` tinyint(4) DEFAULT '0',
   `Hat` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Puffle hat ID',
   `Backyard` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Determines the puffle''s location'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Adopted puffles';
 
 INSERT INTO `puffle` (`ID`, `PenguinID`, `Name`, `AdoptionDate`, `Type`, `Subtype`, `Food`, `Play`, `Rest`, `Clean`, `Walking`, `Hat`, `Backyard`) VALUES
-(22, 101, 'Wee', '2018-08-06 17:10:49', 1, 0, 100, 0, 41, 91, 0, 52, 0),
-(23, 102, 'Tabby', '2018-08-07 14:41:00', 8, 1007, 100, 80, 120, 100, 0, 0, 0),
-(24, 101, 'Blurp', '2018-08-07 14:55:59', 4, 0, 37, 100, 4, 67, 0, 72, 0);
+(1, 101, 'Blu', '2018-08-11 03:17:40', 0, 0, 72, 100, 81, 90, 0, 49, 0),
+(2, 101, 'Tangerine', '2018-08-11 03:18:14', 8, 1007, 100, 100, 100, 100, 0, 0, 0),
+(3, 101, 'Majestic', '2018-08-11 03:18:49', 6, 1020, 100, 100, 100, 100, 0, 0, 0);
+
+CREATE TABLE `puffle_quest` (
+  `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Penguin ID',
+  `TaskID` tinyint(4) UNSIGNED NOT NULL COMMENT 'Task ID',
+  `Completed` datetime DEFAULT NULL COMMENT 'Time of completion',
+  `ItemCollected` tinyint(4) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Item collection status',
+  `CoinsCollected` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Coins collection status'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `puffle_quest` (`PenguinID`, `TaskID`, `Completed`, `ItemCollected`, `CoinsCollected`) VALUES
+(101, 0, NULL, 0, 0),
+(101, 1, NULL, 0, 0),
+(101, 2, NULL, 0, 0),
+(101, 3, NULL, 0, 0);
 
 CREATE TABLE `redemption_award` (
   `CodeID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique code ID',
@@ -457,6 +336,9 @@ ALTER TABLE `puffle`
   ADD PRIMARY KEY (`ID`),
   ADD KEY `PenguinID` (`PenguinID`);
 
+ALTER TABLE `puffle_quest`
+  ADD PRIMARY KEY (`PenguinID`,`TaskID`);
+
 ALTER TABLE `redemption_award`
   ADD PRIMARY KEY (`CodeID`,`Award`);
 
@@ -469,19 +351,19 @@ ALTER TABLE `stamp`
 
 
 ALTER TABLE `igloo`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique igloo ID', AUTO_INCREMENT=14;
+  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique igloo ID', AUTO_INCREMENT=2;
 
 ALTER TABLE `login`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique login ID', AUTO_INCREMENT=76;
+  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique login ID', AUTO_INCREMENT=6;
 
 ALTER TABLE `penguin`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique penguin ID', AUTO_INCREMENT=104;
+  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique penguin ID', AUTO_INCREMENT=102;
 
 ALTER TABLE `postcard`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique postcard ID', AUTO_INCREMENT=58;
+  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique postcard ID', AUTO_INCREMENT=6;
 
 ALTER TABLE `puffle`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique puffle ID', AUTO_INCREMENT=25;
+  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique puffle ID', AUTO_INCREMENT=4;
 
 ALTER TABLE `redemption_code`
   MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique code ID';
