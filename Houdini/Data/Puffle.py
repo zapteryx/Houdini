@@ -14,10 +14,10 @@ class Puffle(Base):
     AdoptionDate = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     Type = Column(Integer, nullable=False)
     Subtype = Column(Integer, nullable=False)
-    Food = Column(Integer, nullable=False)
-    Play = Column(Integer, nullable=False)
-    Rest = Column(Integer, nullable=False)
-    Clean = Column(Integer, nullable=False)
+    Food = Column(Integer, nullable=False, server_default=text("100"))
+    Play = Column(Integer, nullable=False, server_default=text("100"))
+    Rest = Column(Integer, nullable=False, server_default=text("100"))
+    Clean = Column(Integer, nullable=False, server_default=text("100"))
     Walking = Column(Integer, server_default=text("0"))
     Hat = Column(Integer, server_default=text("0"))
     Backyard = Column(Integer, server_default=text("0"))
@@ -30,5 +30,17 @@ class CareInventory(Base):
     PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True, nullable=False)
     ItemID = Column(SmallInteger, primary_key=True, nullable=False, server_default=text("0"))
     Quantity = Column(Integer, nullable=False, server_default=text("1"))
+
+    penguin = relationship(u'Penguin')
+
+class PuffleQuest(Base):
+    __tablename__ = 'puffle_quest'
+
+    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                       nullable=False)
+    TaskID = Column(Integer, primary_key=True, nullable=False)
+    Completed = Column(DateTime, nullable=True, server_default=text("current_timestamp()"))
+    ItemCollected = Column(Integer, server_default=text("0"))
+    CoinsCollected = Column(Integer, server_default=text("0"))
 
     penguin = relationship(u'Penguin')
