@@ -34,12 +34,6 @@ CREATE TABLE `care_inventory` (
   `Quantity` tinyint(3) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Quantity owned'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `care_inventory` (`PenguinID`, `ItemID`, `Quantity`) VALUES
-(101, 3, 30),
-(101, 49, 1),
-(101, 79, 30),
-(101, 143, 10);
-
 CREATE TABLE `cover_stamps` (
   `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Unique penguin ID',
   `Stamp` smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Cover stamp or item ID',
@@ -77,9 +71,6 @@ CREATE TABLE `igloo` (
   `Locked` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is igloo locked?'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin igloo settings';
 
-INSERT INTO `igloo` (`ID`, `PenguinID`, `Type`, `Floor`, `Music`, `Location`, `Locked`) VALUES
-(1, 101, 1, 0, 0, 1, 1);
-
 CREATE TABLE `igloo_furniture` (
   `IglooID` int(10) UNSIGNED NOT NULL COMMENT 'Furniture igloo ID',
   `FurnitureID` mediumint(8) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Furniture item ID',
@@ -112,10 +103,6 @@ CREATE TABLE `inventory` (
   `ItemID` smallint(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Clothing item ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin owned clothing items';
 
-INSERT INTO `inventory` (`PenguinID`, `ItemID`) VALUES
-(101, 1),
-(101, 4);
-
 CREATE TABLE `location_inventory` (
   `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Owner penguin ID',
   `LocationID` int(10) UNSIGNED NOT NULL COMMENT 'Location ID'
@@ -127,13 +114,6 @@ CREATE TABLE `login` (
   `Date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `IPAddress` char(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin login records';
-
-INSERT INTO `login` (`ID`, `PenguinID`, `Date`, `IPAddress`) VALUES
-(1, 101, '2018-08-11 03:16:45', '127.0.0.1'),
-(2, 101, '2018-08-11 03:22:18', '127.0.0.1'),
-(3, 101, '2018-08-11 03:25:21', '127.0.0.1'),
-(4, 101, '2018-08-11 03:27:54', '127.0.0.1'),
-(5, 101, '2018-08-11 03:32:01', '127.0.0.1');
 
 CREATE TABLE `penguin` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique penguin ID',
@@ -181,12 +161,13 @@ CREATE TABLE `penguin` (
   `NinjaMatchesWon` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'CardJitsu matches won',
   `FireMatchesWon` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuFire matches won',
   `WaterMatchesWon` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuWater matces won',
+  `HasDug` tinyint(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Puffle digging boolean',
   `Nuggets` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Golden puffle nuggets',
   `Rank` tinyint(1) DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguins';
 
-INSERT INTO `penguin` (`ID`, `Username`, `Nickname`, `Approval`, `Password`, `LoginKey`, `ConfirmationHash`, `Email`, `RegistrationDate`, `Active`, `Igloo`, `LastPaycheck`, `MinutesPlayed`, `Moderator`, `MascotStamp`, `Coins`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Permaban`, `BookModified`, `BookColor`, `BookHighlight`, `BookPattern`, `BookIcon`, `AgentStatus`, `FieldOpStatus`, `CareerMedals`, `AgentMedals`, `LastFieldOp`, `NinjaRank`, `NinjaProgress`, `FireNinjaRank`, `FireNinjaProgress`, `WaterNinjaRank`, `WaterNinjaProgress`, `NinjaMatchesWon`, `FireMatchesWon`, `WaterMatchesWon`, `Nuggets`, `Rank`) VALUES
-(101, 'Houdini', 'Houdini', 1, '$2y$12$8lNgd8WTUCakhP10fq05XOcU5MGxukpca3P/dVBVq4wCpjrIBsL7i', '', '63134c9c1a294c12a091789fc67e4be5', 'houdini@solero.me', '2018-08-11 03:16:14', 1, 1, '2018-08-01 00:00:00', 10, 0, 0, 247320, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, '2018-08-11 03:16:14', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+INSERT INTO `penguin` (`ID`, `Username`, `Nickname`, `Approval`, `Password`, `LoginKey`, `ConfirmationHash`, `Email`, `RegistrationDate`, `Active`, `Igloo`, `LastPaycheck`, `MinutesPlayed`, `Moderator`, `MascotStamp`, `Coins`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Permaban`, `BookModified`, `BookColor`, `BookHighlight`, `BookPattern`, `BookIcon`, `AgentStatus`, `FieldOpStatus`, `CareerMedals`, `AgentMedals`, `LastFieldOp`, `NinjaRank`, `NinjaProgress`, `FireNinjaRank`, `FireNinjaProgress`, `WaterNinjaRank`, `WaterNinjaProgress`, `NinjaMatchesWon`, `FireMatchesWon`, `WaterMatchesWon`, `HasDug`, `Nuggets`, `Rank`) VALUES
+(101, 'Houdini', 'Houdini', 1, '$2y$12$8lNgd8WTUCakhP10fq05XOcU5MGxukpca3P/dVBVq4wCpjrIBsL7i', '', '', 'houdini@solero.me', '2018-08-11 03:16:14', 1, 0, '2018-08-01 00:00:00', 134, 0, 0, 246876, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, '2018-08-11 03:16:14', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
 
 CREATE TABLE `penguin_redemption` (
   `PenguinID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique penguin ID',
@@ -203,9 +184,6 @@ CREATE TABLE `postcard` (
   `HasRead` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is read?'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Sent postcards';
 
-INSERT INTO `postcard` (`ID`, `SenderID`, `RecipientID`, `Type`, `SendDate`, `Details`, `HasRead`) VALUES
-(5, NULL, 101, 112, '2018-08-11 03:25:21', '', 1);
-
 CREATE TABLE `puffle` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique puffle ID',
   `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Owner penguin ID',
@@ -219,13 +197,10 @@ CREATE TABLE `puffle` (
   `Clean` tinyint(3) UNSIGNED NOT NULL DEFAULT '100' COMMENT 'Puffle clean %',
   `Walking` tinyint(4) DEFAULT '0',
   `Hat` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Puffle hat ID',
-  `Backyard` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Determines the puffle''s location'
+  `Backyard` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Determines the puffle''s location',
+  `HasDug` tinyint(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Digging status boolean',
+  `State` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Puffle state'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Adopted puffles';
-
-INSERT INTO `puffle` (`ID`, `PenguinID`, `Name`, `AdoptionDate`, `Type`, `Subtype`, `Food`, `Play`, `Rest`, `Clean`, `Walking`, `Hat`, `Backyard`) VALUES
-(1, 101, 'Blu', '2018-08-11 03:17:40', 0, 0, 72, 100, 81, 90, 0, 49, 0),
-(2, 101, 'Tangerine', '2018-08-11 03:18:14', 8, 1007, 100, 100, 100, 100, 0, 0, 0),
-(3, 101, 'Majestic', '2018-08-11 03:18:49', 6, 1020, 100, 100, 100, 100, 0, 0, 0);
 
 CREATE TABLE `puffle_quest` (
   `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Penguin ID',
@@ -234,12 +209,6 @@ CREATE TABLE `puffle_quest` (
   `ItemCollected` tinyint(4) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Item collection status',
   `CoinsCollected` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Coins collection status'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-INSERT INTO `puffle_quest` (`PenguinID`, `TaskID`, `Completed`, `ItemCollected`, `CoinsCollected`) VALUES
-(101, 0, NULL, 0, 0),
-(101, 1, NULL, 0, 0),
-(101, 2, NULL, 0, 0),
-(101, 3, NULL, 0, 0);
 
 CREATE TABLE `redemption_award` (
   `CodeID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique code ID',
@@ -351,19 +320,19 @@ ALTER TABLE `stamp`
 
 
 ALTER TABLE `igloo`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique igloo ID', AUTO_INCREMENT=2;
+  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique igloo ID';
 
 ALTER TABLE `login`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique login ID', AUTO_INCREMENT=6;
+  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique login ID';
 
 ALTER TABLE `penguin`
   MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique penguin ID', AUTO_INCREMENT=102;
 
 ALTER TABLE `postcard`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique postcard ID', AUTO_INCREMENT=6;
+  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique postcard ID';
 
 ALTER TABLE `puffle`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique puffle ID', AUTO_INCREMENT=4;
+  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique puffle ID';
 
 ALTER TABLE `redemption_code`
   MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique code ID';
