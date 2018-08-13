@@ -779,6 +779,27 @@ class XT:
         "Data": [XTData("Name", str)]
     }
 
+    PuffleTreasure = {
+        "Handler": "p#puffledig",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    PuffleTreasureOnCommand = {
+        "Handler": "p#puffledigoncommand",
+        "Data": []
+    }
+
+    PenguinOnSlideOrZipline = {
+        "Handler": "u#followpath",
+        "Data": [XTData("ServerId", int)]
+    }
+
+    GoldRevealAnimation = {
+        "Handler": "p#revealgoldpuffle",
+        "Data": []
+    }
+
+
 class HandlerEvent(object):
 
     def __init__(self, handlerDetails):
@@ -926,7 +947,7 @@ class Handlers:
     @staticmethod
     def Throttle(secs=1):
         def handlerFunction(function):
-            def handler(penguin, data):
+            def handler(penguin, *data, **kwargs):
                 Handlers.Throttles[function] = secs
 
                 if secs == -1 and function in penguin.throttle:
@@ -940,7 +961,7 @@ class Handlers:
                 if time.time() < lastSent + Handlers.Throttles[function]:
                     return function
 
-                function(penguin, data)
+                function(penguin, *data, **kwargs)
                 penguin.throttle[function] = time.time()
 
                 return function
