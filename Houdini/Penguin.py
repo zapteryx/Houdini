@@ -32,6 +32,8 @@ class Penguin(Spheniscidae):
         self.gameFinished = True
 
         self.walkingPuffle = None
+        self.digCount = 0
+        self.canDigGold = False
 
         self.logger.info("Penguin class instantiated")
 
@@ -88,7 +90,7 @@ class Penguin(Spheniscidae):
 
         self.sendXt("aloc", locationId, self.user.Coins)
 
-    def addFurniture(self, furnitureId, furnitureCost=0):
+    def addFurniture(self, furnitureId, furnitureCost=0, sendXt=True):
         furnitureQuantity = 1
 
         if furnitureId in self.furniture:
@@ -106,7 +108,8 @@ class Penguin(Spheniscidae):
         self.furniture[furnitureId] = furnitureQuantity
         self.user.Coins -= furnitureCost
 
-        self.sendXt("af", furnitureId, self.user.Coins)
+        if sendXt:
+            self.sendXt("af", furnitureId, self.user.Coins)
 
     def addFlooring(self, floorId, floorCost=0):
         self.user.Coins -= floorCost
@@ -194,7 +197,6 @@ class Penguin(Spheniscidae):
             str() # Party information
         ]
 
-        # TODO: The zero at the end here will need to be adjusted once golden puffles are added
         if self.walkingPuffle is not None:
             playerArray.extend([self.walkingPuffle.ID, self.walkingPuffle.Type,
                                 self.walkingPuffle.Subtype if self.walkingPuffle.Subtype else str(),
