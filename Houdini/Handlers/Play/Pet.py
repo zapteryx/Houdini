@@ -7,6 +7,7 @@ from Houdini.Data.Postcard import Postcard
 from Houdini.Data import retryableTransaction
 
 puffleTypes = range(0, 12)
+puffleFavoriteFood = [101, 107, 112, 109, 110, 106, 114, 111, 108, 113, 115, 128]
 
 def decreaseStats(server):
     for (playerId, player) in server.players.items():
@@ -74,6 +75,27 @@ def handleSendAdoptPuffle(self, data):
 
     if len(self.puffles) >= 19:
         return self.sendError(440)
+
+    if data.TypeId == 10:
+        questsDone = sum(1 for taskId in self.puffleQuests if
+                         self.puffleQuests[taskId].Completed is not None)
+
+        if questsDone < 4:
+            return self.transport.loseConnection()
+
+        for taskId in self.puffleQuests:
+            self.puffleQuests[taskId].Completed = None
+            self.puffleQuests[taskId].CoinsCollected = 0
+
+    if data.TypeId == 11:
+        if self.user.Nuggets < 15 or not self.canDigGold:
+            return self.transport.loseConnection()
+
+        self.user.Nuggets = 0
+        self.canDigGold = False
+
+        if 125 not in self.careInventory:
+            self.addCareItem(125, 1, sendXt=False)
 
     self.user.Coins -= 800 if data.SubtypeId else 400
 
@@ -176,7 +198,7 @@ def handleGetPuffleHandlerStatus(self, data):
     self.sendXt("phg", 1)
 
 @Handlers.Handle(XT.SetPuffleHandlerStatus)
-def handlePuffleHandlerStatus(self, data):
+def handleSetPuffleHandlerStatus(self, data):
     pass
 
 @Handlers.Handle(XT.PuffleCareItemDelivered)
@@ -196,10 +218,16 @@ def handlePuffleCareItemDelivered(self, data):
     puffle = self.puffles[data.PuffleId]
     careItem = self.server.careItems.getItem(data.CareItemId)
 
-    puffle.Food = max(0, min(puffle.Food + careItem.Effect.Food, 100))
-    puffle.Play = max(0, min(puffle.Play + careItem.Effect.Play, 100))
-    puffle.Rest = max(0, min(puffle.Rest + careItem.Effect.Rest, 100))
-    puffle.Clean = max(0, min(puffle.Clean + careItem.Effect.Clean, 100))
+    if data.CareItemId is not puffleFavoriteFood[puffle.Type]:
+        puffle.Food = max(0, min(puffle.Food + careItem.Effect.Food, 100))
+        puffle.Play = max(0, min(puffle.Play + careItem.Effect.Play, 100))
+        puffle.Rest = max(0, min(puffle.Rest + careItem.Effect.Rest, 100))
+        puffle.Clean = max(0, min(puffle.Clean + careItem.Effect.Clean, 100))
+    else:
+        puffle.Food = 100
+        puffle.Play = 100
+        puffle.Rest = 100
+        puffle.Clean = 100
 
     celebrationBoolean = puffle.Food == puffle.Play == puffle.Rest == puffle.Clean == 100
 
@@ -208,6 +236,13 @@ def handlePuffleCareItemDelivered(self, data):
                                                   int(celebrationBoolean))
 
     self.room.sendXt("pcid", self.user.ID, careItemDelivery)
+
+    if data.CareItemId == 126:
+        self.user.Coins -= 10 # TODO: Check if they have enough coins
+        self.canDigGold = True
+
+        self.room.sendXt("oberry", self.user.ID, puffle.ID)
+        self.sendXt("currencies", "1|{}".format(self.user.Nuggets))
 
 @Handlers.Handle(XT.PuffleVisitorHatUpdate)
 def handlePuffleVisitorHatUpdate(self, data):
@@ -278,20 +313,31 @@ def handleRainbowPuffleQuestCookie(self, data):
 
     self.sendXt("rpqd", json.dumps(tasks))
 
-# TODO: Check if 20 minutes have passed since the last quest was completed
 @Handlers.Handle(XT.RainbowPuffleTaskComplete)
 def handleRainbowPuffleTaskComplete(self, data):
-    if data.TaskId not in self.puffleQuests:
+    if data.TaskId not in self.puffleQuests \
+            or not self.walkingPuffle:
         return self.transport.loseConnection()
+
+    lastQuestCompletionDate = self.session.query(PuffleQuest.Completed) \
+        .order_by(PuffleQuest.Completed.desc()).first()[0]
+
+    currentDatetime = datetime.now()
+
+    if lastQuestCompletionDate is not None and \
+            (currentDatetime - lastQuestCompletionDate) < timedelta(minutes=20):
+        self.logger.debug("Not enough time has elapsed")
+        return
 
     puffleTask = self.puffleQuests[data.TaskId]
 
     if puffleTask.Completed is not None:
+        self.logger.debug("Task has already been completed!")
         return
 
     puffleTask.ItemCollected = 1
     puffleTask.CoinsCollected = 1
-    puffleTask.Completed = datetime.now()
+    puffleTask.Completed = currentDatetime
 
 @Handlers.Handle(XT.RainbowPuffleTaskCoinCollected)
 def handleRainbowPuffleTaskCoinCollected(self, data):
@@ -342,3 +388,115 @@ def handleRainbowPuffleCheckName(self, data):
 @Handlers.Handle(XT.PuffleFrame)
 def handlePuffleFrame(self, data):
     self.sendXt("ps", data.PuffleId, data.FrameId)
+
+def selectTreasureByType(self, treasureType):
+    goldenItems = self.walkingPuffle.Type == 11
+    if treasureType == "Food":
+        careItemId = random.choice(puffleFavoriteFood)
+        self.addCareItem(careItemId, sendXt=False)
+        if careItemId == puffleFavoriteFood[self.walkingPuffle.Type]:
+            self.addStamp(495, sendXt=True)
+        return careItemId, 1
+    elif treasureType == "Furniture":
+        furnitureList = self.server.config["Treasure"]["Furniture"]
+        if goldenItems:
+            furnitureList.extend(self.server.config["Treasure"]["Gold"]["Furniture"])
+        furnitureId = random.choice(furnitureList)
+        self.addFurniture(furnitureId, sendXt=False)
+        return furnitureId, 1
+    elif treasureType == "Clothing":
+        self.addStamp(494, True)
+        clothingList = self.server.config["Treasure"]["Clothing"]
+
+        if goldenItems:
+            clothingList.extend(self.server.config["Treasure"]["Gold"]["Clothing"])
+        availableClothing = list(set(clothingList) - set(self.inventory))
+
+        if not availableClothing:
+            treasureQuantity = random.randrange(10, 250)
+            self.user.Coins += treasureQuantity
+            if treasureQuantity >= 50:
+                self.addStamp(493, True)
+            return 0, treasureQuantity
+
+        itemId = random.choice(availableClothing)
+        self.addItem(itemId, sendXt=False)
+        return itemId, 1
+
+@Handlers.Handle(XT.PuffleTreasure)
+@Handlers.Throttle(5)
+def handlePuffleTreasure(self, data, digOnCommand=False):
+    if not self.walkingPuffle:
+        return self.transport.loseConnection()
+
+    treasureTypes = {0: "Coins", 1: "Food", 2: "Furniture", 3: "Clothing", None: None}
+
+    if self.canDigGold:
+        treasureTypes[4] = "Gold"
+        del treasureTypes[1], treasureTypes[2], \
+            treasureTypes[3], treasureTypes[None]
+
+    if digOnCommand and None in treasureTypes:
+        del treasureTypes[None]
+
+    treasureTypeIndex = random.choice(list(treasureTypes))
+    treasureType = treasureTypes[treasureTypeIndex]
+
+    if treasureType is None:
+        return self.room.sendXt("nodig", self.user.ID, 1)
+    elif treasureTypeIndex == 0: # Coins
+        treasureId = 0
+        treasureQuantity = random.randrange(10, 250)
+        self.user.Coins += treasureQuantity
+        if treasureQuantity >= 50:
+            self.addStamp(493, True)
+    elif treasureTypeIndex == 4 and self.canDigGold and self.user.Nuggets < 15:
+        # Dig golden nuggets
+        treasureId = 0
+        treasureQuantity = random.randrange(1, 4)
+
+        self.user.Nuggets += treasureQuantity
+        self.sendXt("currencies", "1|{}".format(self.user.Nuggets))
+    else:
+        treasureId, treasureQuantity = selectTreasureByType(self, treasureType)
+
+    firstSuccessfulDig = self.user.HasDug == 0
+
+    if firstSuccessfulDig:
+        self.addStamp(489, True)
+
+        for player in self.room.players:
+            player.addStamp(490, True)
+
+    self.room.sendXt("puffledig", self.user.ID, self.walkingPuffle.ID,
+                     treasureTypeIndex, treasureId, treasureQuantity,
+                     int(firstSuccessfulDig))
+    self.user.HasDug = 1
+    self.walkingPuffle.HasDug = 1
+    self.digCount += 1
+
+    if self.digCount == 5:
+        self.addStamp(492, True)
+
+    pufflesHaveDug = set([self.puffles[puffleId].Type
+                          for puffleId in self.puffles
+                          if self.puffles[puffleId].HasDug])
+
+    if pufflesHaveDug == set(puffleTypes):
+        self.addStamp(491, True)
+
+@Handlers.Handle(XT.PuffleTreasureOnCommand)
+@Handlers.Throttle(120)
+def handlePuffleTreasureOnCommand(self, data):
+    handlePuffleTreasure(self, [], digOnCommand=True)
+
+@Handlers.Handle(XT.PenguinOnSlideOrZipline)
+def handlePenguinOnSlideOrZipline(self, data):
+    self.room.sendXt("followpath", self.user.ID, data.ServerId)
+
+@Handlers.Handle(XT.GoldRevealAnimation)
+def handleGoldRevealAnimation(self, data):
+    if not self.canDigGold or not self.user.Nuggets >= 15:
+        return self.transport.loseConnection()
+
+    self.sendXt("revealgoldpuffle", self.user.ID)
