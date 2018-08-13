@@ -19,8 +19,9 @@ class Puffle(Base):
     Rest = Column(Integer, nullable=False, server_default=text("100"))
     Clean = Column(Integer, nullable=False, server_default=text("100"))
     Walking = Column(Integer, server_default=text("0"))
-    Hat = Column(Integer, server_default=text("0"))
-    Backyard = Column(Integer, server_default=text("0"))
+    Hat = Column(Integer, nullable=False, server_default=text("0"))
+    Backyard = Column(Integer, nullable=False, server_default=text("0"))
+    HasDug = Column(Integer, nullable=False, server_default=text("0"))
 
     penguin = relationship(u'Penguin')
 
