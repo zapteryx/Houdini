@@ -73,7 +73,7 @@ def handleSendAdoptPuffle(self, data):
     if self.user.Coins < 800:
         return self.sendError(401)
 
-    if len(self.puffles) >= 19:
+    if len(self.puffles) >= 75:
         return self.sendError(440)
 
     if data.TypeId == 10:
@@ -83,9 +83,7 @@ def handleSendAdoptPuffle(self, data):
         if questsDone < 4:
             return self.transport.loseConnection()
 
-        for taskId in self.puffleQuests:
-            self.puffleQuests[taskId].Completed = None
-            self.puffleQuests[taskId].CoinsCollected = 0
+        self.user.RainbowAdoptability = 0
 
     if data.TypeId == 11:
         if self.user.Nuggets < 15 or not self.canDigGold:
@@ -202,6 +200,7 @@ def handleSetPuffleHandlerStatus(self, data):
     pass
 
 @Handlers.Handle(XT.PuffleCareItemDelivered)
+@Handlers.Throttle()
 def handlePuffleCareItemDelivered(self, data):
     if data.PuffleId not in self.puffles:
         return self.transport.loseConnection()
@@ -289,15 +288,22 @@ def handleRainbowPuffleQuestCookie(self, data):
 
     taskAvailability = lastQuestCompletionDate + timedelta(minutes=20) \
         if lastQuestCompletionDate is not None else datetime.now()
+    minutesRemaining = (taskAvailability - datetime.now()).total_seconds() / 60
+
+    if questsDone > 3 and minutesRemaining <= 0:
+        for taskId in self.puffleQuests:
+            self.puffleQuests[taskId].Completed = None
+            self.puffleQuests[taskId].CoinsCollected = 0
+
+        questsDone = 0
 
     taskAvailabilityUnix = time.mktime(taskAvailability.timetuple())
-    minutesRemaining = (taskAvailability - datetime.now()).total_seconds() / 60
 
     tasks = {
         "currTask": next((task.TaskID for task in puffleQuests if task.Completed is None), 3),
         "taskAvail": int(taskAvailabilityUnix), # When the next task will be available
         "bonus": int(questsDone > 3 and 5220 not in self.inventory), # Sending 2 doesn't matter
-        "cannon": int(questsDone > 3),
+        "cannon": self.user.RainbowAdoptability,
         "questsDone": questsDone,
         "hoursRemaining": 0,
         "minutesRemaining": int(minutesRemaining),
@@ -338,6 +344,9 @@ def handleRainbowPuffleTaskComplete(self, data):
     puffleTask.ItemCollected = 1
     puffleTask.CoinsCollected = 1
     puffleTask.Completed = currentDatetime
+
+    if data.TaskId == 3:
+        self.user.RainbowAdoptability = 1
 
 @Handlers.Handle(XT.RainbowPuffleTaskCoinCollected)
 def handleRainbowPuffleTaskCoinCollected(self, data):
@@ -391,6 +400,7 @@ def handlePuffleFrame(self, data):
 
 def selectTreasureByType(self, treasureType):
     goldenItems = self.walkingPuffle.Type == 11
+    borderTabbyItems = self.walkingPuffle.Subtype in (1006, 1007)
     if treasureType == "Food":
         careItemId = random.choice(puffleFavoriteFood)
         self.addCareItem(careItemId, sendXt=False)
@@ -401,6 +411,8 @@ def selectTreasureByType(self, treasureType):
         furnitureList = self.server.config["Treasure"]["Furniture"]
         if goldenItems:
             furnitureList.extend(self.server.config["Treasure"]["Gold"]["Furniture"])
+        if borderTabbyItems:
+            furnitureList.extend(self.server.config["Treasure"]["BorderTabby"]["Furniture"])
         furnitureId = random.choice(furnitureList)
         self.addFurniture(furnitureId, sendXt=False)
         return furnitureId, 1
@@ -410,6 +422,9 @@ def selectTreasureByType(self, treasureType):
 
         if goldenItems:
             clothingList.extend(self.server.config["Treasure"]["Gold"]["Clothing"])
+        if borderTabbyItems:
+            clothingList.extend(self.server.config["Treasure"]["BorderTabby"]["Clothing"])
+
         availableClothing = list(set(clothingList) - set(self.inventory))
 
         if not availableClothing:
@@ -500,3 +515,19 @@ def handleGoldRevealAnimation(self, data):
         return self.transport.loseConnection()
 
     self.sendXt("revealgoldpuffle", self.user.ID)
+
+@Handlers.Handle(XT.ReturnPuffle)
+def handleReturnPuffle(self, data):
+    if data.PuffleId not in self.puffles:
+        return self.transport.loseConnection()
+
+    del self.puffles[data.PuffleId]
+
+    if self.walkingPuffle is not None and \
+            self.walkingPuffle.ID == data.PuffleId:
+        self.walkingPuffle = None
+
+    self.session.query(Puffle).filter(Puffle.ID == data.PuffleId).delete()
+    self.session.commit()
+
+    self.room.sendXt("prp", data.PuffleId)
