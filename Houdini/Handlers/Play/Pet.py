@@ -514,7 +514,7 @@ def handleGoldRevealAnimation(self, data):
     if not self.canDigGold or not self.user.Nuggets >= 15:
         return self.transport.loseConnection()
 
-    self.sendXt("revealgoldpuffle", self.user.ID)
+    self.room.sendXt("revealgoldpuffle", self.user.ID)
 
 @Handlers.Handle(XT.ReturnPuffle)
 def handleReturnPuffle(self, data):
