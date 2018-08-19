@@ -799,6 +799,11 @@ class XT:
         "Data": []
     }
 
+    ReturnPuffle = {
+        "Handler": "p#prp",
+        "Data": [XTData("PuffleId", int)]
+    }
+
 
 class HandlerEvent(object):
 
