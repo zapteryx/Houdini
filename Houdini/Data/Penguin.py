@@ -54,6 +54,7 @@ class Penguin(Base):
     NinjaMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
     FireMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
     WaterMatchesWon = Column(Integer, nullable=False, server_default=text("0"))
+    RainbowAdoptability = Column(Integer, nullable=False, server_default=text("0"))
     HasDug = Column(Integer, nullable=False, server_default=text("0"))
     Nuggets = Column(Integer, nullable=False, server_default=text("0"))
 

@@ -161,13 +161,13 @@ CREATE TABLE `penguin` (
   `NinjaMatchesWon` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'CardJitsu matches won',
   `FireMatchesWon` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuFire matches won',
   `WaterMatchesWon` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'JitsuWater matces won',
+  `RainbowAdoptability` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Rainbow puffle adoptability status',
   `HasDug` tinyint(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Puffle digging boolean',
-  `Nuggets` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Golden puffle nuggets',
-  `Rank` tinyint(1) DEFAULT '1'
+  `Nuggets` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Golden puffle nuggets'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguins';
 
-INSERT INTO `penguin` (`ID`, `Username`, `Nickname`, `Approval`, `Password`, `LoginKey`, `ConfirmationHash`, `Email`, `RegistrationDate`, `Active`, `Igloo`, `LastPaycheck`, `MinutesPlayed`, `Moderator`, `MascotStamp`, `Coins`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Permaban`, `BookModified`, `BookColor`, `BookHighlight`, `BookPattern`, `BookIcon`, `AgentStatus`, `FieldOpStatus`, `CareerMedals`, `AgentMedals`, `LastFieldOp`, `NinjaRank`, `NinjaProgress`, `FireNinjaRank`, `FireNinjaProgress`, `WaterNinjaRank`, `WaterNinjaProgress`, `NinjaMatchesWon`, `FireMatchesWon`, `WaterMatchesWon`, `HasDug`, `Nuggets`, `Rank`) VALUES
-(101, 'Houdini', 'Houdini', 1, '$2y$12$8lNgd8WTUCakhP10fq05XOcU5MGxukpca3P/dVBVq4wCpjrIBsL7i', '', '', 'houdini@solero.me', '2018-08-11 03:16:14', 1, 0, '2018-08-01 00:00:00', 134, 0, 0, 246876, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, '2018-08-11 03:16:14', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
+INSERT INTO `penguin` (`ID`, `Username`, `Nickname`, `Approval`, `Password`, `LoginKey`, `ConfirmationHash`, `Email`, `RegistrationDate`, `Active`, `Igloo`, `LastPaycheck`, `MinutesPlayed`, `Moderator`, `MascotStamp`, `Coins`, `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag`, `Permaban`, `BookModified`, `BookColor`, `BookHighlight`, `BookPattern`, `BookIcon`, `AgentStatus`, `FieldOpStatus`, `CareerMedals`, `AgentMedals`, `LastFieldOp`, `NinjaRank`, `NinjaProgress`, `FireNinjaRank`, `FireNinjaProgress`, `WaterNinjaRank`, `WaterNinjaProgress`, `NinjaMatchesWon`, `FireMatchesWon`, `WaterMatchesWon`, `RainbowAdoptability`, `HasDug`, `Nuggets`) VALUES
+(101, 'Houdini', 'Houdini', 1, '$2y$12$8lNgd8WTUCakhP10fq05XOcU5MGxukpca3P/dVBVq4wCpjrIBsL7i', '', '', 'houdini@solero.me', '2018-08-11 03:16:14', 1, 1, '2018-08-01 00:00:00', 166, 0, 0, 243373, 4, 498, 0, 0, 24073, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, '2018-08-11 03:16:14', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0);
 
 CREATE TABLE `penguin_redemption` (
   `PenguinID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique penguin ID',
@@ -198,8 +198,7 @@ CREATE TABLE `puffle` (
   `Walking` tinyint(4) DEFAULT '0',
   `Hat` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Puffle hat ID',
   `Backyard` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Determines the puffle''s location',
-  `HasDug` tinyint(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Digging status boolean',
-  `State` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Puffle state'
+  `HasDug` tinyint(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Digging status boolean'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Adopted puffles';
 
 CREATE TABLE `puffle_quest` (
