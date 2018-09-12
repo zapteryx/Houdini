@@ -34,7 +34,8 @@ def handlePlayerThrowBall(self, data):
 def handleSendPlayerMove(self, data):
     self.x = data.X
     self.y = data.Y
-
+    self.frame = 1
+    
     self.room.sendXt("sp", self.user.ID, data.X, data.Y)
 
 @Handlers.Handle(XT.PlayerAction)
