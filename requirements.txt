@@ -2,10 +2,10 @@ bcrypt >= 3.1.4
 redis >= 2.10.5
 SQLAlchemy == 1.2.2
 Twisted >= 17.5.0
-watchdog == 0.8.3
+watchdog >= 0.8.3
 mysql; sys_platform != 'win32'
 pypiwin32; sys_platform == 'win32'
 pymysql; sys_platform == 'win32'
 six >= 1.10.0
-marshmallow == 2.14.0
-beaker == 1.9.0
+marshmallow >= 2.15.1
+beaker >= 1.9.0
