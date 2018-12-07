@@ -52,6 +52,7 @@ from Houdini.Crumbs.Stamp import StampSchema, StampGroupSchema,\
 from Houdini.Crumbs.Card import CardSchema, CardCollection
 from Houdini.Crumbs.Dance import SongSchema, DanceCollection
 from Houdini.Crumbs.Location import LocationSchema, LocationCollection
+from Houdini.Crumbs.Puffle import CareItemSchema, CareItemCollection
 
 def retrieveItemCollection(crumbsFile="crumbs/paper_items.json"):
     assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
@@ -202,3 +203,20 @@ def retrieveLocationCollection(crumbsFile="crumbs/igloo_locations.json"):
         logger.info("%d locations items loaded", len(locationCollection))
 
         return locationCollection
+
+def retrieveCareItemCollection(crumbsFile="crumbs/puffle_items.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as fileHandle:
+        careItems = json.load(fileHandle)
+
+        schema = CareItemSchema(many=True)
+        result = schema.load(careItems)
+
+        careItemCollection = CareItemCollection(result.data)
+
+        logger.info("%d care items items loaded", len(careItemCollection))
+
+        # print(careItemCollection.getItem(79).Effect.Food)
+
+        return careItemCollection

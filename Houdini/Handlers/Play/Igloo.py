@@ -33,6 +33,8 @@ def getActiveIgloo(self, penguinId):
             playerObject.user.Igloo = igloo.ID
             playerObject.igloo = igloo
 
+            self.session.commit()
+
     furnitureString = getLayoutFurniture(self, igloo.ID)
 
     return "{}:1:0:{}:{}:{}:{}:{}:{}:{}"\
@@ -72,7 +74,7 @@ def getAllLayoutLikes(self, playerId):
 
 @Handlers.Handle(XT.BuyIglooLocation)
 def handleBuyIglooLocation(self, data):
-    if data.LocationId not in self.server.igloos:
+    if data.LocationId not in self.server.locations:
         return self.sendError(402)
 
     locationCost = self.server.locations.getCost(data.LocationId)

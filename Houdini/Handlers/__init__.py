@@ -342,12 +342,12 @@ class XT:
 
     GetPlayerPuffles = {
         "Handler": "p#pg",
-        "Data": [XTData("PlayerId", int)]
+        "Data": [XTData("PlayerId", int), XTData("RoomType", str)]
     }
 
     AdoptPuffle = {
         "Handler": "p#pn",
-        "Data": [XTData("TypeId", int), XTData("Name", str)]
+        "Data": [XTData("TypeId", int), XTData("Name", str), XTData("SubtypeId", int)]
     }
 
     GetMyPlayerPuffles = {
@@ -704,6 +704,112 @@ class XT:
         "Data": [XTData("LocationId", int)]
     }
 
+    CheckPuffleName = {
+        "Handler": "p#checkpufflename",
+        "Data": [XTData("Name", str)]
+    }
+
+    AddPuffleCareItem = {
+        "Handler": "p#papi",
+        "Data": [XTData("ItemId", int)]
+    }
+
+    GetMyPufflesStats = {
+        "Handler": "p#pgmps",
+        "Data": []
+    }
+
+    GetPuffleHandlerStatus = {
+        "Handler": "p#phg",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    SetPuffleHandlerStatus = {
+        "Handler": "p#phs",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    PuffleCareItemDelivered = {
+        "Handler": "p#pcid",
+        "Data": [XTData("PuffleId", int), XTData("CareItemId", int)]
+    }
+
+    PuffleVisitorHatUpdate = {
+        "Handler": "p#puphi",
+        "Data": [XTData("PuffleId", int), XTData("HatId", int)]
+    }
+
+    WalkSwapPuffle = {
+        "Handler": "p#pufflewalkswap",
+        "Data": [XTData("PuffleId", int)]
+    }
+
+    PuffleTrick = {
+        "Handler": "p#puffletrick",
+        "Data": [XTData("TrickId", int)]
+    }
+
+    ChangePuffleRoom = {
+        "Handler": "p#puffleswap",
+        "Data": [XTData("PuffleId", int), XTData("RoomType", str)]
+    }
+
+    RainbowPuffleQuestCookie = {
+        "Handler": "rpq#rpqd",
+        "Data": []
+    }
+
+    RainbowPuffleTaskComplete = {
+        "Handler": "rpq#rpqtc",
+        "Data": [XTData("TaskId", int)]
+    }
+
+    RainbowPuffleTaskCoinCollected = {
+        "Handler": "rpq#rpqcc",
+        "Data": [XTData("TaskId", int)]
+    }
+
+    RainbowPuffleTaskItemCollected = {
+        "Handler": "rpq#rpqic",
+        "Data": [XTData("TaskId", int)]
+    }
+
+    RainbowPuffleTaskBonusCollected = {
+        "Handler": "rpq#rpqbc",
+        "Data": []
+    }
+
+    RainbowPuffleCheckName = {
+        "Handler": "p#pcn",
+        "Data": [XTData("Name", str)]
+    }
+
+    PuffleTreasure = {
+        "Handler": "p#puffledig",
+        "Data": [XTData("PlayerId", int)]
+    }
+
+    PuffleTreasureOnCommand = {
+        "Handler": "p#puffledigoncommand",
+        "Data": []
+    }
+
+    PenguinOnSlideOrZipline = {
+        "Handler": "u#followpath",
+        "Data": [XTData("ServerId", int)]
+    }
+
+    GoldRevealAnimation = {
+        "Handler": "p#revealgoldpuffle",
+        "Data": []
+    }
+
+    ReturnPuffle = {
+        "Handler": "p#prp",
+        "Data": [XTData("PuffleId", int)]
+    }
+
+
 class HandlerEvent(object):
 
     def __init__(self, handlerDetails):
@@ -851,7 +957,7 @@ class Handlers:
     @staticmethod
     def Throttle(secs=1):
         def handlerFunction(function):
-            def handler(penguin, data):
+            def handler(penguin, *data, **kwargs):
                 Handlers.Throttles[function] = secs
 
                 if secs == -1 and function in penguin.throttle:
@@ -865,7 +971,7 @@ class Handlers:
                 if time.time() < lastSent + Handlers.Throttles[function]:
                     return function
 
-                function(penguin, data)
+                function(penguin, *data, **kwargs)
                 penguin.throttle[function] = time.time()
 
                 return function
