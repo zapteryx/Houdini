@@ -40,7 +40,7 @@ def handleJoinWorld(self, data):
 
     currentTime = int(time.time())
     penguinStandardTime = currentTime * 1000
-    serverTimeOffset = 7
+    serverTimeOffset = 8
 
     timer = self.session.query(Timer).filter(Timer.PenguinID == self.user.ID).first()
 
