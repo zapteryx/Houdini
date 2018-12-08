@@ -2,7 +2,7 @@ import time
 from beaker.cache import region_invalidate as Invalidate
 
 from Houdini.Spheniscidae import Spheniscidae
-from Houdini.Data.Penguin import Inventory, IglooInventory, FurnitureInventory, LocationInventory
+from Houdini.Data.Penguin import Inventory, IglooInventory, FurnitureInventory, LocationInventory, FloorInventory
 from Houdini.Data.Puffle import Puffle, CareInventory
 from Houdini.Data.Postcard import Postcard
 from Houdini.Data.Stamp import Stamp
@@ -84,7 +84,7 @@ class Penguin(Spheniscidae):
         if locationId in self.locations:
             return False
 
-        self.iglooInventory.append(locationId)
+        self.locations.append(locationId)
         self.session.add(LocationInventory(PenguinID=self.user.ID, LocationID=locationId))
         self.user.Coins -= locationCost
 
@@ -112,8 +112,12 @@ class Penguin(Spheniscidae):
             self.sendXt("af", furnitureId, self.user.Coins)
 
     def addFlooring(self, floorId, floorCost=0):
+        if floorId in self.floors:
+            return False
+
+        self.floors.append(floorId)
+        self.session.add(FloorInventory(PenguinID=self.user.ID, FloorID=floorId))
         self.user.Coins -= floorCost
-        self.igloo.Floor = floorId
 
         self.sendXt("ag", floorId, self.user.Coins)
 

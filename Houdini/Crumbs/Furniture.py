@@ -13,12 +13,19 @@ class FurnitureSchema(Schema):
     Prompt = fields.String(load_from="prompt")
     MaxQuantity = fields.Integer(load_from="max_quantity")
     Sort = fields.Integer(load_from="sort")
+    Bait = fields.String(load_from="is_bait", required=False)
 
     @post_load
     def make_furniture(self, data):
         return Furniture(**data)
 
 class FurnitureCollection(SchemaObjectCollection):
+
+    def isBait(self, furnitureId):
+        return hasattr(self.schemaObjects[int(furnitureId)], "Bait")
+
+    def getMaxQuantity(self, furnitureId):
+        return self.schemaObjects[furnitureId].MaxQuantity
 
     def getCost(self, furnitureId):
         return self.schemaObjects[furnitureId].Cost

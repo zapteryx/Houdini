@@ -77,13 +77,13 @@ def handleBuyIglooLocation(self, data):
     if data.LocationId not in self.server.locations:
         return self.sendError(402)
 
+    if data.LocationId in self.locations:
+        return self.sendError(502)
+
     locationCost = self.server.locations.getCost(data.LocationId)
 
     if locationCost > self.user.Coins:
         return self.sendError(401)
-
-    if data.LocationId in self.locations:
-        return self.sendError(502)
 
     self.addLocation(data.LocationId, locationCost)
 
@@ -257,6 +257,9 @@ def handleUpdateFloor(self, data):
     if data.FloorId not in self.server.floors:
         return self.sendError(402)
 
+    if data.FloorId in self.floors:
+        return self.sendError(501)
+
     floorCost = self.server.floors.getCost(data.FloorId)
 
     if floorCost > self.user.Coins:
@@ -269,13 +272,13 @@ def handleUpdateIglooType(self, data):
     if data.IglooId not in self.server.igloos:
         return self.sendError(402)
 
+    if data.IglooId in self.iglooInventory:
+        return self.sendError(500)
+
     iglooCost = self.server.igloos.getCost(data.IglooId)
 
     if iglooCost > self.user.Coins:
         return self.sendError(401)
-
-    if data.IglooId in self.iglooInventory:
-        return self.sendError(500)
 
     self.addIgloo(data.IglooId, iglooCost)
 
@@ -283,6 +286,23 @@ def handleUpdateIglooType(self, data):
 def handleBuyFurniture(self, data):
     if data.FurnitureId not in self.server.furniture:
         return self.sendError(402)
+
+    maxQuantity = self.server.furniture.getMaxQuantity(data.FurnitureId)
+
+    if data.FurnitureId not in self.furniture:
+        quantity = 0
+    else:
+        quantity = self.furniture[data.FurnitureId]
+
+    if quantity >= maxQuantity:
+        if data.FurnitureId == 786:
+            # Display a different error for Card-Jitsu mats
+            return self.sendError(409)
+        else:
+            return self.sendError(403)
+
+    if self.server.furniture.isBait(data.FurnitureId):
+        return cheatBan(self, self.user.ID, comment="Added bait item")
 
     furnitureCost = self.server.furniture.getCost(data.FurnitureId)
 
