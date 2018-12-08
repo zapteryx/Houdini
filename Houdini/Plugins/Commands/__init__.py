@@ -6,6 +6,7 @@ from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
 from Houdini.Data.Penguin import Penguin
 from Houdini.Handlers.Play.Item import handleBuyInventory
+from Houdini.Handlers.Play.Igloo import handleBuyFurniture, handleUpdateFloor, handleUpdateIglooType, handleBuyIglooLocation
 from Houdini.Handlers.Play.Moderation import moderatorBan, moderatorKick
 
 commandCollection = {}
@@ -134,6 +135,63 @@ class Commands(object):
             return player.sendError(402)
         else:
             reactor.callFromThread(handleBuyInventory, player, arguments)
+
+    @Command("af", CommandArgument("FurnitureId", int))
+    def handleFurnitureCommand(self, player, arguments):
+        self.logger.debug("%s is trying to add furniture (id: %d)" % (player.user.Username, arguments.FurnitureId))
+
+        if arguments.FurnitureId not in self.server.furniture:
+            self.logger.debug("Furniture (id: %d) does not exist" % (arguments.FurnitureId))
+            return player.sendError(402)
+        elif self.server.furniture.isBait(arguments.FurnitureId):
+            self.logger.debug("Denied %s from adding furniture (id: %d) - item is bait" % (player.user.Username, arguments.FurnitureId))
+            return player.sendError(402)
+        elif not self.patchedItems.blacklistEnabled and arguments.FurnitureId not in self.patchedItems.patchedFurniture:
+            self.logger.debug("Denied %s from adding furniture (id: %d) - item is patched" % (player.user.Username, arguments.FurnitureId))
+            return player.sendError(402)
+        elif self.patchedItems.blacklistEnabled and arguments.FurnitureId in self.patchedItems.patchedFurniture:
+            self.logger.debug("Denied %s from adding furniture (id: %d) - item is patched" % (player.user.Username, arguments.FurnitureId))
+            return player.sendError(402)
+        else:
+            reactor.callFromThread(handleBuyFurniture, player, arguments)
+
+    @Command("ag", CommandArgument("FloorId", int))
+    def handleFloorCommand(self, player, arguments):
+        self.logger.debug("%s is trying to add floor (id: %d)" % (player.user.Username, arguments.FloorId))
+
+        if arguments.FloorId not in self.server.floors:
+            self.logger.debug("Floor (id: %d) does not exist" % (arguments.FloorId))
+            return player.sendError(402)
+        elif not self.patchedItems.blacklistEnabled and arguments.FloorId not in self.patchedItems.patchedFlooring:
+            self.logger.debug("Denied %s from adding floor (id: %d) - item is patched" % (player.user.Username, arguments.FloorId))
+            return player.sendError(402)
+        elif self.patchedItems.blacklistEnabled and arguments.FloorId in self.patchedItems.patchedFlooring:
+            self.logger.debug("Denied %s from adding floor (id: %d) - item is patched" % (player.user.Username, arguments.FloorId))
+            return player.sendError(402)
+        else:
+            reactor.callFromThread(handleUpdateFloor, player, arguments)
+
+    @Command("au", CommandArgument("IglooId", int))
+    def handleIglooCommand(self, player, arguments):
+        self.logger.debug("%s is trying to add igloo (id: %d)" % (player.user.Username, arguments.IglooId))
+
+        if arguments.IglooId not in self.server.igloos:
+            self.logger.debug("Igloo (id: %d) does not exist" % (arguments.IglooId))
+            return player.sendError(402)
+        elif not self.patchedItems.blacklistEnabled and arguments.IglooId not in self.patchedItems.patchedIgloos:
+            self.logger.debug("Denied %s from adding igloo (id: %d) - item is patched" % (player.user.Username, arguments.IglooId))
+            return player.sendError(402)
+        elif self.patchedItems.blacklistEnabled and arguments.IglooId in self.patchedItems.patchedIgloos:
+            self.logger.debug("Denied %s from adding igloo (id: %d) - item is patched" % (player.user.Username, arguments.IglooId))
+            return player.sendError(402)
+        else:
+            reactor.callFromThread(handleUpdateIglooType, player, arguments)
+
+    @Command("aloc", CommandArgument("LocationId", int))
+    def handleLocationCommand(self, player, arguments):
+        self.logger.debug("%s is trying to add location (id: %d)" % (player.user.Username, arguments.LocationId))
+
+        reactor.callFromThread(handleBuyIglooLocation, player, arguments)
 
     # Do not edit below this line.
     def processCommand(self, messageDetails):
