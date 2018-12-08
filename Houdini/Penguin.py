@@ -194,8 +194,6 @@ class Penguin(Spheniscidae):
             self.user.Member,
             self.user.MembershipDays,
             self.user.Avatar,
-            1, self.age,
-            0, # Avatar integer, not entirely sure how this works yet
             str(), # Unused value
             str() # Party information
         ]
