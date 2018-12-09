@@ -583,7 +583,7 @@ class XT:
     }
 
     GetNinjaSnowLevel = {
-        "Handler": "ni#gwl",
+        "Handler": "ni#gsl",
         "Data": []
     }
 

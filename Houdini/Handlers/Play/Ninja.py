@@ -9,22 +9,22 @@ def handleGetNinjaRanks(self, data):
 
 @Handlers.Handle(XT.GetNinjaLevel)
 def handleGetNinjaLevel(self, data):
-    self.sendXt("gnl", self.user.NinjaRank, self.user.NinjaProgress)
+    self.sendXt("gnl", self.user.NinjaRank, self.user.NinjaProgress, 10)
 
 
 @Handlers.Handle(XT.GetNinjaFireLevel)
 def handleGetNinjaLevel(self, data):
-    self.sendXt("gfl", self.user.FireNinjaRank, self.user.FireNinjaProgress)
+    self.sendXt("gfl", self.user.FireNinjaRank, self.user.FireNinjaProgress, 5)
 
 
 @Handlers.Handle(XT.GetNinjaWaterLevel)
 def handleGetNinjaLevel(self, data):
-    self.sendXt("gwl", self.user.WaterNinjaRank, self.user.WaterNinjaProgress)
+    self.sendXt("gwl", self.user.WaterNinjaRank, self.user.WaterNinjaProgress, 5)
 
 
 @Handlers.Handle(XT.GetNinjaSnowLevel)
 def handleGetNinjaLevel(self, data):
-    self.sendXt("gsl", self.user.SnowNinjaRank, self.user.SnowNinjaProgress)
+    self.sendXt("gsl", self.user.SnowNinjaRank, self.user.SnowNinjaProgress, 24)
 
 
 @Handlers.Handle(XT.GetCards)
