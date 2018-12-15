@@ -3,7 +3,7 @@ from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
 
 from Houdini.Handlers.Play.Message import handleSendMessage
-from Houdini.Handlers.Play.Pet import handleSendAdoptPuffle
+from Houdini.Handlers.Play.Pet import handleCheckPuffleName
 from Houdini.Handlers.Play.Moderation import languageBan
 
 from collections import Counter, OrderedDict
@@ -32,8 +32,8 @@ class ChatFilter(object):
             Handlers.Message -= handleSendMessage
             Handlers.Message += self.handleSendMessage
 
-            Handlers.AdoptPuffle -= handleSendAdoptPuffle
-            Handlers.AdoptPuffle += self.handleSendAdoptPuffle
+            Handlers.CheckPuffleName -= handleCheckPuffleName
+            Handlers.CheckPuffleName += self.handleCheckPuffleName
 
     @staticmethod
     def makeRegexBadWord(badWord):
@@ -48,7 +48,7 @@ class ChatFilter(object):
         cleanMessage = self.removeSpecialChars(string)
         self.logger.info("[ChatFilter] Checking '%s' against bad words list" % (string))
         for badWord in self.words:
-            if re.search(badWord, cleanMessage):
+            if re.search(badWord, cleanMessage.lower()):
                 return True
         return False
 
@@ -59,11 +59,12 @@ class ChatFilter(object):
 
         handleSendMessage(player, data)
 
-    def handleSendAdoptPuffle(self, player, data):
+    def handleCheckPuffleName(self, player, data):
         if self.isNaughty(data.Name):
             self.logger.info("[ChatFilter] %s tried to name a puffle '%s'" % (player.user.Username, data.Name))
-            return player.sendError(441)
-        handleSendAdoptPuffle(player, data)
+            return player.sendXt("checkpufflename", data.Name, 0)
+
+        handleCheckPuffleName(player, data)
 
     def ready(self):
         self.logger.info("ChatFilter plugin has been loaded!")
