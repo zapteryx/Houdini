@@ -19,7 +19,7 @@ def decreaseStats(server):
                 puffle.Food = max(10, min(puffle.Food - 8, 100))
                 puffle.Rest = max(10, min(puffle.Rest - 8, 100))
                 puffle.Clean = max(10, min(puffle.Clean - 8, 100))
-            else:
+            elif not puffle.Backyard:
                 puffle.Food = max(0, min(puffle.Food - 4, 100))
                 puffle.Play = max(0, min(puffle.Play - 4, 100))
                 puffle.Rest = max(0, min(puffle.Rest - 4, 100))
