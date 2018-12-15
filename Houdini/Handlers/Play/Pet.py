@@ -157,11 +157,17 @@ def handleSendPuffleWalk(self, data):
     if data.PuffleId in self.puffles:
         puffle = self.puffles[data.PuffleId]
 
-        puffle.Walking = 1 if not puffle.Walking else 0
-        self.walkingPuffle = puffle if puffle.Walking else None
+        if not puffle.Walking:
+            puffle.Walking = 1
+            puffle.Backyard = 0
+            self.walkingPuffle = puffle
+        else:
+            puffle.Walking = 0
+            puffle.Backyard = 1 if self.inBackyard else 0
+            self.walkingPuffle = None
 
         self.room.sendXt("pw", self.user.ID, puffle.ID, puffle.Type,
-                         puffle.Subtype, puffle.Walking, puffle.Hat)
+                         puffle.Subtype, puffle.Walking, puffle.Hat, puffle.Backyard)
 
 @Handlers.Handle(XT.PlayPuffle)
 def handleSendPufflePlay(self, data):
@@ -307,13 +313,16 @@ def handleWalkSwapPuffle(self, data):
         return self.transport.loseConnection()
 
     self.walkingPuffle.Walking = 0
+    self.walkingPuffle.Backyard = 1 if self.inBackyard == 1 else 0
 
     puffle = self.puffles[data.PuffleId]
     puffle.Walking = 1
     self.walkingPuffle = puffle
 
+    puffle.Backyard = 0
+
     self.room.sendXt("pufflewalkswap", self.user.ID, puffle.ID, puffle.Type,
-                     puffle.Subtype, puffle.Walking, puffle.Hat)
+                     puffle.Subtype, puffle.Walking, puffle.Hat, puffle.Backyard)
 
 @Handlers.Handle(XT.PuffleTrick)
 def handlePuffleTrick(self, data):

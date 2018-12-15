@@ -127,4 +127,9 @@ def handleJoinPlayerIgloo(self, data):
 
     self.room.remove(self)
 
+    if data.RoomType == "backyard":
+        self.inBackyard = True
+    else:
+        self.inBackyard = False
+
     igloo.add(self, data.RoomType)
