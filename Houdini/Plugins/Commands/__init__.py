@@ -7,6 +7,7 @@ from Houdini.Handlers import Handlers
 from Houdini.Data.Penguin import Penguin
 from Houdini.Handlers.Play.Item import handleBuyInventory
 from Houdini.Handlers.Play.Igloo import handleBuyFurniture, handleUpdateFloor, handleUpdateIglooType, handleBuyIglooLocation
+from Houdini.Handlers.Play.Pet import handleAddPuffleCareItem
 from Houdini.Handlers.Play.Moderation import moderatorBan, moderatorKick
 
 commandCollection = {}
@@ -192,6 +193,12 @@ class Commands(object):
         self.logger.debug("%s is trying to add location (id: %d)" % (player.user.Username, arguments.LocationId))
 
         reactor.callFromThread(handleBuyIglooLocation, player, arguments)
+
+    @Command("papi", CommandArgument("ItemId", int))
+    def handlePuffleItemCommand(self, player, arguments):
+        self.logger.debug("%s is trying to add a puffle item (id: %d)" % (player.user.Username, arguments.ItemId))
+
+        reactor.callFromThread(handleAddPuffleCareItem, player, arguments)
 
     # Do not edit below this line.
     def processCommand(self, messageDetails):
