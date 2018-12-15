@@ -206,6 +206,22 @@ def handleAddPuffleCareItem(self, data):
     if data.ItemId not in self.server.careItems:
         return self.sendError(402)
 
+    if data.ItemId not in self.careInventory:
+        quantity = 0
+    else:
+        quantity = self.careInventory[data.ItemId]
+
+    if self.server.careItems.getPlayExternal(data.ItemId) == "superplay":
+        if quantity >= 1:
+            return self.sendError(408)
+    elif self.server.careItems.getType(data.ItemId) == "head":
+        if quantity >= 75:
+            return self.sendError(407)
+    else:
+        maxQuantity = self.server.careItems.getQuantity(data.ItemId)
+        if quantity >= maxQuantity:
+            return self.sendError(406)
+
     itemCost = self.server.careItems.getCost(data.ItemId)
 
     if itemCost > self.user.Coins:

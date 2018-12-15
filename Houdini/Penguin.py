@@ -42,10 +42,6 @@ class Penguin(Spheniscidae):
             itemQuantity = self.careInventory[careItemId]
             itemQuantity += additionalQuantity
 
-            # TODO: Remove this limit?
-            if itemQuantity >= 100:
-                return False
-
             self.session.query(CareInventory).filter_by(PenguinID=self.user.ID, ItemID=careItemId) \
                 .update({"Quantity": itemQuantity})
         else:
