@@ -301,7 +301,7 @@ def handlePuffleCareItemDelivered(self, data):
 @Handlers.Handle(XT.PuffleVisitorHatUpdate)
 def handlePuffleVisitorHatUpdate(self, data):
     if data.PuffleId not in self.puffles or \
-            data.HatId not in self.careInventory:
+            (data.HatId != 0 and data.HatId not in self.careInventory):
         return self.transport.loseConnection()
 
     self.puffles[data.PuffleId].Hat = data.HatId
