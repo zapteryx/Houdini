@@ -1,6 +1,5 @@
 import zope.interface, logging
 from twisted.internet import reactor
-from twisted.internet.threads import blockingCallFromThread, deferToThread
 
 from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
@@ -73,8 +72,8 @@ class Commands(object):
             self.bot.randomizeClothing()
             self.bot.randomizeName()
             self.bot.updateString()
-            reactor.callFromThread(self.bot.removeFromRoom, player)
-            reactor.callFromThread(self.bot.addToRoom, player)
+            self.bot.removeFromRoom(player)
+            self.bot.addToRoom(player)
 
     def botAnnounce(self, player, arguments):
         if player.user.Moderator:
@@ -102,7 +101,7 @@ class Commands(object):
 
             if playerId is not None and playerId in self.server.players:
                 if not self.server.players[playerId].user.Moderator:
-                    reactor.callFromThread(moderatorKick, player, playerId)
+                    moderatorKick(player, playerId)
 
                     self.logger.info("%s has kicked %s" % (player.user.Username, arguments.Username))
 
@@ -118,8 +117,7 @@ class Commands(object):
                                               arguments.Username, Penguin.ID)
 
             if playerId is not None:
-                reactor.callFromThread(moderatorBan, player, playerId,
-                                       arguments.Duration, arguments.Reason)
+                moderatorBan(player, playerId, arguments.Duration, arguments.Reason)
 
                 self.logger.info("%s has banned %s for %s hours using the !BAN command." %
                                  (player.user.Username, arguments.Username, arguments.Duration))
@@ -131,10 +129,10 @@ class Commands(object):
             player.y = 0
             player.frame = 1
 
-            reactor.callFromThread(player.joinRoom, arguments.RoomId)
+            player.joinRoom(arguments.RoomId)
 
             if self.bot.isStationary:
-                reactor.callFromThread(self.bot.addToRoom, player)
+                self.bot.addToRoom(player)
 
     @Command("ac", CommandArgument("Coins", int))
     def handleCoinsCommand(self, player, arguments):
@@ -142,14 +140,14 @@ class Commands(object):
 
         newAmount = max(min(self.coinLimit, player.user.Coins + arguments.Coins), 1)
 
-        reactor.callFromThread(player.sendCoins, newAmount)
+        player.sendCoins(newAmount)
 
     @Command("ai", CommandArgument("ItemId", int))
     def handleItemCommand(self, player, arguments):
         self.logger.debug("%s is trying to add an item (id: %d)" % (player.user.Username, arguments.ItemId))
 
         if not self.server.items.isBait(arguments.ItemId):
-            reactor.callFromThread(handleBuyInventory, player, arguments)
+            handleBuyInventory(player, arguments)
 
     @Command("ping")
     def handlePingCommand(self, player, arguments):
@@ -157,10 +155,7 @@ class Commands(object):
 
         self.bot.sendMessage(player, "Pong!")
 
-    # Do not edit below this line.
-    def processCommand(self, messageDetails):
-        playerObject, commandMessage = messageDetails
-
+    def processCommand(self, playerObject, commandMessage):
         commandTokens = commandMessage.split(" ")
         commandString = commandTokens.pop(0).upper()
 
@@ -215,8 +210,7 @@ class Commands(object):
         if data.Message.startswith(self.commandPrefix):
             commandMessage = data.Message[1:]
 
-            deferToThread(self.processCommand, [player, commandMessage])\
-                .addErrback(self.handleCommandError)
+            self.processCommand(player, commandMessage)
 
     def ready(self):
         self.logger.info("Commands plugin has been loaded!")
