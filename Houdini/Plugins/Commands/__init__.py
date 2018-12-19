@@ -1,11 +1,13 @@
 import zope.interface, logging
-from twisted.internet import reactor
+from twisted.internet.defer import inlineCallbacks
 
 from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
 from Houdini.Data.Penguin import Penguin
 from Houdini.Handlers.Play.Item import handleBuyInventory
 from Houdini.Handlers.Play.Moderation import moderatorBan, moderatorKick
+
+from sqlalchemy.sql import select
 
 commandCollection = {}
 
@@ -58,13 +60,6 @@ class Commands(object):
 
         Handlers.Message += self.handleMessage
 
-    @staticmethod
-    def getPlayer(sessionObject, playerUsername, specificQuery=Penguin):
-        player = sessionObject.query(specificQuery). \
-            filter_by(Username=playerUsername).scalar()
-
-        return player
-
     def botRandomize(self, player, arguments):
         if player.user.Moderator:
             self.logger.debug("Bot randomization command used by {}".format(player.user.Username))
@@ -94,10 +89,12 @@ class Commands(object):
             commandMethod(player, arguments.Action[1:])
 
     @Command("kick", VariableCommandArgument("Username"))
+    @inlineCallbacks
     def handleKickCommand(self, player, arguments):
         if player.user.Moderator:
-            playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
-                                              arguments.Username, Penguin.ID)
+            arguments.Username = " ".join(arguments.Username)
+            playerId = yield player.engine.scalar(select([Penguin.c.ID]).where(
+                Penguin.c.Username == arguments.Username))
 
             if playerId is not None and playerId in self.server.players:
                 if not self.server.players[playerId].user.Moderator:
@@ -109,12 +106,13 @@ class Commands(object):
     @Command("ban", TokenizedArgument("Username", str),
              TokenizedArgument("Duration", int),
              TokenizedArgument("Reason", str))
+    @inlineCallbacks
     def handleBanCommand(self, player, arguments):
         if player.user.Moderator:
             self.logger.info("%s is attempting to ban %s." % (player.user.Username, arguments.Username))
 
-            playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
-                                              arguments.Username, Penguin.ID)
+            playerId = yield player.engine.scalar(select([Penguin.c.ID]).where(
+                Penguin.c.Username == arguments.Username))
 
             if playerId is not None:
                 moderatorBan(player, playerId, arguments.Duration, arguments.Reason)
