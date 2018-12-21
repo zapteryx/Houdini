@@ -70,7 +70,16 @@ def handleSendAdoptPuffle(self, data):
     if not 16 > len(data.Name) >= 3:
         return self.sendError(441)
 
-    if self.user.Coins < 800:
+    if data.TypeId in range(0, 9) and not data.SubtypeId:
+        puffleCost = 400
+    elif data.TypeId == 10 or data.TypeId == 11 or \
+             data.SubtypeId in range(1000, 1005) or \
+             data.SubtypeId in range(1021, 1027):
+        puffleCost = 0
+    else:
+        puffleCost = 800
+
+    if self.user.Coins < puffleCost:
         return self.sendError(401)
 
     if len(self.puffles) >= 75:
@@ -95,7 +104,7 @@ def handleSendAdoptPuffle(self, data):
         if 125 not in self.careInventory:
             self.addCareItem(125, 1, sendXt=False)
 
-    self.user.Coins -= 800 if data.SubtypeId else 400
+    self.user.Coins -= puffleCost
 
     ownedPuffles = self.session.query(Puffle).filter(Puffle.PenguinID == self.user.ID)
     playerPuffles = [puffle.Type for puffle in ownedPuffles]
