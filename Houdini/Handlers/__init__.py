@@ -355,6 +355,16 @@ class XT:
         "Data": []
     }
 
+    CareStationMenu = {
+        "Handler": "p#carestationmenu",
+        "Data": []
+    }
+
+    CareStationMenuChoice = {
+        "Handler": "p#carestationmenuchoice",
+        "Data": [XTData("ItemChosen", int)]
+    }
+
     MovePuffle = {
         "Handler": "p#pm",
         "Data": [XTData("PuffleId", int), XTData("X", int), XTData("Y", int)]

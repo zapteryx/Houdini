@@ -574,6 +574,33 @@ def handleGoldRevealAnimation(self, data):
 
     self.room.sendXt("revealgoldpuffle", self.user.ID)
 
+@Handlers.Handle(XT.CareStationMenu)
+def handleCareStationMenu(self, data):
+    self.sendXt("carestationmenu", "121|117", "119")
+
+@Handlers.Handle(XT.CareStationMenuChoice)
+def handleCareStationMenuChoice(self, data):
+
+    data.PuffleId = self.walkingPuffle.ID
+    puffle = self.puffles[data.PuffleId]
+
+    itemCost = 5 if data.ItemChosen == 121 else 10
+
+    if self.user.Coins >= itemCost:
+        self.user.Coins -= itemCost
+
+        if data.ItemChosen == 121:
+            puffle.Food = max(0, min(puffle.Food + 30, 100))
+            puffle.Play = max(0, min(puffle.Play + -10, 100))
+            puffle.Rest = max(0, min(puffle.Rest + -8, 100))
+            puffle.Clean = max(0, min(puffle.Clean + -1, 100))
+        else:
+            puffle.Food = max(0, min(puffle.Food + 100, 100))
+
+        self.sendXt("carestationmenuchoice", self.user.ID, puffle.Food, puffle.Play, puffle.Rest, puffle.Clean)
+    else:
+        return self.sendError(401)
+
 @Handlers.Handle(XT.ReturnPuffle)
 def handleReturnPuffle(self, data):
     if data.PuffleId not in self.puffles:
