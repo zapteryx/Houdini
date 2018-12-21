@@ -70,6 +70,8 @@ def handleJoinWorld(self, data):
 
     self.user.LoginKey = ""
 
+    self.inBackyard = False
+
     self.server.players[self.user.ID] = self
 
     for buddyId, buddyNickname in self.buddies.items():
