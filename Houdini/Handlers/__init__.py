@@ -211,14 +211,24 @@ class XT:
         "Data": []
     }
 
-    GetBuddyList = {
+    GetPendingRequests = {
+        "Handler": "b#pr",
+        "Data": []
+    }
+
+    GetBuddies = {
         "Handler": "b#gb",
         "Data": []
     }
 
-    BuddyRequest = {
-        "Handler": "b#br",
-        "Data": [XTData("Id", int)]
+    GetBestFriends = {
+        "Handler": "b#gbf",
+        "Data": []
+    }
+
+    GetCharacters = {
+        "Handler": "b#gc",
+        "Data": []
     }
 
     BuddyAccept = {
@@ -228,11 +238,6 @@ class XT:
 
     RemoveBuddy = {
         "Handler": "b#rb",
-        "Data": [XTData("Id", int)]
-    }
-
-    FindBuddy = {
-        "Handler": "b#bf",
         "Data": [XTData("Id", int)]
     }
 
@@ -253,6 +258,11 @@ class XT:
 
     GetPlayer = {
         "Handler": "u#gp",
+        "Data": [XTData("Id", int)]
+    }
+
+    GetCharacter = {
+        "Handler": "u#gmo",
         "Data": [XTData("Id", int)]
     }
 
@@ -630,6 +640,11 @@ class XT:
     SendGoldenChoice = {
         "Handler": "rsgc",
         "Data": [XTData("Code", str), XTData("Choice", int)]
+    }
+
+    GetPlayerInfoBySwid = {
+        "Handler": "u#pbs",
+        "Data": [XTData("Id", int)]
     }
 
     GetPlayerInfoById = {

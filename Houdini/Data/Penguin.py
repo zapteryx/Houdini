@@ -95,6 +95,7 @@ class BuddyList(Base):
                        nullable=False)
     BuddyID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
                      nullable=False, index=True)
+    Type = Column(SmallInteger, nullable=False, server_default=text("0"))
 
 class Inventory(Base):
     __tablename__ = 'inventory'

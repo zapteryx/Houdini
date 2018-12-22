@@ -25,7 +25,8 @@ CREATE TABLE `ban` (
 
 CREATE TABLE `buddy_list` (
   `PenguinID` int(10) UNSIGNED NOT NULL,
-  `BuddyID` int(10) UNSIGNED NOT NULL
+  `BuddyID` int(10) UNSIGNED NOT NULL,
+  `Type` tinyint(1) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin buddy relationships';
 
 CREATE TABLE `care_inventory` (

@@ -1,96 +1,57 @@
+from sqlalchemy import and_, or_
+
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin, BuddyList
 
-@Handlers.Handle(XT.GetBuddyList)
-@Handlers.Throttle(-1)
-def handleGetBuddyList(self, data):
-    buddiesArray = []
+@Handlers.Handle(XT.GetPendingRequests)
+def handleGetPendingRequests(self, data):
+    pendingRequests = []
 
-    for buddyId, buddyName in self.buddies.items():
-        buddiesArray.append("%d|%s|%d" % (buddyId, buddyName,
-                              1 if buddyId in self.server.players else 0))
+    buddyRequests = {buddyId: buddyNickname for buddyId, buddyNickname in
+                    self.session.query(BuddyList.BuddyID, Penguin.Nickname).
+                    join(Penguin, Penguin.ID == BuddyList.BuddyID).
+                    filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.Type == 0))}
 
-    self.sendXt("gb", "%".join(buddiesArray))
+    if len(buddyRequests):
+        for buddyId, buddyNickname in buddyRequests.items():
+            pendingRequests.append("{}|{}".format(buddyId, buddyNickname))
 
-@Handlers.Handle(XT.BuddyRequest)
-def handleBuddyRequest(self, data):
-    if len(self.buddies) >= 100:
-        return
+        self.sendXt("pr", *pendingRequests)
 
-    if data.Id in self.buddies:
-        return
+@Handlers.Handle(XT.GetBuddies)
+def handleGetBuddies(self, data):
+    playerBuddies = []
 
-    if data.Id not in self.server.players:
-        return
+    acceptedBuddies = {buddyId: buddyNickname for buddyId, buddyNickname in
+                    self.session.query(BuddyList.BuddyID, Penguin.Nickname).
+                    join(Penguin, Penguin.ID == BuddyList.BuddyID).
+                    filter(BuddyList.PenguinID == self.user.ID).
+                    filter(or_(BuddyList.Type == 1,BuddyList.Type == 2))}
 
-    buddyObject = self.server.players[data.Id]
+    if len(acceptedBuddies) > 0:
+        for buddyId, buddyNickname in acceptedBuddies.items():
+            status = "online" if buddyId in self.server.players else "offline"
+            playerBuddies.append("{}|{}|{}|{}".format(buddyId, buddyId, buddyNickname, status))
 
-    if self.user.ID in buddyObject.ignore:
-        return
+        self.sendXt("gb", *playerBuddies)
 
-    if not hasattr(buddyObject, "buddyRequests"):
-        buddyObject.buddyRequests = {}
-    elif self.user.ID in buddyObject.buddyRequests:
-        return
+@Handlers.Handle(XT.GetBestFriends)
+def handleGetBestFriends(self, data):
+    bestFriends = self.session.query(BuddyList.BuddyID).join(Penguin, Penguin.ID == BuddyList.BuddyID). \
+                     filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.Type == 2))
 
-    buddyObject.buddyRequests[self.user.ID] = [self.user.Username, self.buddies]
+    if bestFriends.count() > 0:
+        bestFriendsString = "%".join("{}".format(buddy.BuddyID) for buddy in bestFriends)
 
-    buddyObject.sendXt("br", self.user.ID, self.user.Username)
+        self.sendXt("gbf", bestFriendsString)
 
+@Handlers.Handle(XT.GetCharacters)
+def handleGetCharacters(self, data):
+    characterBuddies = self.session.query(BuddyList.BuddyID).join(Penguin, Penguin.ID == BuddyList.BuddyID). \
+                     filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.Type == 3))
 
-@Handlers.Handle(XT.BuddyAccept)
-def handleBuddyAccept(self, data):
-    if data.Id not in self.buddyRequests:
-        return
+    if characterBuddies.count() > 0:
+        characterBuddiesString = "%".join("{}".format(buddy.BuddyID) for buddy in characterBuddies)
 
-    buddyUsername, buddyBuddies = self.buddyRequests[data.Id]
-    self.buddies[data.Id] = buddyUsername
+        self.sendXt("gc", characterBuddiesString)
 
-    buddyBuddies[self.user.ID] = self.user.Username
-
-    self.session.add(BuddyList(PenguinID=self.user.ID, BuddyID=data.Id))
-    self.session.add(BuddyList(PenguinID=data.Id, BuddyID=self.user.ID))
-
-    del self.buddyRequests[data.Id]
-
-    try:
-        buddyObject = self.server.players[data.Id]
-        buddyObject.sendXt("ba", self.user.ID, self.user.Username)
-    except KeyError:
-        self.sendXt("bof", data.Id)
-    finally:
-        self.logger.debug("%d and %d are now buddies.", data.Id, self.user.ID)
-
-
-@Handlers.Handle(XT.RemoveBuddy)
-def handleRemoveBuddy(self, data):
-    if data.Id not in self.buddies:
-        return
-
-    del self.buddies[data.Id]
-
-    self.session.query(BuddyList).filter_by(PenguinID=self.user.ID, BuddyID=data.Id).delete()
-    self.session.query(BuddyList).filter_by(PenguinID=data.Id, BuddyID=self.user.ID).delete()
-
-    try:
-        buddyObject = self.server.players[data.Id]
-
-        buddyObject.sendXt("rb", self.user.ID)
-        del buddyObject.buddies[self.user.ID]
-    except KeyError:
-        self.logger.debug("%d tried removing an offline buddy (%d)", self.user.ID, data.Id)
-
-    finally:
-        self.logger.debug("%d and %d are no longer buddies", self.user.ID, data.Id)
-
-
-@Handlers.Handle(XT.FindBuddy)
-def handleFindBuddy(self, data):
-    try:
-        if data.Id not in self.buddies:
-            return
-
-        buddyObject = self.server.players[data.Id]
-        self.sendXt("bf", buddyObject.room.Id)
-    except KeyError:
-        self.logger.debug("%s (%d) tried to find a buddy who was offline!", self.user.Username, self.user.ID)

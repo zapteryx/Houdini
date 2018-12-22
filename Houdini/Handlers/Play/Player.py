@@ -107,11 +107,22 @@ def handleGetLatestRevision(self, data):
 def handleLoadPlayerObject(self, data):
     self.sendXt("gp", getPlayerString(self, data.Id))
 
+@Handlers.Handle(XT.GetCharacter)
+@Handlers.Throttle()
+def handleLoadMascotObject(self, data):
+    self.sendXt("gmo", getPlayerString(self, data.Id))
 
 @Handlers.Handle(XT.GetPlayerInfoById)
 @Handlers.Throttle()
 def handleGetPlayerInfoById(self, data):
     self.sendXt("pbi", getPlayerInfo(self, data.Id))
+
+@Handlers.Handle(XT.GetPlayerInfoBySwid)
+@Handlers.Throttle()
+def handleGetPlayerInfoBySwid(self, data):
+    playerInfo = getPlayerInfo(self, data.Id)
+    username = playerInfo.split("|")[2]
+    self.sendXt("pbs", data.Id, data.Id, username)
 
 @Handlers.Handle(XT.PlayerBySwidUsername)
 @Handlers.Throttle()
