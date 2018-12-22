@@ -231,6 +231,11 @@ class XT:
         "Data": []
     }
 
+    ToggleBestFriend = {
+        "Handler": "b#tbf",
+        "Data": [XTData("Id", int)]
+    }
+
     BuddyAccept = {
         "Handler": "b#ba",
         "Data": [XTData("Id", int)]
@@ -645,6 +650,11 @@ class XT:
     GetPlayerInfoBySwid = {
         "Handler": "u#pbs",
         "Data": [XTData("Id", int)]
+    }
+
+    GetPlayerInfoByName = {
+        "Handler": "u#pbn",
+        "Data": [XTData("Name", str)]
     }
 
     GetPlayerInfoById = {

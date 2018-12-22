@@ -55,3 +55,15 @@ def handleGetCharacters(self, data):
 
         self.sendXt("gc", characterBuddiesString)
 
+@Handlers.Handle(XT.ToggleBestFriend)
+def handleToggleBestFriend(self, data):
+    if "character_" not in str(data.Id):
+
+        friend = self.session.query(BuddyList.Type).filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.BuddyID == data.Id)).first()
+
+        if not friend or friend[0] == 0:
+            self.transport.loseConnection()
+
+        type = 2 if friend[0] == 1 else 1
+
+        self.session.query(BuddyList).filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.BuddyID == data.Id)).update({"Type": type})

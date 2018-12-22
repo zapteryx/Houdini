@@ -117,6 +117,17 @@ def handleLoadMascotObject(self, data):
 def handleGetPlayerInfoById(self, data):
     self.sendXt("pbi", getPlayerInfo(self, data.Id))
 
+@Handlers.Handle(XT.GetPlayerInfoByName)
+@Handlers.Throttle()
+def handleGetPlayerInfoByName(self, data):
+    playerArray = self.session.query(Penguin.ID).filter_by(Nickname=data.Name).first()
+
+    if playerArray:
+        playerId = playerArray[0]
+        self.sendXt("pbn", playerId, playerId, data.Name)
+    else:
+        self.sendXt("pbn")
+
 @Handlers.Handle(XT.GetPlayerInfoBySwid)
 @Handlers.Throttle()
 def handleGetPlayerInfoBySwid(self, data):
