@@ -236,6 +236,16 @@ class XT:
         "Data": [XTData("Id", int)]
     }
 
+    BuddyRequest = {
+        "Handler": "b#br",
+        "Data": [XTData("Player", str)]
+    }
+
+    CharacterRequest = {
+        "Handler": "b#cr",
+        "Data": [XTData("Id", int)]
+    }
+
     BuddyAccept = {
         "Handler": "b#ba",
         "Data": [XTData("Id", int)]

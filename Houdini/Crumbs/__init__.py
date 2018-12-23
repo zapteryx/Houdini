@@ -53,6 +53,7 @@ from Houdini.Crumbs.Card import CardSchema, CardCollection
 from Houdini.Crumbs.Dance import SongSchema, DanceCollection
 from Houdini.Crumbs.Location import LocationSchema, LocationCollection
 from Houdini.Crumbs.Puffle import CareItemSchema, CareItemCollection
+from Houdini.Crumbs.Mascot import MascotSchema, MascotCollection
 
 def retrieveItemCollection(crumbsFile="crumbs/paper_items.json"):
     assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
@@ -220,3 +221,18 @@ def retrieveCareItemCollection(crumbsFile="crumbs/puffle_items.json"):
         # print(careItemCollection.getItem(79).Effect.Food)
 
         return careItemCollection
+
+def retrieveMascotCollection(crumbsFile="crumbs/mascots.json"):
+    assert os.path.exists(crumbsFile), "%r does not exist" % crumbsFile
+
+    with open(crumbsFile, "r") as mascotsFileHandle:
+        mascots = json.load(mascotsFileHandle)
+
+        schema = MascotSchema(many=True)
+        result = schema.load(mascots.values())
+
+        mascotCollection = MascotCollection(result.data)
+
+        logger.info("%d mascots loaded", len(mascotCollection))
+
+        return mascotCollection
