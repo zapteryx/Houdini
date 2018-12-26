@@ -718,7 +718,7 @@ class XT:
         "Data": [XTData("Id", int)]
     }
 
-    GetBestFriendsList = {
+    GetBestFriendsIglooList = {
         "Handler": "u#gbffl",
         "Data": []
     }

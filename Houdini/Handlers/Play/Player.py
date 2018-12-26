@@ -34,10 +34,6 @@ def getPlayerInfo(self, penguinId):
 
     return str()
 
-@Handlers.Handle(XT.GetBestFriendsList)
-def handleGetBestFriendsList(self, data):
-    self.sendXt("gbffl", None)
-
 @Handlers.Handle(XT.Heartbeat)
 @Handlers.Throttle(60)
 def handleSendHeartbeat(self, data):

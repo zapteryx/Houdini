@@ -2,8 +2,9 @@ from sqlalchemy import and_, or_
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin, BuddyList
-from Houdini.Handlers.Play.Moderation import cheatBan
 from Houdini.Handlers.Play.Player import getPlayerInfo
+from Houdini.Handlers.Play.Moderation import cheatBan
+from Houdini.Handlers.Play.Igloo import getActiveIgloo
 
 @Handlers.Handle(XT.RefreshPlayerFriendInfo)
 def handleRefreshPlayerFriendInfo(self, data):
@@ -177,3 +178,17 @@ def handleRemoveBuddy(self, data):
                 del player.buddies[self.user.ID]
                 if self.user.ID in player.bestBuddies: player.bestBuddies.remove(self.user.ID)
                 handleRefreshPlayerFriendInfo(player, data)
+
+@Handlers.Handle(XT.GetBestFriendsIglooList)
+def handleGetBestFriendsIglooList(self, data):
+    self.sendXt("gbffl", ",".join("{}".format(buddyId) for buddyId in self.bestBuddies))
+
+@Handlers.Handle(XT.GetFriendsIglooList)
+def GetFriendsIglooList(self, data):
+    buddyIgloos = []
+
+    for buddyId in self.buddies.keys():
+        likes = getActiveIgloo(self, buddyId).split(":")[8]
+        buddyIgloos.append("{}|{}".format(buddyId, likes))
+
+    self.sendXt("grf", *buddyIgloos)
