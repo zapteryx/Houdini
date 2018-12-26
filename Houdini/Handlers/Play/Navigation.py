@@ -5,7 +5,7 @@ from Houdini.Crumbs.Room import Room
 from Houdini.Handlers.Play.Buddy import handleRefreshPlayerFriendInfo
 from Houdini.Handlers.Play.Pet import handleGetMyPlayerPuffles
 from Houdini.Handlers.Play.Stampbook import getStampsString
-from Houdini.Data.Penguin import Penguin
+from Houdini.Data.Penguin import Penguin, BuddyList
 from Houdini.Data.Timer import Timer
 from Houdini.Handlers.Play.Timer import updateEggTimer, checkHours
 
@@ -77,9 +77,20 @@ def handleJoinWorld(self, data):
 
     self.server.players[self.user.ID] = self
 
-    for buddyId, buddyNickname in self.buddies.items():
-        if buddyId in self.server.players:
-            self.server.players[buddyId].sendXt("bon", self.user.ID)
+    if self.user.ID in self.server.mascots:
+        characterBuddies = self.session.query(BuddyList.PenguinID).filter(BuddyList.BuddyID == self.user.ID).all()
+        self.logger.debug(characterBuddies)
+        buddies = [Id for Id in characterBuddies]
+        self.logger.debug(buddies)
+        for buddyId in buddies:
+            self.logger.debug(buddyId)
+            if buddyId[0] in self.server.players:
+                self.logger.debug("online")
+                self.server.players[buddyId[0]].sendXt("cron", self.user.ID)
+    else:
+        for buddyId, buddyNickname in self.buddies.items():
+            if buddyId in self.server.players:
+                self.server.players[buddyId].sendXt("bon", self.user.ID)
 
     randomRoomId = 100
     self.server.rooms[randomRoomId].add(self)

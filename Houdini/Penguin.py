@@ -2,7 +2,7 @@ import time
 from beaker.cache import region_invalidate as Invalidate
 
 from Houdini.Spheniscidae import Spheniscidae
-from Houdini.Data.Penguin import Inventory, IglooInventory, FurnitureInventory, LocationInventory, FloorInventory
+from Houdini.Data.Penguin import Inventory, IglooInventory, FurnitureInventory, LocationInventory, FloorInventory, BuddyList
 from Houdini.Data.Puffle import Puffle, CareInventory
 from Houdini.Data.Postcard import Postcard
 from Houdini.Data.Stamp import Stamp
@@ -212,9 +212,16 @@ class Penguin(Spheniscidae):
         if hasattr(self, "room") and self.room is not None:
             self.room.remove(self)
 
-            for buddyId in self.buddies.keys():
-                if buddyId in self.server.players:
-                    self.server.players[buddyId].sendXt("bof", self.user.ID)
+            if self.user.ID in self.server.mascots:
+                characterBuddies = self.session.query(BuddyList.PenguinID).filter(BuddyList.BuddyID == self.user.ID).all()
+                buddies = [Id for Id in characterBuddies]
+                for buddyId in buddies:
+                    if buddyId[0] in self.server.players:
+                        self.server.players[buddyId[0]].sendXt("crof", self.user.ID)
+            else:
+                for buddyId in self.buddies.keys():
+                    if buddyId in self.server.players:
+                        self.server.players[buddyId].sendXt("bof", self.user.ID)
 
             loginUnix = time.mktime(self.login.Date.timetuple())
             minutesPlayed = int(time.time() - loginUnix) / 60
