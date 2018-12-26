@@ -3,6 +3,7 @@ from sqlalchemy import or_
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
+from Houdini.Data.Puffle import Puffle
 
 @Cache("houdini", "player")
 def getPlayerString(self, penguinId):
@@ -10,14 +11,23 @@ def getPlayerString(self, penguinId):
         player = self.server.players[penguinId]
         playerTuple = (player.user.ID, player.user.Nickname, player.user.Approval, player.user.Color, player.user.Head,
                        player.user.Face, player.user.Neck, player.user.Body, player.user.Hand,
-                       player.user.Feet, player.user.Flag, player.user.Photo)
+                       player.user.Feet, player.user.Flag, player.user.Photo, player.user.Member, player.user.MembershipDays)
+        puffleTuple = (player.walkingPuffle.ID, player.walkingPuffle.Type, player.walkingPuffle.Subtype, player.walkingPuffle.Hat) if player.walkingPuffle else None
     else:
         playerTuple = self.session.query(Penguin.ID, Penguin.Nickname, Penguin.Approval, Penguin.Color, Penguin.Head,
                                          Penguin.Face, Penguin.Neck, Penguin.Body, Penguin.Hand, Penguin.Feet, Penguin.Flag,
-                                         Penguin.Photo).filter_by(ID=penguinId).first()
+                                         Penguin.Photo, Penguin.Member, Penguin.MembershipDays).filter_by(ID=penguinId).first()
+        puffleTuple = self.session.query(Puffle.ID, Puffle.Type, Puffle.Subtype, Puffle.Hat).filter_by(PenguinID=penguinId).filter_by(Walking=1).first()
+
     if playerTuple is not None:
-        playerData = [str(playerDetail) for playerDetail in playerTuple]
-        return "|".join(playerData)
+        playerData = "{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}|{11}||||{12}|{13}"
+        playerData = playerData.format(*playerTuple)
+        if puffleTuple is not None:
+            playerData += "||||{0}|{1}|{2}|{3}|0"
+            playerData = playerData.format(*puffleTuple)
+
+        return playerData
+
     return str()
 
 @Cache("houdini", "player_info")
