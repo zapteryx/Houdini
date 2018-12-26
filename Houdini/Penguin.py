@@ -213,11 +213,10 @@ class Penguin(Spheniscidae):
             self.room.remove(self)
 
             if self.user.ID in self.server.mascots:
-                characterBuddies = self.session.query(BuddyList.PenguinID).filter(BuddyList.BuddyID == self.user.ID).all()
-                buddies = [Id for Id in characterBuddies]
-                for buddyId in buddies:
-                    if buddyId[0] in self.server.players:
-                        self.server.players[buddyId[0]].sendXt("crof", self.user.ID)
+                for playerId in self.server.players.keys():
+                    player = self.server.players[playerId]
+                    if self.user.ID in player.characterBuddies:
+                        player.sendXt("crof", self.user.ID)
             else:
                 for buddyId in self.buddies.keys():
                     if buddyId in self.server.players:

@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy import and_, or_
 
 from Houdini.Handlers import Handlers, XML
 from Houdini.Data.Login import Login
@@ -79,10 +80,22 @@ def handleLogin(self, data):
     self.stamps = [stampId for stampId, in stampQuery]
     self.recentStamps = [stampId for stampId, in stampQuery.filter_by(Recent=1)]
 
+    self.requests = {buddyId: buddyNickname for buddyId, buddyNickname in
+                    self.session.query(BuddyList.BuddyID, Penguin.Nickname).
+                    join(Penguin, Penguin.ID == BuddyList.BuddyID).
+                    filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.Type == 0))}
+
     self.buddies = {buddyId: buddyNickname for buddyId, buddyNickname in
                     self.session.query(BuddyList.BuddyID, Penguin.Nickname).
                     join(Penguin, Penguin.ID == BuddyList.BuddyID).
-                    filter(BuddyList.PenguinID == self.user.ID)}
+                    filter(BuddyList.PenguinID == self.user.ID).
+                    filter(or_(BuddyList.Type == 1,BuddyList.Type == 2))}
+
+    self.bestBuddies = [buddyId for buddyId, in self.session.query(BuddyList.BuddyID).join(Penguin, Penguin.ID == BuddyList.BuddyID). \
+                     filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.Type == 2))]
+
+    self.characterBuddies = [characterId for characterId, in self.session.query(BuddyList.BuddyID).join(Penguin, Penguin.ID == BuddyList.BuddyID). \
+                     filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.Type == 3))]
 
     self.ignore = {ignoreId: ignoreNickname for ignoreId, ignoreNickname in
                    self.session.query(IgnoreList.IgnoreID, Penguin.Nickname).

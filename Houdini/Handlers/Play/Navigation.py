@@ -78,15 +78,10 @@ def handleJoinWorld(self, data):
     self.server.players[self.user.ID] = self
 
     if self.user.ID in self.server.mascots:
-        characterBuddies = self.session.query(BuddyList.PenguinID).filter(BuddyList.BuddyID == self.user.ID).all()
-        self.logger.debug(characterBuddies)
-        buddies = [Id for Id in characterBuddies]
-        self.logger.debug(buddies)
-        for buddyId in buddies:
-            self.logger.debug(buddyId)
-            if buddyId[0] in self.server.players:
-                self.logger.debug("online")
-                self.server.players[buddyId[0]].sendXt("cron", self.user.ID)
+        for playerId in self.server.players.keys():
+            player = self.server.players[playerId]
+            if self.user.ID in player.characterBuddies:
+                player.sendXt("cron", self.user.ID)
     else:
         for buddyId, buddyNickname in self.buddies.items():
             if buddyId in self.server.players:

@@ -9,6 +9,7 @@ from Houdini.Data import retryableTransaction
 import bcrypt, time, os
 
 from datetime import datetime, timedelta
+from sqlalchemy import or_
 
 @Handlers.Handle(XML.Login)
 @retryableTransaction()
@@ -145,7 +146,8 @@ def handleLogin(self, data):
                 self.logger.debug("Skipping buddy iteration for %s " % serverName)
                 continue
 
-            buddies = self.session.query(BuddyList.BuddyID).filter(BuddyList.PenguinID == self.user.ID)
+            buddies = self.session.query(BuddyList.BuddyID).filter(BuddyList.PenguinID == self.user.ID) \
+                        .filter(or_(BuddyList.Type == 1,BuddyList.Type == 2))
             for buddyId, in buddies:
                 if str(buddyId) in serverPlayers:
                     buddyWorlds.append(serversConfig[serverName]["Id"])
