@@ -216,6 +216,11 @@ class XT:
         "Data": []
     }
 
+    RefreshPlayerFriendInfo = {
+        "Handler": "u#rpfi",
+        "Data": []
+    }
+
     GetBuddies = {
         "Handler": "b#gb",
         "Data": []
@@ -248,6 +253,11 @@ class XT:
 
     BuddyAccept = {
         "Handler": "b#ba",
+        "Data": [XTData("Id", int)]
+    }
+
+    BuddyReject = {
+        "Handler": "b#rr",
         "Data": [XTData("Id", int)]
     }
 

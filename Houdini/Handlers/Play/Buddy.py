@@ -4,6 +4,13 @@ from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin, BuddyList
 from Houdini.Handlers.Play.Moderation import cheatBan
 
+@Handlers.Handle(XT.RefreshPlayerFriendInfo)
+def handleRefreshPlayerFriendInfo(self, data):
+    handleGetBuddies(self, data)
+    handleGetBestFriends(self, data)
+    handleGetPendingRequests(self, data)
+    handleGetCharacters(self, data)
+
 @Handlers.Handle(XT.GetPendingRequests)
 def handleGetPendingRequests(self, data):
     pendingRequests = []
@@ -76,6 +83,9 @@ def handleBuddyRequest(self, data):
     else:
         wantedBuddyId = int(data.Player)
 
+    if wantedBuddyId in self.server.mascots:
+        return self.transport.loseConnection()
+
     if wantedBuddyId == self.user.ID:
         # Don't let people add themselves
         return self.transport.loseConnection()
@@ -89,11 +99,12 @@ def handleBuddyRequest(self, data):
         self.session.commit()
 
         if wantedBuddyId in self.server.players:
-            self.server.players[wantedBuddyId].sendXt("br", self.user.ID, self.server.players[self.user.ID].user.Nickname)
+            player = self.server.players[wantedBuddyId]
+            player.sendXt("pr", "{}|{}".format(self.user.ID, self.server.players[self.user.ID].user.Nickname))
 
 @Handlers.Handle(XT.CharacterRequest)
 def handleCharacterRequest(self, data):
-    if self.server.mascots.getMascot(data.Id):
+    if data.Id in self.server.mascots:
         mascotStampId = self.session.query(Penguin.MascotStamp).filter(Penguin.ID == data.Id).first()
 
         if mascotStampId[0] != 0:
@@ -111,3 +122,72 @@ def handleCharacterRequest(self, data):
             self.session.commit()
 
             self.sendXt("cr", data.Id)
+
+@Handlers.Throttle(1)
+@Handlers.Handle(XT.BuddyAccept)
+def handleBuddyAccept(self, data):
+    if data.Id in self.server.mascots:
+        return self.transport.loseConnection()
+
+    if data.Id == self.user.ID:
+        return self.transport.loseConnection()
+
+    pendingRequest = self.session.query(BuddyList.BuddyID,Penguin.Nickname).join(Penguin, Penguin.ID == BuddyList.BuddyID). \
+            filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.BuddyID == data.Id,BuddyList.Type == 0)).first()
+
+    if not pendingRequest:
+        # Prevent hackers from adding players haven't sent requests
+        return cheatBan(self, self.user.ID, 72, "Attempting to add player to friends list")
+
+    doubleRequest = self.session.query(BuddyList.BuddyID,Penguin.Nickname).join(Penguin, Penguin.ID == BuddyList.BuddyID). \
+            filter(and_(BuddyList.PenguinID == data.Id,BuddyList.BuddyID == self.user.ID,BuddyList.Type == 0)).first()
+
+    if doubleRequest:
+        self.session.query(BuddyList).filter(and_(BuddyList.PenguinID == data.Id,BuddyList.BuddyID == self.user.ID,BuddyList.Type == 0)).update({"Type": 1})
+    else:
+        accept = BuddyList(PenguinID=data.Id, BuddyID=self.user.ID, Type=1)
+        self.session.add(accept)
+
+    self.session.query(BuddyList).filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.BuddyID == data.Id,BuddyList.Type == 0)).update({"Type": 1})
+    self.session.commit()
+
+    status = "online" if data.Id in self.server.players else "offline"
+    newBuddy = "{}|{}|{}|{}".format(data.Id, data.Id, pendingRequest[1], status)
+
+    self.sendXt("ba", newBuddy)
+    handleRefreshPlayerFriendInfo(self, data)
+
+    if data.Id in self.server.players:
+        player = self.server.players[data.Id]
+        player.sendXt("ba", "{}|{}|{}|online".format(self.user.ID, self.user.ID, self.user.Nickname))
+        handleRefreshPlayerFriendInfo(player, data)
+
+@Handlers.Handle(XT.BuddyReject)
+def handleBuddyReject(self, data):
+    pendingRequest = self.session.query(BuddyList).filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.BuddyID == data.Id,BuddyList.Type == 0)).first()
+
+    if pendingRequest:
+        self.session.query(BuddyList).filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.BuddyID == data.Id,BuddyList.Type == 0)).delete()
+        self.session.commit()
+
+        self.sendXt("rr", data.Id)
+
+@Handlers.Handle(XT.RemoveBuddy)
+def handleRemoveBuddy(self, data):
+    if data.Id not in self.server.mascots:
+        friend = self.session.query(BuddyList.Type).filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.BuddyID == data.Id)).first()
+
+        if friend:
+            if friend[0] == 1 or friend[0] == 2:
+                self.session.query(BuddyList).filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.BuddyID == data.Id)).delete()
+                self.session.query(BuddyList).filter(and_(BuddyList.PenguinID == data.Id,BuddyList.BuddyID == self.user.ID)).delete()
+
+                self.session.commit()
+
+                self.sendXt("rb", data.Id)
+                handleRefreshPlayerFriendInfo(self, data)
+
+                if data.Id in self.server.players:
+                    player = self.server.players[data.Id]
+                    player.sendXt("rb", self.user.ID)
+                    handleRefreshPlayerFriendInfo(player, data)

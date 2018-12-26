@@ -2,7 +2,7 @@ import time, random
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Crumbs.Room import Room
-from Houdini.Handlers.Play.Buddy import handleGetPendingRequests, handleGetBuddies, handleGetBestFriends, handleGetCharacters
+from Houdini.Handlers.Play.Buddy import handleRefreshPlayerFriendInfo
 from Houdini.Handlers.Play.Pet import handleGetMyPlayerPuffles
 from Houdini.Handlers.Play.Stampbook import getStampsString
 from Houdini.Data.Penguin import Penguin
@@ -40,10 +40,7 @@ def handleJoinWorld(self, data):
 
     self.sendXt("js", self.user.AgentStatus, 0, self.user.Moderator, self.user.BookModified)
 
-    handleGetBuddies(self, data)
-    handleGetBestFriends(self, data)
-    handleGetPendingRequests(self, data)
-    handleGetCharacters(self, data)
+    handleRefreshPlayerFriendInfo(self, data)
 
     handleGetMyPlayerPuffles(self, [])
 
