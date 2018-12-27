@@ -1,5 +1,5 @@
 from Houdini.Handlers import Handlers, XML
-from Houdini.Data.Penguin import Penguin, BuddyList
+from Houdini.Data.Penguin import Penguin, BuddyList, NameApproval
 from Houdini.Data.Ban import Ban
 from Houdini.Data.Login import Login
 from Houdini.Data.Timer import Timer
@@ -124,6 +124,20 @@ def handleLogin(self, data):
 
     self.session.commit()
 
+    nameApproval = self.session.query(NameApproval).filter(NameApproval.PenguinID == user.ID).first()
+    if nameApproval.en == 1:
+        self.user.Approval = 1
+        languageApproved = "1"
+        languageRejected = "0"
+    elif nameApproval.en == 0:
+        self.user.Approval = 0
+        languageApproved = "0"
+        languageRejected = "0"
+    elif nameApproval.en == -1:
+        self.user.Approval = 0
+        languageApproved = "0"
+        languageRejected = "1"
+
     buddyWorlds = []
     worldPopulations = []
 
@@ -154,5 +168,5 @@ def handleLogin(self, data):
                     break
 
     rawLoginData = "|".join([str(user.ID), str(user.ID), user.Username,
-                             user.LoginKey, str(user.Approval), str(0 if bool(user.Approval) else 1)])
+                             user.LoginKey, str(), languageApproved, languageRejected])
     self.sendXt("l", rawLoginData, user.ConfirmationHash, "friendsKey", "|".join(worldPopulations), "email@address.org")

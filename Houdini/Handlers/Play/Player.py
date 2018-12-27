@@ -2,7 +2,7 @@ from beaker.cache import cache_region as Cache
 from sqlalchemy import or_
 
 from Houdini.Handlers import Handlers, XT
-from Houdini.Data.Penguin import Penguin
+from Houdini.Data.Penguin import Penguin, NameApproval
 from Houdini.Data.Puffle import Puffle
 
 @Cache("houdini", "player")
@@ -12,16 +12,23 @@ def getPlayerString(self, penguinId):
         playerTuple = (player.user.ID, player.user.Nickname, player.user.Approval, player.user.Color, player.user.Head,
                        player.user.Face, player.user.Neck, player.user.Body, player.user.Hand,
                        player.user.Feet, player.user.Flag, player.user.Photo, player.user.Member, player.user.MembershipDays)
+        playerData = "{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}|{11}||||{12}|{13}"
+        playerData = playerData.format(*playerTuple)
+
         puffleTuple = (player.walkingPuffle.ID, player.walkingPuffle.Type, player.walkingPuffle.Subtype, player.walkingPuffle.Hat) if player.walkingPuffle else None
     else:
-        playerTuple = self.session.query(Penguin.ID, Penguin.Nickname, Penguin.Approval, Penguin.Color, Penguin.Head,
+        playerTuple = self.session.query(Penguin.ID, Penguin.Nickname, Penguin.Color, Penguin.Head,
                                          Penguin.Face, Penguin.Neck, Penguin.Body, Penguin.Hand, Penguin.Feet, Penguin.Flag,
                                          Penguin.Photo, Penguin.Member, Penguin.MembershipDays).filter_by(ID=penguinId).first()
+        approvalTuple = self.session.query(NameApproval.en).filter_by(PenguinID=penguinId).first()
+        playerData = "{0}|{1}|nameApproval|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}||||{11}|{12}"
+        playerData = playerData.format(*playerTuple)
+        nameApproval = "1" if approvalTuple[0] == 1 else "0"
+        playerData = playerData.replace("nameApproval", nameApproval)
+
         puffleTuple = self.session.query(Puffle.ID, Puffle.Type, Puffle.Subtype, Puffle.Hat).filter_by(PenguinID=penguinId).filter_by(Walking=1).first()
 
     if playerTuple is not None:
-        playerData = "{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}|{11}||||{12}|{13}"
-        playerData = playerData.format(*playerTuple)
         if puffleTuple is not None:
             playerData += "||||{0}|{1}|{2}|{3}|0"
             playerData = playerData.format(*puffleTuple)

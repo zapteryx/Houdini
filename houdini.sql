@@ -126,11 +126,20 @@ CREATE TABLE `login` (
   `IPAddress` char(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin login records';
 
+CREATE TABLE `name_approval` (
+  `PenguinID` int(10) UNSIGNED NOT NULL,
+  `en` tinyint(1) NOT NULL DEFAULT 0,
+  `pt` tinyint(1) NOT NULL DEFAULT 0,
+  `fr` tinyint(1) NOT NULL DEFAULT 0,
+  `es` tinyint(1) NOT NULL DEFAULT 0,
+  `de` tinyint(1) NOT NULL DEFAULT 0,
+  `ru` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin name approvals';
+
 CREATE TABLE `penguin` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique penguin ID',
   `Username` varchar(12) NOT NULL COMMENT 'Penguin login name',
   `Nickname` varchar(24) NOT NULL COMMENT 'Penguin display name',
-  `Approval` tinyint(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Username approval',
   `Password` char(255) NOT NULL COMMENT 'Password hash',
   `LoginKey` char(255) DEFAULT '',
   `ConfirmationHash` char(255) DEFAULT NULL,
@@ -320,6 +329,9 @@ ALTER TABLE `login`
   ADD PRIMARY KEY (`ID`),
   ADD KEY `PenguinID` (`PenguinID`);
 
+ALTER TABLE `name_approval`
+  ADD PRIMARY KEY (`PenguinID`);
+
 ALTER TABLE `penguin`
   ADD PRIMARY KEY (`ID`),
   ADD UNIQUE KEY `Username` (`Username`),
@@ -425,6 +437,9 @@ ALTER TABLE `location_inventory`
 
 ALTER TABLE `login`
   ADD CONSTRAINT `login_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `name_approval`
+  ADD CONSTRAINT `name_approval_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `penguin_redemption`
   ADD CONSTRAINT `penguin_redemption_penguin_ID_fk` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,

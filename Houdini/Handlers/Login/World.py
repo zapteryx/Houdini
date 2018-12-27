@@ -20,13 +20,15 @@ def handleLogin(self, data):
     rawLoginData = data.Username
     passwordHashes = data.Password
 
-    playerId, _, swid, loginKey, languageApproved, languageRejected = rawLoginData.split("|")
+    playerId, _, swid, loginKey, _, languageApproved, languageRejected = rawLoginData.split("|")
     clientLoginKey, confirmationHash = passwordHashes.split("#")
 
     self.logger.info("{} is attempting to login..".format(playerId))
 
     self.session.commit()
     user = self.session.query(Penguin).filter_by(ID=playerId).first()
+
+    user.Approval = 1 if languageApproved == "1" else 0
 
     if user is None:
         return self.sendErrorAndDisconnect(100)

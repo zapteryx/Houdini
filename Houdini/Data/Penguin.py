@@ -12,7 +12,6 @@ class Penguin(Base):
     ID = Column(Integer, primary_key=True)
     Username = Column(String(12), nullable=False, unique=True)
     Nickname = Column(String(24), nullable=False)
-    Approval = Column(SmallInteger, nullable=False, server_default=text("0"))
     Password = Column(String(255), nullable=False)
     LoginKey = Column(String(255), server_default=text("''"))
     ConfirmationHash = Column(String(255), server_default=text("''"))
@@ -87,7 +86,6 @@ class IgnoreList(Base):
     IgnoreID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
                       nullable=False, index=True)
 
-
 class BuddyList(Base):
     __tablename__ = 'buddy_list'
 
@@ -96,6 +94,18 @@ class BuddyList(Base):
     BuddyID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
                      nullable=False, index=True)
     Type = Column(SmallInteger, nullable=False, server_default=text("0"))
+
+class NameApproval(Base):
+    __tablename__ = 'name_approval'
+
+    PenguinID = Column(ForeignKey(u'penguin.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
+                       nullable=False)
+    en = Column(SmallInteger, nullable=False, server_default=text("0"))
+    pt = Column(SmallInteger, nullable=False, server_default=text("0"))
+    fr = Column(SmallInteger, nullable=False, server_default=text("0"))
+    es = Column(SmallInteger, nullable=False, server_default=text("0"))
+    de = Column(SmallInteger, nullable=False, server_default=text("0"))
+    ru = Column(SmallInteger, nullable=False, server_default=text("0"))
 
 class Inventory(Base):
     __tablename__ = 'inventory'
