@@ -9,6 +9,7 @@ from Houdini.Handlers.Play.Item import handleBuyInventory
 from Houdini.Handlers.Play.Igloo import handleBuyFurniture, handleUpdateFloor, handleUpdateIglooType, handleBuyIglooLocation
 from Houdini.Handlers.Play.Pet import handleAddPuffleCareItem
 from Houdini.Handlers.Play.Moderation import moderatorBan, moderatorKick
+from Houdini.Handlers.Play.Setting import handleSendUpdatePlayerColour, handleSendUpdatePlayerHead, handleSendUpdatePlayerFace, handleSendUpdatePlayerNeck, handleSendUpdatePlayerBody, handleSendUpdatePlayerHand, handleSendUpdatePlayerFeet, handleSendUpdatePlayerFlag, handleSendUpdatePlayerPhoto
 
 commandCollection = {}
 
@@ -199,6 +200,46 @@ class Commands(object):
         self.logger.debug("%s is trying to add a puffle item (id: %d)" % (player.user.Nickname, arguments.ItemId))
 
         reactor.callFromThread(handleAddPuffleCareItem, player, arguments)
+
+    @Command("color", CommandArgument("ItemId", int))
+    @Command("colour", CommandArgument("ItemId", int))
+    def handleUpdateColorCommand(self, player, arguments):
+        reactor.callFromThread(handleSendUpdatePlayerColour, player, arguments)
+
+    @Command("head", CommandArgument("ItemId", int))
+    def handleUpdateHeadCommand(self, player, arguments):
+        reactor.callFromThread(handleSendUpdatePlayerHead, player, arguments)
+
+    @Command("face", CommandArgument("ItemId", int))
+    def handleUpdateFaceCommand(self, player, arguments):
+        reactor.callFromThread(handleSendUpdatePlayerFace, player, arguments)
+
+    @Command("neck", CommandArgument("ItemId", int))
+    def handleUpdateNeckCommand(self, player, arguments):
+        reactor.callFromThread(handleSendUpdatePlayerNeck, player, arguments)
+
+    @Command("body", CommandArgument("ItemId", int))
+    def handleUpdateBodyCommand(self, player, arguments):
+        reactor.callFromThread(handleSendUpdatePlayerBody, player, arguments)
+
+    @Command("hand", CommandArgument("ItemId", int))
+    def handleUpdateHandCommand(self, player, arguments):
+        reactor.callFromThread(handleSendUpdatePlayerHand, player, arguments)
+
+    @Command("feet", CommandArgument("ItemId", int))
+    def handleUpdateFeetCommand(self, player, arguments):
+        reactor.callFromThread(handleSendUpdatePlayerFeet, player, arguments)
+
+    @Command("photo", CommandArgument("ItemId", int))
+    @Command("background", CommandArgument("ItemId", int))
+    @Command("bg", CommandArgument("ItemId", int))
+    def handleUpdatePhotoCommand(self, player, arguments):
+        reactor.callFromThread(handleSendUpdatePhotoColour, player, arguments)
+
+    @Command("flag", CommandArgument("ItemId", int))
+    @Command("pin", CommandArgument("ItemId", int))
+    def handleUpdateFlagCommand(self, player, arguments):
+        reactor.callFromThread(handleSendUpdateFlagColour, player, arguments)
 
     # Do not edit below this line.
     def processCommand(self, messageDetails):
