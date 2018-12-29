@@ -147,7 +147,7 @@ class TreasureHunt(object):
 def handleGetGame(self, data):
     if len(self.table.penguins) == 2:
         playerOne, playerTwo = self.table.penguins[:2]
-        self.sendXt("gz", playerOne.user.Username, str())
+        self.sendXt("gz", playerOne.user.Nickname, str())
         return
     self.sendXt("gz", self.table.getString())
 
@@ -158,7 +158,7 @@ def handleJoinGame(self, data):
     if not gameFull:
         seatId = self.table.getSeatId(self)
         self.sendXt("jz", seatId)
-        self.table.sendXt("uz", seatId, self.user.Username)
+        self.table.sendXt("uz", seatId, self.user.Nickname)
 
         if len(self.table.penguins) == 2:
             self.table.sendXt("sz", self.table.getString())

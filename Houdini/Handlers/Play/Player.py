@@ -41,9 +41,9 @@ def getPlayerString(self, penguinId):
 def getPlayerInfo(self, penguinId):
     if penguinId in self.server.players:
         player = self.server.players[penguinId]
-        playerTuple = (player.user.Username, player.user.ID, player.user.Username)
+        playerTuple = (player.user.Nickname, player.user.ID, player.user.Nickname)
     else:
-        playerTuple = self.session.query(Penguin.Username, Penguin.ID, Penguin.Username).filter_by(ID=penguinId).first()
+        playerTuple = self.session.query(Penguin.Nickname, Penguin.ID, Penguin.Nickname).filter_by(ID=penguinId).first()
 
     if playerTuple is not None:
         playerData = [str(playerDetail) for playerDetail in playerTuple]
@@ -145,16 +145,16 @@ def handleGetPlayerInfoByName(self, data):
 @Handlers.Throttle()
 def handleGetPlayerInfoBySwid(self, data):
     playerInfo = getPlayerInfo(self, data.Id)
-    username = playerInfo.split("|")[2]
-    self.sendXt("pbs", data.Id, data.Id, username)
+    nickname = playerInfo.split("|")[2]
+    self.sendXt("pbs", data.Id, data.Id, nickname)
 
 @Handlers.Handle(XT.PlayerBySwidUsername)
 @Handlers.Throttle()
 def handlePlayerBySwidUsername(self, data):
     playerIds = data.IdList.split(",")
 
-    usernames = self.session.query(Penguin.Username)\
+    nicknames = self.session.query(Penguin.Nickname)\
         .filter(or_(*((Penguin.ID == playerId) for playerId in playerIds))).all()
 
-    self.sendXt("pbsu", ",".join([username for username, in usernames]))
+    self.sendXt("pbsu", ",".join([nickname for nickname, in nicknames]))
 

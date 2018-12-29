@@ -67,7 +67,7 @@ class MatchMaking(object):
 def handleJoinMatchMaking(self, data):
     if self.room.Id in MatchMakers:
         self.server.matchMaker.add(self)
-        self.sendXt("jmm", self.user.Username)
+        self.sendXt("jmm", self.user.Nickname)
 
 @Handlers.Handle(XT.LeaveMatchMaking)
 def handleLeaveMatchMaking(self, data):

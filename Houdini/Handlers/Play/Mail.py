@@ -98,7 +98,7 @@ def handleSendMail(self, data):
     self.sendXt("ms", self.user.Coins, 1)
     if data.RecipientId in self.server.players:
         recipientObject = self.server.players[data.RecipientId]
-        recipientObject.sendXt("mr", self.user.Username, self.user.ID, data.PostcardId,
+        recipientObject.sendXt("mr", self.user.Nickname, self.user.ID, data.PostcardId,
                                "", currentTimestamp, postcard.ID)
     self.logger.info("%d sent %d a postcard (%d).", self.user.ID, data.RecipientId,
                      data.PostcardId)

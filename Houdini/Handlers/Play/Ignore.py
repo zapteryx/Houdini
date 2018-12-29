@@ -4,7 +4,7 @@ from Houdini.Data.Penguin import Penguin, IgnoreList
 @Handlers.Handle(XT.GetIgnoreList)
 @Handlers.Throttle(-1)
 def handleGetIgnoreList(self, data):
-    ignoreString = "%".join(["{}|{}".format(ignoreId, ignoreUsername) for ignoreId, ignoreUsername in self.ignore.items()])
+    ignoreString = "%".join(["{}|{}".format(ignoreId, ignoreNickname) for ignoreId, ignoreNickname in self.ignore.items()])
     self.sendXt("gn", ignoreString)
 
 @Handlers.Handle(XT.AddIgnore)
@@ -15,10 +15,10 @@ def handleAddIgnore(self, data):
     if data.PlayerId in self.ignore:
         return
 
-    ignoreUser = self.session.query(Penguin.Username, Penguin.ID).\
+    ignoreUser = self.session.query(Penguin.Nickname, Penguin.ID).\
         filter(Penguin.ID == data.PlayerId).first()
 
-    self.ignore[data.PlayerId] = ignoreUser.Username
+    self.ignore[data.PlayerId] = ignoreUser.Nickname
 
     ignore = IgnoreList(PenguinID=self.user.ID, IgnoreID=ignoreUser.ID)
     self.session.add(ignore)

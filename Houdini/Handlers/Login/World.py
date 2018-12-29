@@ -138,7 +138,7 @@ def handleLogin(self, data):
 
             self.server.rooms[externalIglooId] = Room(**iglooFieldKeywords)
 
-        self.server.openIgloos[self.user.ID] = self.user.Username
+        self.server.openIgloos[self.user.ID] = self.user.Nickname
 
     self.locations = [locationId for locationId, in self.session.query(LocationInventory.LocationID)
         .filter_by(PenguinID=self.user.ID)]

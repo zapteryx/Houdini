@@ -60,41 +60,41 @@ class Commands(object):
         Handlers.Message += self.handleMessage
 
     @staticmethod
-    def getPlayer(sessionObject, playerUsername, specificQuery=Penguin):
+    def getPlayer(sessionObject, playerNickname, specificQuery=Penguin):
         player = sessionObject.query(specificQuery). \
-            filter_by(Username=playerUsername).scalar()
+            filter_by(Nickname=playerNickname).scalar()
 
         return player
 
-    @Command("kick", VariableCommandArgument("Username"))
+    @Command("kick", VariableCommandArgument("Nickname"))
     def handleKickCommand(self, player, arguments):
         if player.user.Moderator:
             playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
-                                              arguments.Username, Penguin.ID)
+                                              arguments.Nickname, Penguin.ID)
 
             if playerId is not None and playerId in self.server.players:
                 if not self.server.players[playerId].user.Moderator:
                     reactor.callFromThread(moderatorKick, player, playerId)
 
-                    self.logger.info("%s has kicked %s" % (player.user.Username, arguments.Username))
+                    self.logger.info("%s has kicked %s" % (player.user.Nickname, arguments.Nickname))
 
     # Example: !BAN King Arthur / 24 / Not actually king.
-    @Command("ban", TokenizedArgument("Username", str),
+    @Command("ban", TokenizedArgument("Nickname", str),
              TokenizedArgument("Duration", int),
              TokenizedArgument("Reason", str))
     def handleBanCommand(self, player, arguments):
         if player.user.Moderator:
-            self.logger.info("%s is attempting to ban %s." % (player.user.Username, arguments.Username))
+            self.logger.info("%s is attempting to ban %s." % (player.user.Nickname, arguments.Nickname))
 
             playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
-                                              arguments.Username, Penguin.ID)
+                                              arguments.Nickname, Penguin.ID)
 
             if playerId is not None:
                 reactor.callFromThread(moderatorBan, player, playerId,
                                        arguments.Duration, arguments.Reason)
 
                 self.logger.info("%s has banned %s for %s hours using the !BAN command." %
-                                 (player.user.Username, arguments.Username, arguments.Duration))
+                                 (player.user.Nickname, arguments.Nickname, arguments.Duration))
 
     @Command("jr", CommandArgument("RoomId", int))
     def handleJoinRoomCommand(self, player, arguments):
@@ -106,97 +106,97 @@ class Commands(object):
 
                 reactor.callFromThread(player.joinRoom, arguments.RoomId)
             else:
-                self.logger.debug("Denied %s from joining room %s - not Moderator" % (player.user.Username, arguments.RoomId))
+                self.logger.debug("Denied %s from joining room %s - not Moderator" % (player.user.Nickname, arguments.RoomId))
 
     @Command("ac", CommandArgument("Coins", int))
     def handleCoinsCommand(self, player, arguments):
-        self.logger.debug("%s is trying to add %d coins" % (player.user.Username, arguments.Coins))
+        self.logger.debug("%s is trying to add %d coins" % (player.user.Nickname, arguments.Coins))
         if player.user.Moderator == 1:
             newAmount = max(min(self.coinLimit, player.user.Coins + arguments.Coins), 1)
 
             reactor.callFromThread(player.sendCoins, newAmount)
         else:
-            self.logger.debug("Denied %s from adding %d coins - not Moderator" % (player.user.Username, arguments.Coins))
+            self.logger.debug("Denied %s from adding %d coins - not Moderator" % (player.user.Nickname, arguments.Coins))
 
     @Command("ai", CommandArgument("ItemId", int))
     def handleItemCommand(self, player, arguments):
-        self.logger.debug("%s is trying to add an item (id: %d)" % (player.user.Username, arguments.ItemId))
+        self.logger.debug("%s is trying to add an item (id: %d)" % (player.user.Nickname, arguments.ItemId))
 
         if arguments.ItemId not in self.server.items:
             self.logger.debug("Item (id: %d) does not exist" % (arguments.ItemId))
             return player.sendError(402)
         elif self.server.items.isBait(arguments.ItemId):
-            self.logger.debug("Denied %s from adding item (id: %d) - item is bait" % (player.user.Username, arguments.ItemId))
+            self.logger.debug("Denied %s from adding item (id: %d) - item is bait" % (player.user.Nickname, arguments.ItemId))
             return player.sendError(402)
         elif not self.patchedItems.blacklistEnabled and arguments.ItemId not in self.patchedItems.patchedClothing:
-            self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Username, arguments.ItemId))
+            self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Nickname, arguments.ItemId))
             return player.sendError(402)
         elif self.patchedItems.blacklistEnabled and arguments.ItemId in self.patchedItems.patchedClothing:
-            self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Username, arguments.ItemId))
+            self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Nickname, arguments.ItemId))
             return player.sendError(402)
         else:
             reactor.callFromThread(handleBuyInventory, player, arguments)
 
     @Command("af", CommandArgument("FurnitureId", int))
     def handleFurnitureCommand(self, player, arguments):
-        self.logger.debug("%s is trying to add furniture (id: %d)" % (player.user.Username, arguments.FurnitureId))
+        self.logger.debug("%s is trying to add furniture (id: %d)" % (player.user.Nickname, arguments.FurnitureId))
 
         if arguments.FurnitureId not in self.server.furniture:
             self.logger.debug("Furniture (id: %d) does not exist" % (arguments.FurnitureId))
             return player.sendError(402)
         elif self.server.furniture.isBait(arguments.FurnitureId):
-            self.logger.debug("Denied %s from adding furniture (id: %d) - item is bait" % (player.user.Username, arguments.FurnitureId))
+            self.logger.debug("Denied %s from adding furniture (id: %d) - item is bait" % (player.user.Nickname, arguments.FurnitureId))
             return player.sendError(402)
         elif not self.patchedItems.blacklistEnabled and arguments.FurnitureId not in self.patchedItems.patchedFurniture:
-            self.logger.debug("Denied %s from adding furniture (id: %d) - item is patched" % (player.user.Username, arguments.FurnitureId))
+            self.logger.debug("Denied %s from adding furniture (id: %d) - item is patched" % (player.user.Nickname, arguments.FurnitureId))
             return player.sendError(402)
         elif self.patchedItems.blacklistEnabled and arguments.FurnitureId in self.patchedItems.patchedFurniture:
-            self.logger.debug("Denied %s from adding furniture (id: %d) - item is patched" % (player.user.Username, arguments.FurnitureId))
+            self.logger.debug("Denied %s from adding furniture (id: %d) - item is patched" % (player.user.Nickname, arguments.FurnitureId))
             return player.sendError(402)
         else:
             reactor.callFromThread(handleBuyFurniture, player, arguments)
 
     @Command("ag", CommandArgument("FloorId", int))
     def handleFloorCommand(self, player, arguments):
-        self.logger.debug("%s is trying to add floor (id: %d)" % (player.user.Username, arguments.FloorId))
+        self.logger.debug("%s is trying to add floor (id: %d)" % (player.user.Nickname, arguments.FloorId))
 
         if arguments.FloorId not in self.server.floors:
             self.logger.debug("Floor (id: %d) does not exist" % (arguments.FloorId))
             return player.sendError(402)
         elif not self.patchedItems.blacklistEnabled and arguments.FloorId not in self.patchedItems.patchedFlooring:
-            self.logger.debug("Denied %s from adding floor (id: %d) - item is patched" % (player.user.Username, arguments.FloorId))
+            self.logger.debug("Denied %s from adding floor (id: %d) - item is patched" % (player.user.Nickname, arguments.FloorId))
             return player.sendError(402)
         elif self.patchedItems.blacklistEnabled and arguments.FloorId in self.patchedItems.patchedFlooring:
-            self.logger.debug("Denied %s from adding floor (id: %d) - item is patched" % (player.user.Username, arguments.FloorId))
+            self.logger.debug("Denied %s from adding floor (id: %d) - item is patched" % (player.user.Nickname, arguments.FloorId))
             return player.sendError(402)
         else:
             reactor.callFromThread(handleUpdateFloor, player, arguments)
 
     @Command("au", CommandArgument("IglooId", int))
     def handleIglooCommand(self, player, arguments):
-        self.logger.debug("%s is trying to add igloo (id: %d)" % (player.user.Username, arguments.IglooId))
+        self.logger.debug("%s is trying to add igloo (id: %d)" % (player.user.Nickname, arguments.IglooId))
 
         if arguments.IglooId not in self.server.igloos:
             self.logger.debug("Igloo (id: %d) does not exist" % (arguments.IglooId))
             return player.sendError(402)
         elif not self.patchedItems.blacklistEnabled and arguments.IglooId not in self.patchedItems.patchedIgloos:
-            self.logger.debug("Denied %s from adding igloo (id: %d) - item is patched" % (player.user.Username, arguments.IglooId))
+            self.logger.debug("Denied %s from adding igloo (id: %d) - item is patched" % (player.user.Nickname, arguments.IglooId))
             return player.sendError(402)
         elif self.patchedItems.blacklistEnabled and arguments.IglooId in self.patchedItems.patchedIgloos:
-            self.logger.debug("Denied %s from adding igloo (id: %d) - item is patched" % (player.user.Username, arguments.IglooId))
+            self.logger.debug("Denied %s from adding igloo (id: %d) - item is patched" % (player.user.Nickname, arguments.IglooId))
             return player.sendError(402)
         else:
             reactor.callFromThread(handleUpdateIglooType, player, arguments)
 
     @Command("aloc", CommandArgument("LocationId", int))
     def handleLocationCommand(self, player, arguments):
-        self.logger.debug("%s is trying to add location (id: %d)" % (player.user.Username, arguments.LocationId))
+        self.logger.debug("%s is trying to add location (id: %d)" % (player.user.Nickname, arguments.LocationId))
 
         reactor.callFromThread(handleBuyIglooLocation, player, arguments)
 
     @Command("papi", CommandArgument("ItemId", int))
     def handlePuffleItemCommand(self, player, arguments):
-        self.logger.debug("%s is trying to add a puffle item (id: %d)" % (player.user.Username, arguments.ItemId))
+        self.logger.debug("%s is trying to add a puffle item (id: %d)" % (player.user.Nickname, arguments.ItemId))
 
         reactor.callFromThread(handleAddPuffleCareItem, player, arguments)
 
@@ -253,7 +253,7 @@ class Commands(object):
         self.logger.error(error)
 
     def handleMessage(self, player, data):
-        self.logger.info("[Commands] Received message from %s: '%s'" % (player.user.Username, data.Message))
+        self.logger.info("[Commands] Received message from %s: '%s'" % (player.user.Nickname, data.Message))
 
         if data.Message.startswith(self.commandPrefix):
             commandMessage = data.Message[1:]

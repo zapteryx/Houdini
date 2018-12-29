@@ -343,17 +343,17 @@ def handleUpdateIglooSlotSummary(self, data):
                         self.user.ID in self.server.openIgloos:
                     del self.server.openIgloos[self.user.ID]
                 else:
-                    self.server.openIgloos[self.user.ID] = self.user.Username
+                    self.server.openIgloos[self.user.ID] = self.user.Nickname
 
             Invalidate(getAllIglooLayouts, 'houdini', 'igloo_layouts', self.user.ID)
 
 # TODO: Cache? (Would require invalidation on every leave/join and like submission)
 @Handlers.Handle(XT.GetOpenIglooList)
 def handleGetOpenIglooList(self, data):
-    openIgloos = ["{}|{}|{}|{}|0".format(playerId, playerUsername,
+    openIgloos = ["{}|{}|{}|{}|0".format(playerId, playerNickname,
                                          getLayoutLikeCount(self, self.server.rooms[playerId + 1000].IglooId),
                                          len(self.server.rooms[playerId + 1000].players))
-                  for playerId, playerUsername in self.server.openIgloos.items()]
+                  for playerId, playerNickname in self.server.openIgloos.items()]
 
     # Room population. Pretty sure this value isn't actually used xd
     localRoomPopulation = 0
