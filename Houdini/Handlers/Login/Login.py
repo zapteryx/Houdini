@@ -64,9 +64,6 @@ def handleLogin(self, data):
         else:
             del self.server.loginAttempts[ipAddr]
 
-    if not user.Active:
-        return self.sendErrorAndDisconnect(900)
-
     if user.Permaban:
         return self.sendErrorAndDisconnect(603)
 
@@ -169,4 +166,16 @@ def handleLogin(self, data):
 
     rawLoginData = "|".join([str(user.ID), str(user.ID), user.Username,
                              user.LoginKey, str(), languageApproved, languageRejected])
-    self.sendXt("l", rawLoginData, user.ConfirmationHash, "friendsKey", "|".join(worldPopulations), "email@address.org")
+
+    if user.Active == 0:
+        regDate = datetime.strptime(str(user.RegistrationDate), "%Y-%m-%d %H:%M:%S")
+        trialExpiry = regDate + timedelta(days=7)
+        trialLeft = trialExpiry - datetime.utcnow()
+        hoursLeft = ((trialLeft.days * 24) + (trialLeft.seconds / 3600))
+        if hoursLeft <= 0:
+            return self.sendXt("loginMustActivate", 0, user.ConfirmationHash, rawLoginData, "email@address.org")
+        else:
+            remaining = "{}|0|0".format(hoursLeft)
+            return self.sendXt("l", rawLoginData, user.ConfirmationHash, "friendsKey", "|".join(worldPopulations), "email@address.org", remaining)
+    else:
+        self.sendXt("l", rawLoginData, user.ConfirmationHash, "friendsKey", "|".join(worldPopulations), "email@address.org")

@@ -8,10 +8,11 @@ from Houdini.Handlers.Play.Igloo import getActiveIgloo
 
 @Handlers.Handle(XT.RefreshPlayerFriendInfo)
 def handleRefreshPlayerFriendInfo(self, data):
-    handleGetBuddies(self, data)
-    handleGetBestFriends(self, data)
-    handleGetPendingRequests(self, data)
-    handleGetCharacters(self, data)
+    if self.user.Active:
+        handleGetBuddies(self, data)
+        handleGetBestFriends(self, data)
+        handleGetPendingRequests(self, data)
+        handleGetCharacters(self, data)
 
 @Handlers.Handle(XT.GetPendingRequests)
 def handleGetPendingRequests(self, data):
@@ -66,6 +67,9 @@ def handleToggleBestFriend(self, data):
 
 @Handlers.Handle(XT.BuddyRequest)
 def handleBuddyRequest(self, data):
+    if not self.user.Active:
+        return self.transport.loseConnection()
+
     if "|" in data.Player:
         wantedBuddyId = int(data.Player.split("|")[1])
     else:
@@ -85,12 +89,16 @@ def handleBuddyRequest(self, data):
 
         if wantedBuddyId in self.server.players:
             player = self.server.players[wantedBuddyId]
-            player.requests[self.user.ID] = self.user.Nickname
-            player.sendXt("pr", "{}|{}".format(self.user.ID, self.user.Nickname))
+            if player.user.Active:
+                player.requests[self.user.ID] = self.user.Nickname
+                player.sendXt("pr", "{}|{}".format(self.user.ID, self.user.Nickname))
 
 @Handlers.Handle(XT.CharacterRequest)
 def handleCharacterRequest(self, data):
     if data.Id in self.server.mascots:
+        if not self.user.Active:
+            return self.transport.loseConnection()
+
         mascotStampId = self.session.query(Penguin.MascotStamp).filter(Penguin.ID == data.Id).first()
 
         if mascotStampId[0] != 0:
@@ -111,6 +119,9 @@ def handleCharacterRequest(self, data):
 @Handlers.Handle(XT.BuddyAccept)
 def handleBuddyAccept(self, data):
     if data.Id in self.server.mascots:
+        return self.transport.loseConnection()
+
+    if not self.user.Active:
         return self.transport.loseConnection()
 
     if data.Id == self.user.ID:

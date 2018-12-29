@@ -6,6 +6,9 @@ def handleSendMessage(self, data):
     if data.Id != self.user.ID:
         return self.transport.loseConnection()
 
+    if not self.user.Active:
+        return self.transport.loseConnection()
+
     if self.muted:
         for roomPlayer in self.room.players:
             if roomPlayer.user.Moderator:
