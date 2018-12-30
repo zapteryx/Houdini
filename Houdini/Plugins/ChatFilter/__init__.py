@@ -47,7 +47,7 @@ class ChatFilter(object):
     def removeSpecialChars(message):
         return "".join(e for e in message if e.isalnum())
 
-    def isNaughty(self, string):
+    def isPartNaughty(self, string):
         cleanMessage = self.removeSpecialChars(string)
         self.logger.info("[ChatFilter] Checking '%s' against bad words list" % (string))
         for badWord in self.words:
@@ -55,10 +55,23 @@ class ChatFilter(object):
                 return True
         return False
 
+    def isNaughty(self, string):
+        self.logger.info("[ChatFilter] Checking '%s' against bad words list" % (string))
+        messageWords = string.lower().split(" ")
+        self.logger.debug(messageWords)
+        for badWord in self.words:
+            for word in messageWords:
+                if badWord == word:
+                    return True
+        return False
+
     def handleSendMessage(self, player, data):
         if self.isNaughty(data.Message):
-            self.logger.info("[ChatFilter] Disallowing %s from saying '%s'" % (player.user.Username, data.Message))
+            self.logger.info("[ChatFilter] Warning %s for trying to say '%s'" % (player.user.Username, data.Message))
             return languageBan(self, player.user.ID)
+        elif self.isPartNaughty(data.Message):
+            self.logger.info("[ChatFilter] Disallowing %s from saying '%s'" % (player.user.Username, data.Message))
+            return
 
         handleSendMessage(player, data)
 
