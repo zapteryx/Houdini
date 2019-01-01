@@ -126,6 +126,15 @@ CREATE TABLE `login` (
   `IPAddress` char(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin login records';
 
+CREATE TABLE `membership` (
+  `PenguinID` int(10) UNSIGNED NOT NULL,
+  `Status` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Whether the user has an active membership',
+  `CurrentPlan` smallint(5) UNSIGNED NOT NULL COMMENT 'The number of days in their current period',
+  `Start` datetime DEFAULT NULL COMMENT 'Start datetime of their current period',
+  `End` datetime DEFAULT NULL COMMENT 'End datetime of their current period',
+  `CumulativeDays` smallint(5) UNSIGNED NOT NULL COMMENT 'Number of total days being a member'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT="Penguin membership status";
+
 CREATE TABLE `name_approval` (
   `PenguinID` int(10) UNSIGNED NOT NULL,
   `en` tinyint(1) NOT NULL DEFAULT 0,
@@ -146,8 +155,6 @@ CREATE TABLE `penguin` (
   `Email` varchar(255) NOT NULL COMMENT 'User email address',
   `RegistrationDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `Active` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Email activated',
-  `Member` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is user a member?',
-  `MembershipDays` smallint(4) NOT NULL DEFAULT '0' COMMENT 'Number of cumulative days the user has had membership',
   `SafeChat` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is user in safe chat mode?',
   `Igloo` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Player''s active igloo',
   `LastPaycheck` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'EPF previous paycheck',
@@ -329,6 +336,9 @@ ALTER TABLE `login`
   ADD PRIMARY KEY (`ID`),
   ADD KEY `PenguinID` (`PenguinID`);
 
+ALTER TABLE `membership`
+  ADD PRIMARY KEY (`PenguinID`);
+
 ALTER TABLE `name_approval`
   ADD PRIMARY KEY (`PenguinID`);
 
@@ -437,6 +447,9 @@ ALTER TABLE `location_inventory`
 
 ALTER TABLE `login`
   ADD CONSTRAINT `login_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `membership`
+  ADD CONSTRAINT `membership_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `name_approval`
   ADD CONSTRAINT `name_approval_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;

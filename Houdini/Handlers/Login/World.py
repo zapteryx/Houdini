@@ -10,6 +10,7 @@ from Houdini.Data.Penguin import Penguin, BuddyList, IgnoreList, IglooInventory,
 from Houdini.Data.Igloo import Igloo, IglooLike
 from Houdini.Data.Puffle import Puffle, CareInventory, PuffleQuest
 from Houdini.Data.Deck import Deck
+from Houdini.Data.Membership import Membership
 from Houdini.Crypto import Crypto
 from Houdini.Data import retryableTransaction
 from Houdini.Handlers.Play.Navigation import RoomFieldKeywords, Room
@@ -27,8 +28,11 @@ def handleLogin(self, data):
 
     self.session.commit()
     user = self.session.query(Penguin).filter_by(ID=playerId).first()
+    membership = self.session.query(Membership).filter_by(PenguinID=playerId).first()
 
     user.Approval = 1 if languageApproved == "1" else 0
+    user.Member = membership.Status
+    user.MembershipDays = membership.CumulativeDays
 
     if user is None:
         return self.sendErrorAndDisconnect(100)

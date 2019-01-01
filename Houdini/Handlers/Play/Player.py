@@ -3,6 +3,7 @@ from sqlalchemy import or_
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin, NameApproval
+from Houdini.Data.Membership import Membership
 from Houdini.Data.Puffle import Puffle
 
 @Cache("houdini", "player")
@@ -19,12 +20,15 @@ def getPlayerString(self, penguinId):
     else:
         playerTuple = self.session.query(Penguin.ID, Penguin.Nickname, Penguin.Color, Penguin.Head,
                                          Penguin.Face, Penguin.Neck, Penguin.Body, Penguin.Hand, Penguin.Feet, Penguin.Flag,
-                                         Penguin.Photo, Penguin.Member, Penguin.MembershipDays).filter_by(ID=penguinId).first()
+                                         Penguin.Photo).filter_by(ID=penguinId).first()
         approvalTuple = self.session.query(NameApproval.en).filter_by(PenguinID=penguinId).first()
-        playerData = "{0}|{1}|nameApproval|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}||||{11}|{12}"
+        membershipTuple = self.session.query(Membership.Status, Membership.CumulativeDays).filter_by(PenguinID=penguinId).first()
+        playerData = "{0}|{1}|nameApproval|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}||||membership|memberDays"
         playerData = playerData.format(*playerTuple)
         nameApproval = "1" if approvalTuple[0] == 1 else "0"
         playerData = playerData.replace("nameApproval", nameApproval)
+        playerData = playerData.replace("membership", str(membershipTuple[0]))
+        playerData = playerData.replace("memberDays", str(membershipTuple[1]))
 
         puffleTuple = self.session.query(Puffle.ID, Puffle.Type, Puffle.Subtype, Puffle.Hat).filter_by(PenguinID=penguinId).filter_by(Walking=1).first()
 

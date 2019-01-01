@@ -18,8 +18,6 @@ class Penguin(Base):
     Email = Column(String(255), nullable=False, index=True)
     RegistrationDate = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     Active = Column(SmallInteger, nullable=False, server_default=text("0"))
-    Member = Column(SmallInteger, nullable=False, server_default=text("1"))
-    MembershipDays = Column(SmallInteger, nullable=False, server_default=text("0"))
     SafeChat = Column(SmallInteger, nullable=False, server_default=text("0"))
     Igloo = Column(Integer, nullable=False, server_default=text("0"))
     LastPaycheck = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
