@@ -3,22 +3,20 @@ from datetime import datetime
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Redemption import RedemptionCode, RedemptionAward, PenguinRedemption
 
-
 @Handlers.Handle(XT.JoinRedemption)
 @Handlers.Throttle(-1)
 def handleJoinRedemption(self, data):
-    if int(data.ID) != self.user.ID:
+    loginArray = data.LoginData.split("|")
+    if int(loginArray[0]) != self.user.ID:
+
+    if loginArray[3] == "":
         return self.transport.loseConnection()
 
-    if data.LoginKey == "":
-        return self.transport.loseConnection()
-
-    if data.LoginKey != self.user.LoginKey:
+    if loginArray[3] != self.user.LoginKey:
         self.user.LoginKey = ""
         return self.sendErrorAndDisconnect(101)
 
     self.sendXt("rjs", "", 1)
-
 
 @Handlers.Handle(XT.SendCode)
 @Handlers.Throttle(2)
@@ -51,7 +49,6 @@ def handleSendCode(self, data):
     self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
     self.user.Coins += code.Coins
     self.sendXt("rsc", code.Type, ",".join(map(str, awardIds)), code.Coins)
-
 
 @Handlers.Handle(XT.SendGoldenChoice)
 @Handlers.Throttle(2)

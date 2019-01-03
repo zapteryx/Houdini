@@ -654,7 +654,7 @@ class XT:
 
     JoinRedemption = {
         "Handler": "rjs",
-        "Data": [XTData("ID", int), XTData("LoginKey", str), XTData("Language", str)]
+        "Data": [XTData("LoginData", str), XTData("ConfirmationHash", str), XTData("Language", str)]
     }
 
     SendCode = {
