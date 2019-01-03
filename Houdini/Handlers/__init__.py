@@ -662,6 +662,16 @@ class XT:
         "Data": [XTData("Code", str)]
     }
 
+    RedeemSendPuffle = {
+        "Handler": "rsp",
+        "Data": [XTData("Name", str), XTData("ID", int)]
+    }
+
+    SendCart = {
+        "Handler": "rscrt",
+        "Data": [XTData("Code", str), XTData("Choice", str), XTData("SuperExclusive", int)]
+    }
+
     SendGoldenChoice = {
         "Handler": "rsgc",
         "Data": [XTData("Code", str), XTData("Choice", int)]

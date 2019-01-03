@@ -252,7 +252,7 @@ CREATE TABLE `redemption_award` (
 CREATE TABLE `redemption_code` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique code ID',
   `Code` varchar(16) NOT NULL DEFAULT '' COMMENT 'Remption code',
-  `Type` enum('DS','BLANKET','CARD','GOLDEN','CAMPAIGN') NOT NULL DEFAULT 'BLANKET' COMMENT 'Code type',
+  `Type` enum('DS','BLANKET','CARD','GOLDEN','CAMPAIGN','CATALOG') NOT NULL DEFAULT 'BLANKET' COMMENT 'Code type',
   `Coins` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Code coins amount',
   `Expires` datetime DEFAULT NULL COMMENT 'Expiry date'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Redemption codes';

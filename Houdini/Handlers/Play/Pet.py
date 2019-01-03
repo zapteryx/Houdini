@@ -61,6 +61,42 @@ def handleGetMyPlayerPuffles(self, data):
 
     self.sendXt("pgu", *playerPuffles)
 
+def handleAddInitialCareItems(self, data):
+    playerPuffles = [puffle.Type for puffle in self.puffles.values()]
+
+    if not data.SubtypeId:
+        if data.TypeId == 0 and data.TypeId not in playerPuffles:
+            self.addCareItem(27, 1, sendXt=False)
+        elif data.TypeId == 1 and data.TypeId not in playerPuffles:
+            self.addCareItem(28, 1, sendXt=False)
+        elif data.TypeId == 2 and data.TypeId not in playerPuffles:
+            self.addCareItem(31, 1, sendXt=False)
+        elif data.TypeId == 3 and data.TypeId not in playerPuffles:
+            self.addCareItem(30, 1, sendXt=False)
+        elif data.TypeId == 4 and data.TypeId not in playerPuffles:
+            self.addCareItem(35, 1, sendXt=False)
+        elif data.TypeId == 5 and data.TypeId not in playerPuffles:
+            self.addCareItem(29, 1, sendXt=False)
+        elif data.TypeId == 6 and data.TypeId not in playerPuffles:
+            self.addCareItem(32, 1, sendXt=False)
+        elif data.TypeId == 7 and data.TypeId not in playerPuffles:
+            self.addCareItem(33, 1, sendXt=False)
+        elif data.TypeId == 8 and data.TypeId not in playerPuffles:
+            self.addCareItem(34, 1, sendXt=False)
+        elif data.TypeId == 9 and data.TypeId not in playerPuffles:
+            self.addCareItem(36, 1, sendXt=False)
+        elif data.TypeId == 10 and data.TypeId not in playerPuffles:
+            self.addCareItem(103, 1, sendXt=False)
+        elif data.TypeId == 11 and data.TypeId not in playerPuffles:
+            self.addCareItem(125, 1, sendXt=False)
+
+    if len(self.puffles) < 1:
+        self.addCareItem(1, 1, sendXt=False)
+        self.addCareItem(3, 10, sendXt=False)
+        self.addCareItem(8, 1, sendXt=False)
+        self.addCareItem(37, 1, sendXt=False)
+        self.addCareItem(79, 10, sendXt=False)
+
 @Handlers.Handle(XT.AdoptPuffle)
 @retryableTransaction()
 def handleSendAdoptPuffle(self, data):
@@ -101,46 +137,9 @@ def handleSendAdoptPuffle(self, data):
         self.user.Nuggets = 0
         self.canDigGold = False
 
-        if 125 not in self.careInventory:
-            self.addCareItem(125, 1, sendXt=False)
-
     self.user.Coins -= puffleCost
 
-    ownedPuffles = self.session.query(Puffle).filter(Puffle.PenguinID == self.user.ID)
-    playerPuffles = [puffle.Type for puffle in ownedPuffles]
-
-    if not data.SubtypeId:
-        if data.TypeId == 0 and data.TypeId not in playerPuffles:
-            self.addCareItem(27, 1, sendXt=False)
-        elif data.TypeId == 1 and data.TypeId not in playerPuffles:
-            self.addCareItem(28, 1, sendXt=False)
-        elif data.TypeId == 2 and data.TypeId not in playerPuffles:
-            self.addCareItem(31, 1, sendXt=False)
-        elif data.TypeId == 3 and data.TypeId not in playerPuffles:
-            self.addCareItem(30, 1, sendXt=False)
-        elif data.TypeId == 4 and data.TypeId not in playerPuffles:
-            self.addCareItem(35, 1, sendXt=False)
-        elif data.TypeId == 5 and data.TypeId not in playerPuffles:
-            self.addCareItem(29, 1, sendXt=False)
-        elif data.TypeId == 6 and data.TypeId not in playerPuffles:
-            self.addCareItem(32, 1, sendXt=False)
-        elif data.TypeId == 7 and data.TypeId not in playerPuffles:
-            self.addCareItem(33, 1, sendXt=False)
-        elif data.TypeId == 8 and data.TypeId not in playerPuffles:
-            self.addCareItem(34, 1, sendXt=False)
-        elif data.TypeId == 9 and data.TypeId not in playerPuffles:
-            self.addCareItem(36, 1, sendXt=False)
-        elif data.TypeId == 10 and data.TypeId not in playerPuffles:
-            self.addCareItem(103, 1, sendXt=False)
-        elif data.TypeId == 11 and data.TypeId not in playerPuffles:
-            self.addCareItem(125, 1, sendXt=False)
-
-    if len(self.puffles) < 1:
-        self.addCareItem(1, 1, sendXt=False)
-        self.addCareItem(3, 10, sendXt=False)
-        self.addCareItem(8, 1, sendXt=False)
-        self.addCareItem(37, 1, sendXt=False)
-        self.addCareItem(79, 10, sendXt=False)
+    handleAddInitialCareItems(self, data)
 
     puffle = Puffle(PenguinID=self.user.ID, Name=data.Name, Type=data.TypeId,
                     Subtype=data.SubtypeId)
