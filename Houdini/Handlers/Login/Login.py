@@ -2,6 +2,8 @@ from Houdini.Handlers import Handlers, XML
 from Houdini.Data.Penguin import Penguin, BuddyList, NameApproval
 from Houdini.Data.Ban import Ban
 from Houdini.Data.Login import Login
+from Houdini.Data.Membership import Membership
+from Houdini.Data.Postcard import Postcard
 from Houdini.Data.Timer import Timer
 from Houdini.Crypto import Crypto
 from Houdini.Data import retryableTransaction
@@ -134,6 +136,33 @@ def handleLogin(self, data):
         self.user.Approval = 0
         languageApproved = "0"
         languageRejected = "1"
+
+    membership = self.session.query(Membership).filter_by(PenguinID=user.ID).first()
+    if membership.Status == 1:
+        membershipEnd = datetime.strptime(str(membership.End), "%Y-%m-%d %H:%M:%S")
+        membershipLeft = membershipEnd - datetime.utcnow()
+        if membershipLeft.days < 0:
+            self.logger.debug("none left")
+            membership.Status = 0
+            membership.CurrentPlan = 0
+            membership.Start = None
+            membership.End = None
+            membership.Postcards = 0
+            postcard = Postcard(RecipientID=self.user.ID, SenderID=None, Type=124)
+            self.session.add(postcard)
+            self.session.commit()
+        elif membershipLeft.days <= 7:
+            if membership.Postcards == 1:
+                membership.Postcards = 2
+                postcard = Postcard(RecipientID=self.user.ID, SenderID=None, Type=123)
+                self.session.add(postcard)
+                self.session.commit()
+        elif membershipLeft.days <= 14:
+            if membership.Postcards == 0:
+                membership.Postcards = 1
+                postcard = Postcard(RecipientID=self.user.ID, SenderID=None, Type=122)
+                self.session.add(postcard)
+                self.session.commit()
 
     buddyWorlds = []
     worldPopulations = []

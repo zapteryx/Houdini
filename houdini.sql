@@ -132,7 +132,8 @@ CREATE TABLE `membership` (
   `CurrentPlan` smallint(5) UNSIGNED NOT NULL COMMENT 'The number of days in their current period',
   `Start` datetime DEFAULT NULL COMMENT 'Start datetime of their current period',
   `End` datetime DEFAULT NULL COMMENT 'End datetime of their current period',
-  `CumulativeDays` smallint(5) UNSIGNED NOT NULL COMMENT 'Number of total days being a member'
+  `CumulativeDays` smallint(5) UNSIGNED NOT NULL COMMENT 'Number of total days being a member',
+  `Postcards` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Expiration postcards sent to player'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT="Penguin membership status";
 
 CREATE TABLE `name_approval` (

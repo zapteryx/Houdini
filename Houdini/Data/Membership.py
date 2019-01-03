@@ -15,3 +15,4 @@ class Membership(Base):
     Start = Column(DateTime, nullable=True, server_default=text("current_timestamp()"))
     End = Column(DateTime, nullable=True, server_default=text("current_timestamp()"))
     CumulativeDays = Column(SmallInteger, nullable=False, server_default=text("0"))
+    Postcards = Column(SmallInteger, nullable=False, server_default=text("0"))

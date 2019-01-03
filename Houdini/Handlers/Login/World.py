@@ -31,8 +31,16 @@ def handleLogin(self, data):
     membership = self.session.query(Membership).filter_by(PenguinID=playerId).first()
 
     user.Approval = 1 if languageApproved == "1" else 0
+
     user.Member = membership.Status
     user.MembershipDays = membership.CumulativeDays
+
+    if user.Member == 0:
+        user.MembershipLeft = None
+    else:
+        membershipEnd = datetime.strptime(str(membership.End), "%Y-%m-%d %H:%M:%S")
+        membershipLeft = membershipEnd - datetime.utcnow()
+        user.MembershipLeft = round(membershipLeft.days + (float(membershipLeft.seconds) / 86400),1)
 
     if user is None:
         return self.sendErrorAndDisconnect(100)
