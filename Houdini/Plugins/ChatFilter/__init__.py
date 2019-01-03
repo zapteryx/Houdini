@@ -4,6 +4,7 @@ from Houdini.Handlers import Handlers
 
 from Houdini.Handlers.Play.Message import handleSendMessage
 from Houdini.Handlers.Play.Pet import handleCheckPuffleName, handleRainbowPuffleCheckName
+from Houdini.Handlers.Redemption import handleRedeemSendPuffle
 from Houdini.Handlers.Play.Moderation import languageBan
 
 from collections import Counter, OrderedDict
@@ -38,6 +39,9 @@ class ChatFilter(object):
             Handlers.RainbowPuffleCheckName -= handleRainbowPuffleCheckName
             Handlers.RainbowPuffleCheckName += self.handleRainbowPuffleCheckName
 
+            Handlers.RedeemSendPuffle -= handleRedeemSendPuffle
+            Handlers.RedeemSendPuffle += self.handleRedeemSendPuffle
+
     @staticmethod
     def makeRegexBadWord(badWord):
         return "".join([char if count == 1 else char + "{" + str(count) + ",}"
@@ -58,7 +62,6 @@ class ChatFilter(object):
     def isNaughty(self, string):
         self.logger.info("[ChatFilter] Checking '%s' against bad words list" % (string))
         messageWords = string.lower().split(" ")
-        self.logger.debug(messageWords)
         for badWord in self.words:
             for word in messageWords:
                 if badWord == word:
@@ -88,6 +91,13 @@ class ChatFilter(object):
             return player.sendError(441)
 
         handleRainbowPuffleCheckName(player, data)
+
+    def handleRedeemSendPuffle(self, player, data):
+        if self.isNaughty(data.Name):
+            self.logger.info("[ChatFilter] %s tried to name a puffle '%s' (treasure book)" % (player.user.Username, data.Name))
+            return player.sendXt("rsp", data.Name, 0)
+
+        handleRedeemSendPuffle(player, data)
 
     def ready(self):
         self.logger.info("ChatFilter plugin has been loaded!")
