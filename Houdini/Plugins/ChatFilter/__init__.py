@@ -4,7 +4,7 @@ from Houdini.Handlers import Handlers
 
 from Houdini.Handlers.Play.Message import handleSendMessage
 from Houdini.Handlers.Play.Pet import handleCheckPuffleName, handleRainbowPuffleCheckName
-from Houdini.Handlers.Redemption import handleRedeemSendPuffle
+from Houdini.Handlers.Redemption.Code import handleRedeemSendPuffle
 from Houdini.Handlers.Play.Moderation import languageBan
 
 from collections import Counter, OrderedDict
