@@ -51,8 +51,8 @@ def handleSendCode(self, data):
     items = []
 
     if code.Type == "GOLDEN":
-        return self.sendXt("rsc", "GOLDEN", self.user.NinjaRank, self.user.FireNinjaRank, self.user.WaterNinjaRank,
-                           int(self.user.FireNinjaRank > 0), int(self.user.WaterNinjaRank > 0))
+        return self.sendXt("rsc", "GOLDEN", self.user.NinjaRank, self.user.FireNinjaRank, self.user.WaterNinjaRank, self.user.SnowNinjaRank,
+                           int(self.user.FireNinjaRank > 0), int(self.user.WaterNinjaRank > 0), int(self.user.SnowNinjaRank > 0))
 
     if code.Type == "CARD":
         cardIds = []
