@@ -23,6 +23,7 @@ class RedemptionCode(Base):
     Type = Column(Enum(u'DS', u'BLANKET', u'CARD', u'GOLDEN', u'CAMPAIGN', u'CATALOG'), nullable=False,
                   server_default=text("'BLANKET'"))
     Coins = Column(Integer, nullable=False, server_default=text("0"))
+    SingleUse = Column(SmallInteger, nullable=False, server_default=text("1"))
     Expires = Column(DateTime)
 
     penguin = relationship(u'Penguin', secondary='penguin_redemption')

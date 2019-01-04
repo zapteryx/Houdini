@@ -33,9 +33,15 @@ def handleSendCode(self, data):
     if code is None:
         return self.sendError(720)
 
-    redeemed = self.session.query(PenguinRedemption).filter_by(PenguinID=self.user.ID, CodeID=code.ID).scalar()
-    if redeemed is not None:
+    redeemed = self.session.query(PenguinRedemption).filter_by(CodeID=code.ID).all()
+
+    if code.SingleUse == 1 and redeemed is not None:
         return self.sendError(721)
+
+    if code.SingleUse == 0:
+        for penguin in redeemed:
+            if penguin.PenguinID == self.user.ID:
+                return self.sendError(721)
 
     if code.Expires is not None and code.Expires < datetime.now():
         return self.sendError(726)

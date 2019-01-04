@@ -254,6 +254,7 @@ CREATE TABLE `redemption_code` (
   `Code` varchar(16) NOT NULL DEFAULT '' COMMENT 'Remption code',
   `Type` enum('DS','BLANKET','CARD','GOLDEN','CAMPAIGN','CATALOG') NOT NULL DEFAULT 'BLANKET' COMMENT 'Code type',
   `Coins` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Code coins amount',
+  `SingleUse` tinyint(1) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Whether the code can be used more than once',
   `Expires` datetime DEFAULT NULL COMMENT 'Expiry date'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Redemption codes';
 
