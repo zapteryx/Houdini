@@ -15,4 +15,5 @@ def handleJoinRedemption(self, data):
         return self.sendErrorAndDisconnect(101)
 
     self.user.TBValidation = False
+    self.user.isRedeemingPuffle = False
     self.sendXt("rjs", "", 1)

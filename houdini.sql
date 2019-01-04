@@ -246,6 +246,8 @@ CREATE TABLE `puffle_quest` (
 
 CREATE TABLE `redemption_award` (
   `CodeID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique code ID',
+  `AwardID` int(10) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Unique award ID per code',
+  `AwardType` enum('Clothing','Furniture','Igloo','Location','Floor','Puffle','Puffle Item','Card') NOT NULL DEFAULT 'Item' COMMENT 'Award type',
   `Award` mediumint(6) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Award item ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Redemption code awards';
 
@@ -366,7 +368,7 @@ ALTER TABLE `puffle_quest`
   ADD PRIMARY KEY (`PenguinID`,`TaskID`);
 
 ALTER TABLE `redemption_award`
-  ADD PRIMARY KEY (`CodeID`,`Award`);
+  ADD PRIMARY KEY (`CodeID`,`AwardID`,`AwardType`,`Award`);
 
 ALTER TABLE `redemption_code`
   ADD PRIMARY KEY (`ID`),

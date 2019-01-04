@@ -10,6 +10,9 @@ class RedemptionAward(Base):
 
     CodeID = Column(ForeignKey(u'redemption_code.ID', ondelete=u'CASCADE', onupdate=u'CASCADE'), primary_key=True,
                     nullable=False, server_default=text("0"))
+    AwardID = Column(SmallInteger, primary_key=True, nullable=False, server_default=text("1"))
+    AwardType = Column(Enum(u'Clothing', u'Furniture', u'Igloo', u'Location', u'Floor', u'Puffle', u'Puffle Item', u'Card'), primary_key=True,
+                  nullable=False, server_default=text("'Clothing'"))
     Award = Column(SmallInteger, primary_key=True, nullable=False, server_default=text("1"))
 
     redemption_code = relationship(u'RedemptionCode')

@@ -47,22 +47,52 @@ def handleSendCode(self, data):
 
         return self.sendXt("rsc", "treasurebook", 1, ",".join(map(str, ownedIds)), numRedeemed)
 
-    awards = self.session.query(RedemptionAward.Award).filter_by(CodeID=code.ID)
-    awardIds = [awardId for awardId, in awards]
+    awards = self.session.query(RedemptionAward).filter_by(CodeID=code.ID).all()
+    items = []
 
     if code.Type == "GOLDEN":
         return self.sendXt("rsc", "GOLDEN", self.user.NinjaRank, self.user.FireNinjaRank, self.user.WaterNinjaRank,
                            int(self.user.FireNinjaRank > 0), int(self.user.WaterNinjaRank > 0))
 
     if code.Type == "CARD":
-        self.addCards(*awardIds)
+        cardIds = []
+
+        for award in awards:
+            cardIds.append(award.Award)
+            items.append(str(award.Award))
+
+        self.addCards(*cardIds)
     else:
-        for itemId in awardIds:
-            self.addItem(itemId)
+        for award in awards:
+            if award.AwardType == "Clothing":
+                self.addItem(award.Award, sendXt=False)
+                items.append(str(award.Award))
+            elif award.AwardType == "Furniture":
+                self.addFurniture(award.Award, sendXt=False)
+                items.append("f" + str(award.Award))
+            elif award.AwardType == "Igloo":
+                self.addIgloo(award.Award, sendXt=False)
+                items.append("g" + str(award.Award))
+            elif award.AwardType == "Location":
+                self.addLocation(award.Award, sendXt=False)
+                items.append("loc" + str(award.Award))
+            elif award.AwardType == "Floor":
+                self.addFlooring(award.Award, sendXt=False)
+                items.append("flr" + str(award.Award))
+            elif award.AwardType == "Puffle":
+                items.append("p" + str(award.Award))
+                self.user.isRedeemingPuffle = True
+            elif award.AwardType == "Puffle Item":
+                self.addCareItem(award.Award, sendXt=False)
+                items.append("pi" + str(award.Award))
 
     self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
+
     self.user.Coins += code.Coins
-    self.sendXt("rsc", code.Type, ",".join(map(str, awardIds)), code.Coins)
+    coins = "" if code.Coins == 0 else code.Coins
+
+    self.session.commit()
+    self.sendXt("rsc", code.Type, ",".join(items), coins)
 
 @Handlers.Handle(XT.SendGoldenChoice)
 @Handlers.Throttle(2)
@@ -138,8 +168,8 @@ def handleSendCart(self, data):
 @Handlers.Handle(XT.RedeemSendPuffle)
 @Handlers.Throttle(2)
 def handleRedeemSendPuffle(self, data):
-    if self.user.TBValidation != True:
-        return cheatBan(self, self.user.ID, 72, "Attempting to perm Treasure Book")
+    if self.user.TBValidation != True and self.user.isRedeemingPuffle != True:
+        return cheatBan(self, self.user.ID, 72, "Attempting to perm Puffle")
 
     if data.Name is None or data.ID is None:
         return self.transport.loseConnection()
@@ -163,3 +193,4 @@ def handleRedeemSendPuffle(self, data):
 
     self.receiveSystemPostcard(111, data.Name)
     self.sendXt("rsp", 1)
+    self.user.isRedeemingPuffle = False

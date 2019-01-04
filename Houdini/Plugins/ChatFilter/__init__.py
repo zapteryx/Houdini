@@ -94,7 +94,7 @@ class ChatFilter(object):
 
     def handleRedeemSendPuffle(self, player, data):
         if self.isNaughty(data.Name):
-            self.logger.info("[ChatFilter] %s tried to name a puffle '%s' (treasure book)" % (player.user.Username, data.Name))
+            self.logger.info("[ChatFilter] %s tried to name a puffle '%s' (redemption)" % (player.user.Username, data.Name))
             return player.sendXt("rsp", data.Name, 0)
 
         handleRedeemSendPuffle(player, data)

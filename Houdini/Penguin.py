@@ -66,7 +66,7 @@ class Penguin(Spheniscidae):
         if sendXt:
             self.sendXt("ai", itemId, self.user.Coins)
 
-    def addIgloo(self, iglooId, iglooCost=0):
+    def addIgloo(self, iglooId, iglooCost=0, sendXt=True):
         if iglooId in self.iglooInventory:
             return False
 
@@ -74,9 +74,10 @@ class Penguin(Spheniscidae):
         self.session.add(IglooInventory(PenguinID=self.user.ID, IglooID=iglooId))
         self.user.Coins -= iglooCost
 
-        self.sendXt("au", iglooId, self.user.Coins)
+        if sendXt:
+            self.sendXt("au", iglooId, self.user.Coins)
 
-    def addLocation(self, locationId, locationCost=0):
+    def addLocation(self, locationId, locationCost=0, sendXt=True):
         if locationId in self.locations:
             return False
 
@@ -84,7 +85,8 @@ class Penguin(Spheniscidae):
         self.session.add(LocationInventory(PenguinID=self.user.ID, LocationID=locationId))
         self.user.Coins -= locationCost
 
-        self.sendXt("aloc", locationId, self.user.Coins)
+        if sendXt:
+            self.sendXt("aloc", locationId, self.user.Coins)
 
     def addFurniture(self, furnitureId, furnitureCost=0, sendXt=True):
         furnitureQuantity = 1
@@ -107,7 +109,7 @@ class Penguin(Spheniscidae):
         if sendXt:
             self.sendXt("af", furnitureId, self.user.Coins)
 
-    def addFlooring(self, floorId, floorCost=0):
+    def addFlooring(self, floorId, floorCost=0, sendXt=True):
         if floorId in self.floors:
             return False
 
@@ -115,7 +117,8 @@ class Penguin(Spheniscidae):
         self.session.add(FloorInventory(PenguinID=self.user.ID, FloorID=floorId))
         self.user.Coins -= floorCost
 
-        self.sendXt("ag", floorId, self.user.Coins)
+        if sendXt:
+            self.sendXt("ag", floorId, self.user.Coins)
 
     def addStamp(self, stampId, sendXt=False):
         if stampId in self.stamps:
