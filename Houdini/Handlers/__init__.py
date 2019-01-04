@@ -657,6 +657,16 @@ class XT:
         "Data": [XTData("LoginData", str), XTData("ConfirmationHash", str), XTData("Language", str)]
     }
 
+    GetBookQuestion = {
+        "Handler": "rgbq",
+        "Data": [XTData("Book", int)]
+    }
+
+    SendBookAnswer = {
+        "Handler": "rsba",
+        "Data": [XTData("Book", int), XTData("QuestionID", int), XTData("Answer", str)]
+    }
+
     SendCode = {
         "Handler": "rsc",
         "Data": [XTData("Code", str)]

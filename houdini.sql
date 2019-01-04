@@ -251,6 +251,15 @@ CREATE TABLE `redemption_award` (
   `Award` mediumint(6) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Award item ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Redemption code awards';
 
+CREATE TABLE `redemption_book` (
+  `BookID` tinyint(3) UNSIGNED NOT NULL COMMENT 'Book ID',
+  `QuestionID` tinyint(3) UNSIGNED NOT NULL COMMENT 'Unique question ID',
+  `Page` tinyint(3) UNSIGNED NOT NULL COMMENT 'Page number',
+  `Line` tinyint(3) UNSIGNED NOT NULL COMMENT 'Line number',
+  `WordNumber` tinyint(3) UNSIGNED NOT NULL COMMENT 'Word number',
+  `Word` varchar(20) NOT NULL COMMENT 'Word answer'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Book codes';
+
 CREATE TABLE `redemption_code` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique code ID',
   `Code` varchar(16) NOT NULL DEFAULT '' COMMENT 'Remption code',
@@ -369,6 +378,9 @@ ALTER TABLE `puffle_quest`
 
 ALTER TABLE `redemption_award`
   ADD PRIMARY KEY (`CodeID`,`AwardID`,`AwardType`,`Award`);
+
+ALTER TABLE `redemption_book`
+  ADD PRIMARY KEY (`BookID`,`QuestionID`);
 
 ALTER TABLE `redemption_code`
   ADD PRIMARY KEY (`ID`),

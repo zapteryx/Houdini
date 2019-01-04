@@ -18,6 +18,17 @@ class RedemptionAward(Base):
     redemption_code = relationship(u'RedemptionCode')
 
 
+class RedemptionBook(Base):
+    __tablename__ = 'redemption_book'
+
+    BookID = Column(SmallInteger, primary_key=True, nullable=False)
+    QuestionID = Column(SmallInteger, primary_key=True, nullable=False)
+    Page = Column(SmallInteger, nullable=False)
+    Line = Column(SmallInteger, nullable=False)
+    WordNumber = Column(SmallInteger, nullable=False)
+    Word = Column(String(20), nullable=False)
+
+
 class RedemptionCode(Base):
     __tablename__ = 'redemption_code'
 
