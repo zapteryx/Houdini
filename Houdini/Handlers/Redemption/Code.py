@@ -13,7 +13,7 @@ treasureBookIds = [14519, 14438, 14523, 11391, 14565, 14650, 14651, 14203, 11165
 def handleSendCode(self, data):
     code = self.session.query(RedemptionCode).filter(RedemptionCode.Code == data.Code).first()
 
-    if code is None:
+    if code is None or code.ID <= 50:
         return self.sendError(720)
 
     redeemed = self.session.query(PenguinRedemption).filter_by(CodeID=code.ID).all()
