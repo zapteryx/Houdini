@@ -7,14 +7,6 @@ from Houdini.Data import retryableTransaction
 @Handlers.Handle(XT.StartMailEngine)
 @Handlers.Throttle(-1)
 def handleStartMailEngine(self, data):
-    if not self.user.AgentStatus and random.random() < 0.4:
-        epfInvited = self.session.query(Postcard).filter(Postcard.RecipientID == self.user.ID). \
-            filter((Postcard.Type == '112') | (Postcard.Type == '47')).first()
-        if not epfInvited:
-            postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
-                                Details="", Type=112)
-            self.session.add(postcard)
-
     if self.user.ID >= 500:
         lastPaycheck = self.user.LastPaycheck.date()
         if lastPaycheck == 0:
