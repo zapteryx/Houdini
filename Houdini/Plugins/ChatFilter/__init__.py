@@ -3,9 +3,9 @@ from Houdini.Plugins import Plugin
 from Houdini.Handlers import Handlers
 
 from Houdini.Handlers.Play.Message import handleSendMessage
-from Houdini.Handlers.Play.Pet import handleCheckPuffleName, handleRainbowPuffleCheckName
+from Houdini.Handlers.Play.Pet import handleCheckPuffleName, handleRainbowPuffleCheckName, handleSendAdoptPuffle
 from Houdini.Handlers.Redemption.Code import handleRedeemSendPuffle
-from Houdini.Handlers.Play.Moderation import languageBan
+from Houdini.Handlers.Play.Moderation import languageBan, cheatBan
 
 from collections import Counter, OrderedDict
 
@@ -32,6 +32,9 @@ class ChatFilter(object):
         if self.server.server["World"]:
             Handlers.Message -= handleSendMessage
             Handlers.Message += self.handleSendMessage
+
+            Handlers.AdoptPuffle -= handleSendAdoptPuffle
+            Handlers.AdoptPuffle += self.handleSendAdoptPuffle
 
             Handlers.CheckPuffleName -= handleCheckPuffleName
             Handlers.CheckPuffleName += self.handleCheckPuffleName
@@ -77,6 +80,15 @@ class ChatFilter(object):
             return
 
         handleSendMessage(player, data)
+
+    def handleSendAdoptPuffle(self, player, data):
+        # The purpose of this function is to detect people sending the adoption packet without first checking the name
+        # If this happens and it is bad, the player is hacking and gets banned
+        if self.isNaughty(data.Name):
+            self.logger.info("[ChatFilter] %s tried to adopt a puffle called '%s'" % (player.user.Username, data.Name))
+            return cheatBan(player, player.user.ID, 72, "Attempting to force-name a puffle")
+
+        handleSendAdoptPuffle(player, data)
 
     def handleCheckPuffleName(self, player, data):
         if self.isNaughty(data.Name):
