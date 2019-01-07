@@ -52,7 +52,9 @@ def handleJoinWorld(self, data):
             if item in self.server.availableClothing["Unlockable"]:
                 awards = self.session.query(RedemptionAward).filter(and_(RedemptionAward.Award == item, RedemptionAward.AwardType == "Clothing")).all()
                 for award in awards:
-                    selfRedeemed = self.session.query(PenguinRedemption.CodeID).filter(PenguinRedemption.CodeID == award.CodeID).filter(PenguinRedemption.PenguinID == self.user.ID).scalar()
+                    selfRedeemed = self.session.query(PenguinRedemption.CodeID) \
+                        .filter(and_(PenguinRedemption.CodeID == award.CodeID,PenguinRedemption.PenguinID == self.user.ID)) \
+                        .scalar()
                     if not selfRedeemed:
                         self.logger.info("Unlockable item {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
                         return cheatBan(self, self.user.ID, 72, "Unlockable item {} permed".format(str(item)))
@@ -61,18 +63,6 @@ def handleJoinWorld(self, data):
             elif self.server.items.isBait(item):
                 self.logger.info("Bait item {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
                 return cheatBan(self, self.user.ID, 72, "Bait item {} permed".format(str(item)))
-
-    self.sendXt("activefeatures")
-
-    self.sendXt("js", self.user.AgentStatus, 0, self.user.Moderator, self.user.BookModified)
-
-    handleRefreshPlayerFriendInfo(self, data)
-
-    handleGetMyPlayerPuffles(self, [])
-
-    currentTime = int(time.time())
-    penguinStandardTime = currentTime * 1000
-    serverTimeOffset = 8
 
     timer = self.session.query(Timer).filter(Timer.PenguinID == self.user.ID).first()
 
@@ -91,8 +81,20 @@ def handleJoinWorld(self, data):
     else:
         timeLeft = 1440
 
+    self.sendXt("activefeatures")
+
+    self.sendXt("js", self.user.AgentStatus, 0, self.user.Moderator, self.user.BookModified)
+
+    currentTime = int(time.time())
+    penguinStandardTime = currentTime * 1000
+    serverTimeOffset = 8
+
     self.sendXt("lp", self.getPlayerString(), self.user.Coins, self.user.SafeChat, timeLeft,
                 penguinStandardTime, self.age, 0, self.user.MinutesPlayed, self.user.MembershipLeft, serverTimeOffset, 1, 0, 211843)
+
+    handleRefreshPlayerFriendInfo(self, data)
+
+    handleGetMyPlayerPuffles(self, [])
 
     self.sendXt("gps", self.user.ID, getStampsString(self, self.user.ID))
 
@@ -111,8 +113,7 @@ def handleJoinWorld(self, data):
             if characterId in self.server.players:
                 self.sendXt("cron", characterId)
 
-    randomRoomId = 100
-    self.server.rooms[randomRoomId].add(self)
+    self.server.rooms[100].add(self)
 
 @Handlers.Handle(XT.JoinRoom)
 @Handlers.Throttle(0.2)
