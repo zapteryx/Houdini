@@ -220,6 +220,11 @@ def handleAddPuffleCareItem(self, data):
     if data.ItemId not in self.server.careItems:
         return self.sendError(402)
 
+    if self.server.serverName == "Redemption":
+        return self.transport.loseConnection()
+    elif data.ItemId not in self.server.availableCareItems["Standard"]:
+        return self.sendError(402)
+
     if data.ItemId not in self.careInventory:
         quantity = 0
     else:

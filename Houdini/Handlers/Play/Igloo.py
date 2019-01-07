@@ -80,6 +80,11 @@ def handleBuyIglooLocation(self, data):
     if data.LocationId in self.locations:
         return self.sendError(502)
 
+    if self.server.serverName == "Redemption":
+        return self.transport.loseConnection()
+    elif data.LocationId not in self.server.availableLocations["Standard"]:
+        return self.sendError(402)
+
     locationCost = self.server.locations.getCost(data.LocationId)
 
     if locationCost > self.user.Coins:
@@ -260,6 +265,11 @@ def handleUpdateFloor(self, data):
     if data.FloorId in self.floors:
         return self.sendError(501)
 
+    if self.server.serverName == "Redemption":
+        return self.transport.loseConnection()
+    elif data.FloorId not in self.server.availableFlooring["Standard"]:
+        return self.sendError(402)
+
     floorCost = self.server.floors.getCost(data.FloorId)
 
     if floorCost > self.user.Coins:
@@ -275,6 +285,11 @@ def handleUpdateIglooType(self, data):
     if data.IglooId in self.iglooInventory:
         return self.sendError(500)
 
+    if self.server.serverName == "Redemption":
+        return self.transport.loseConnection()
+    elif data.IglooId not in self.server.availableIgloos["Standard"]:
+        return self.sendError(402)
+
     iglooCost = self.server.igloos.getCost(data.IglooId)
 
     if iglooCost > self.user.Coins:
@@ -285,6 +300,11 @@ def handleUpdateIglooType(self, data):
 @Handlers.Handle(XT.BuyFurniture)
 def handleBuyFurniture(self, data):
     if data.FurnitureId not in self.server.furniture:
+        return self.sendError(402)
+
+    if self.server.serverName == "Redemption":
+        return self.transport.loseConnection()
+    elif data.FurnitureId not in self.server.availableFurniture["Standard"]:
         return self.sendError(402)
 
     maxQuantity = self.server.furniture.getMaxQuantity(data.FurnitureId)

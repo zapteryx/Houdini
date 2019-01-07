@@ -123,6 +123,11 @@ class HoudiniFactory(Factory):
             self.mascots = retrieveMascotCollection()
 
             self.availableClothing = self.config["AvailableItems"]["Clothing"]
+            self.availableFurniture = self.config["AvailableItems"]["Furniture"]
+            self.availableIgloos = self.config["AvailableItems"]["Igloos"]
+            self.availableFlooring = self.config["AvailableItems"]["Flooring"]
+            self.availableLocations = self.config["AvailableItems"]["Locations"]
+            self.availableCareItems = self.config["AvailableItems"]["CareItems"]
 
             self.openIgloos = {}
 
