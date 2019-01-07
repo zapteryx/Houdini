@@ -122,6 +122,8 @@ class HoudiniFactory(Factory):
             self.careItems = retrieveCareItemCollection()
             self.mascots = retrieveMascotCollection()
 
+            self.availableClothing = self.config["AvailableItems"]["Clothing"]
+
             self.openIgloos = {}
 
             createTables(self.config["Tables"], self.rooms)

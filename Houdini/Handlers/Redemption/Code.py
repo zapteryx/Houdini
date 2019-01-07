@@ -6,8 +6,6 @@ from Houdini.Data.Puffle import Puffle
 from Houdini.Handlers.Play.Pet import handleAddInitialCareItems
 from Houdini.Handlers.Play.Moderation import cheatBan
 
-treasureBookIds = [14519, 14438, 14523, 11391, 14565, 14650, 14651, 14203, 11165, 14239, 12056, 14562, 16114, 11474, 14707, 16131, 11434, 14151, 14529, 14659, 11882, 15459, 34144, 11883, 34145, 34158, 11254, 13072, 14363, 16071, 10125, 11255, 14364, 16070]
-
 @Handlers.Handle(XT.SendCode)
 @Handlers.Throttle(2)
 def handleSendCode(self, data):
@@ -33,7 +31,7 @@ def handleSendCode(self, data):
     if code.Type == "CATALOG":
         ownedIds = []
 
-        for id in treasureBookIds:
+        for id in self.server.availableClothing["TreasureBook"]:
             if id in self.inventory:
                 ownedIds.append(id)
 
@@ -151,7 +149,7 @@ def handleSendCart(self, data):
 
     for id in choices:
         if id[:1] != "p":
-            if int(id) not in treasureBookIds and id not in awardIds:
+            if int(id) not in self.server.availableClothing["TreasureBook"] and id not in awardIds:
                 return self.transport.loseConnection()
             else:
                 self.addItem(id, itemCost=0, sendXt=False)

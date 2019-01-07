@@ -45,7 +45,8 @@ def handleBuyEpfItem(self, data):
     if self.server.items.isItemEPF(data.ItemId):
         if data.ItemId not in self.server.items:
             return self.sendError(402)
-
+        elif data.ItemId not in self.server.availableClothing["EPF"]:
+            return self.sendError(402)
         elif data.ItemId in self.inventory:
             return self.sendError(400)
 

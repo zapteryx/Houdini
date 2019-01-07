@@ -129,12 +129,6 @@ class Commands(object):
         elif self.server.items.isBait(arguments.ItemId):
             self.logger.debug("Denied %s from adding item (id: %d) - item is bait" % (player.user.Nickname, arguments.ItemId))
             return player.sendError(402)
-        elif not self.patchedItems.blacklistEnabled and arguments.ItemId not in self.patchedItems.patchedClothing:
-            self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Nickname, arguments.ItemId))
-            return player.sendError(402)
-        elif self.patchedItems.blacklistEnabled and arguments.ItemId in self.patchedItems.patchedClothing:
-            self.logger.debug("Denied %s from adding item (id: %d) - item is patched" % (player.user.Nickname, arguments.ItemId))
-            return player.sendError(402)
         else:
             reactor.callFromThread(handleBuyInventory, player, arguments)
 
@@ -148,12 +142,6 @@ class Commands(object):
         elif self.server.furniture.isBait(arguments.FurnitureId):
             self.logger.debug("Denied %s from adding furniture (id: %d) - item is bait" % (player.user.Nickname, arguments.FurnitureId))
             return player.sendError(402)
-        elif not self.patchedItems.blacklistEnabled and arguments.FurnitureId not in self.patchedItems.patchedFurniture:
-            self.logger.debug("Denied %s from adding furniture (id: %d) - item is patched" % (player.user.Nickname, arguments.FurnitureId))
-            return player.sendError(402)
-        elif self.patchedItems.blacklistEnabled and arguments.FurnitureId in self.patchedItems.patchedFurniture:
-            self.logger.debug("Denied %s from adding furniture (id: %d) - item is patched" % (player.user.Nickname, arguments.FurnitureId))
-            return player.sendError(402)
         else:
             reactor.callFromThread(handleBuyFurniture, player, arguments)
 
@@ -164,12 +152,6 @@ class Commands(object):
         if arguments.FloorId not in self.server.floors:
             self.logger.debug("Floor (id: %d) does not exist" % (arguments.FloorId))
             return player.sendError(402)
-        elif not self.patchedItems.blacklistEnabled and arguments.FloorId not in self.patchedItems.patchedFlooring:
-            self.logger.debug("Denied %s from adding floor (id: %d) - item is patched" % (player.user.Nickname, arguments.FloorId))
-            return player.sendError(402)
-        elif self.patchedItems.blacklistEnabled and arguments.FloorId in self.patchedItems.patchedFlooring:
-            self.logger.debug("Denied %s from adding floor (id: %d) - item is patched" % (player.user.Nickname, arguments.FloorId))
-            return player.sendError(402)
         else:
             reactor.callFromThread(handleUpdateFloor, player, arguments)
 
@@ -179,12 +161,6 @@ class Commands(object):
 
         if arguments.IglooId not in self.server.igloos:
             self.logger.debug("Igloo (id: %d) does not exist" % (arguments.IglooId))
-            return player.sendError(402)
-        elif not self.patchedItems.blacklistEnabled and arguments.IglooId not in self.patchedItems.patchedIgloos:
-            self.logger.debug("Denied %s from adding igloo (id: %d) - item is patched" % (player.user.Nickname, arguments.IglooId))
-            return player.sendError(402)
-        elif self.patchedItems.blacklistEnabled and arguments.IglooId in self.patchedItems.patchedIgloos:
-            self.logger.debug("Denied %s from adding igloo (id: %d) - item is patched" % (player.user.Nickname, arguments.IglooId))
             return player.sendError(402)
         else:
             reactor.callFromThread(handleUpdateIglooType, player, arguments)
@@ -303,8 +279,6 @@ class Commands(object):
                 .addErrback(self.handleCommandError)
 
     def ready(self):
-        self.patchedItems = self.server.plugins["PatchedItems"]
-
         self.logger.info("Commands plugin has been loaded!")
 
 class CommandData:

@@ -19,8 +19,17 @@ def handleBuyInventory(self, data):
     if data.ItemId not in self.server.items:
         return self.sendError(402)
 
-    elif data.ItemId in self.inventory:
+    if data.ItemId in self.inventory:
         return self.sendError(400)
+
+    if self.server.serverName == "Redemption":
+        return self.transport.loseConnection()
+    else:
+        if data.ItemId in self.server.availableClothing["EPF"]:
+            return self.sendError(402)
+        elif data.ItemId not in self.server.availableClothing["Standard"] and \
+                data.ItemId not in self.server.availableClothing["Mascot"]:
+            return self.sendError(402)
 
     if self.server.items.isBait(data.ItemId):
         return cheatBan(self, self.user.ID, comment="Added bait item")
