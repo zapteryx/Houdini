@@ -1,4 +1,5 @@
 import time, random
+from sqlalchemy import and_
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Crumbs.Room import Room
@@ -6,8 +7,10 @@ from Houdini.Handlers.Play.Buddy import handleRefreshPlayerFriendInfo
 from Houdini.Handlers.Play.Pet import handleGetMyPlayerPuffles
 from Houdini.Handlers.Play.Stampbook import getStampsString
 from Houdini.Data.Penguin import Penguin, BuddyList
+from Houdini.Data.Redemption import RedemptionAward, PenguinRedemption
 from Houdini.Data.Timer import Timer
 from Houdini.Handlers.Play.Timer import updateEggTimer, checkHours
+from Houdini.Handlers.Play.Moderation import cheatBan
 
 RoomFieldKeywords = {
     "Id": None,
@@ -41,6 +44,24 @@ def handleJoinWorld(self, data):
         # This prevents even the player from seeing their own name underneath their ID in-game
         self.user.Nickname = "P" + str(self.user.ID)
 
+    self.server.players[self.user.ID] = self
+    self.user.LoginKey = ""
+
+    if not self.user.Moderator:
+        for item in self.inventory:
+            if item in self.server.availableClothing["Unlockable"]:
+                awards = self.session.query(RedemptionAward).filter(and_(RedemptionAward.Award == item, RedemptionAward.AwardType == "Clothing")).all()
+                for award in awards:
+                    selfRedeemed = self.session.query(PenguinRedemption.CodeID).filter(PenguinRedemption.CodeID == award.CodeID).filter(PenguinRedemption.PenguinID == self.user.ID).scalar()
+                    if not selfRedeemed:
+                        self.logger.info("Unlockable item {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
+                        return cheatBan(self, self.user.ID, 72, "Unlockable item {} permed".format(str(item)))
+                    else:
+                        break
+            elif self.server.items.isBait(item):
+                self.logger.info("Bait item {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
+                return cheatBan(self, self.user.ID, 72, "Bait item {} permed".format(str(item)))
+
     self.sendXt("activefeatures")
 
     self.sendXt("js", self.user.AgentStatus, 0, self.user.Moderator, self.user.BookModified)
@@ -67,7 +88,6 @@ def handleJoinWorld(self, data):
 
         if str(timer.PlayHourStart) != "00:00:00" and str(timer.PlayHourEnd) != "23:59:59":
             checkHours(self, timer.PlayHourStart, timer.PlayHourEnd, 1)
-
     else:
         timeLeft = 1440
 
@@ -76,11 +96,7 @@ def handleJoinWorld(self, data):
 
     self.sendXt("gps", self.user.ID, getStampsString(self, self.user.ID))
 
-    self.user.LoginKey = ""
-
     self.inBackyard = False
-
-    self.server.players[self.user.ID] = self
 
     if self.user.ID in self.server.mascots:
         for playerId in self.server.players.keys():
