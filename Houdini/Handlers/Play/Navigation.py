@@ -63,6 +63,81 @@ def handleJoinWorld(self, data):
             elif self.server.items.isBait(item):
                 self.logger.info("Bait item {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
                 return cheatBan(self, self.user.ID, 72, "Bait item {} permed".format(str(item)))
+        for item in self.furniture:
+            if item in self.server.availableFurniture["Unlockable"]:
+                awards = self.session.query(RedemptionAward).filter(and_(RedemptionAward.Award == item, RedemptionAward.AwardType == "Furniture")).all()
+                for award in awards:
+                    selfRedeemed = self.session.query(PenguinRedemption.CodeID) \
+                        .filter(and_(PenguinRedemption.CodeID == award.CodeID,PenguinRedemption.PenguinID == self.user.ID)) \
+                        .scalar()
+                    if not selfRedeemed:
+                        self.logger.info("Unlockable furniture {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
+                        return cheatBan(self, self.user.ID, 72, "Unlockable furniture {} permed".format(str(item)))
+                    else:
+                        break
+            elif self.server.furniture.isBait(item):
+                self.logger.info("Bait furniture {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
+                return cheatBan(self, self.user.ID, 72, "Bait furniture {} permed".format(str(item)))
+        for item in self.iglooInventory:
+            if item in self.server.availableIgloos["Unlockable"]:
+                awards = self.session.query(RedemptionAward).filter(and_(RedemptionAward.Award == item, RedemptionAward.AwardType == "Igloo")).all()
+                for award in awards:
+                    selfRedeemed = self.session.query(PenguinRedemption.CodeID) \
+                        .filter(and_(PenguinRedemption.CodeID == award.CodeID,PenguinRedemption.PenguinID == self.user.ID)) \
+                        .scalar()
+                    if not selfRedeemed:
+                        self.logger.info("Unlockable igloo {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
+                        return cheatBan(self, self.user.ID, 72, "Unlockable igloo {} permed".format(str(item)))
+                    else:
+                        break
+            elif self.server.igloos.isBait(item):
+                self.logger.info("Bait igloo {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
+                return cheatBan(self, self.user.ID, 72, "Bait furniture {} permed".format(str(item)))
+        for item in self.locations:
+            if item in self.server.availableLocations["Unlockable"]:
+                awards = self.session.query(RedemptionAward).filter(and_(RedemptionAward.Award == item, RedemptionAward.AwardType == "Location")).all()
+                for award in awards:
+                    selfRedeemed = self.session.query(PenguinRedemption.CodeID) \
+                        .filter(and_(PenguinRedemption.CodeID == award.CodeID,PenguinRedemption.PenguinID == self.user.ID)) \
+                        .scalar()
+                    if not selfRedeemed:
+                        self.logger.info("Unlockable location {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
+                        return cheatBan(self, self.user.ID, 72, "Unlockable location {} permed".format(str(item)))
+                    else:
+                        break
+            elif self.server.locations.isBait(item):
+                self.logger.info("Bait location {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
+                return cheatBan(self, self.user.ID, 72, "Bait location {} permed".format(str(item)))
+        for item in self.floors:
+            if item in self.server.availableFlooring["Unlockable"]:
+                awards = self.session.query(RedemptionAward).filter(and_(RedemptionAward.Award == item, RedemptionAward.AwardType == "Floor")).all()
+                for award in awards:
+                    selfRedeemed = self.session.query(PenguinRedemption.CodeID) \
+                        .filter(and_(PenguinRedemption.CodeID == award.CodeID,PenguinRedemption.PenguinID == self.user.ID)) \
+                        .scalar()
+                    if not selfRedeemed:
+                        self.logger.info("Unlockable floor {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
+                        return cheatBan(self, self.user.ID, 72, "Unlockable floor {} permed".format(str(item)))
+                    else:
+                        break
+            elif self.server.floors.isBait(item):
+                self.logger.info("Bait floor {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
+                return cheatBan(self, self.user.ID, 72, "Bait floor {} permed".format(str(item)))
+        for item in self.careInventory:
+            if item in self.server.availableCareItems["Unlockable"]:
+                awards = self.session.query(RedemptionAward).filter(and_(RedemptionAward.Award == item, RedemptionAward.AwardType == "Puffle Item")).all()
+                for award in awards:
+                    selfRedeemed = self.session.query(PenguinRedemption.CodeID) \
+                        .filter(and_(PenguinRedemption.CodeID == award.CodeID,PenguinRedemption.PenguinID == self.user.ID)) \
+                        .scalar()
+                    if not selfRedeemed:
+                        self.logger.info("Unlockable care item {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
+                        return cheatBan(self, self.user.ID, 72, "Unlockable care item {} permed".format(str(item)))
+                    else:
+                        break
+            elif self.server.careItems.isBait(item):
+                self.logger.info("Bait care item {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
+                return cheatBan(self, self.user.ID, 72, "Bait care item {} permed".format(str(item)))
 
     timer = self.session.query(Timer).filter(Timer.PenguinID == self.user.ID).first()
 

@@ -28,12 +28,16 @@ class CareItemSchema(Schema):
     RootItemId = fields.Integer(load_from="root_item_id")
     PlayExternal = fields.String(load_from="play_external")
     Effect = fields.Nested(CareItemEffectSchema, load_from="effect")
+    Bait = fields.String(load_from="is_bait", required=False)
 
     @post_load
     def make_item(self, data):
         return CareItem(**data)
 
 class CareItemCollection(SchemaObjectCollection):
+
+    def isBait(self, careItemId):
+        return hasattr(self.schemaObjects[int(careItemId)], "Bait")
 
     def getQuantity(self, careItemId):
         return self.schemaObjects[careItemId].Quantity
