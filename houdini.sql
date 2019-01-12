@@ -72,6 +72,14 @@ INSERT INTO furniture_inventory (PenguinID, FurnitureID, Quantity) VALUES
 (101, 961, 1),
 (101, 2053, 1);
 
+CREATE TABLE `gamedata_launch` (
+  `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Penguin ID',
+  `LevelID` tinyint(2) UNSIGNED NOT NULL COMMENT 'Level number',
+  `PuffleOs` smallint(3) UNSIGNED NOT NULL COMMENT 'Number of Puffle Os collected',
+  `BestTime` smallint(5) UNSIGNED NOT NULL COMMENT 'Best completion time',
+  `TurboDone` tinyint(1) UNSIGNED NOT NULL COMMENT 'Whether the level was completed in turbo mode'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Puffle Launch game data';
+
 CREATE TABLE `igloo` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique igloo ID',
   `PenguinID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Owner penguin ID',
@@ -319,6 +327,9 @@ ALTER TABLE `floor_inventory`
 ALTER TABLE `furniture_inventory`
   ADD PRIMARY KEY (`PenguinID`,`FurnitureID`);
 
+ALTER TABLE `gamedata_launch`
+  ADD PRIMARY KEY (`PenguinID`,`LevelID`);
+
 ALTER TABLE `igloo`
   ADD PRIMARY KEY (`ID`),
   ADD KEY `PenguinID` (`PenguinID`);
@@ -436,6 +447,9 @@ ALTER TABLE `floor_inventory`
 
 ALTER TABLE `furniture_inventory`
   ADD CONSTRAINT `furniture_inventory_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `gamedata_launch`
+  ADD CONSTRAINT `gamedata_launch_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `igloo`
   ADD CONSTRAINT `igloo_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;

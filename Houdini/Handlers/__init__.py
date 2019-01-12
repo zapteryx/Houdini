@@ -572,6 +572,16 @@ class XT:
         "Data": [XTData("Score", int)]
     }
 
+    GetGameData = {
+        "Handler": "ggd",
+        "Data": [VariableXTData("Null")]
+    }
+
+    SaveGameData = {
+        "Handler": "sgd",
+        "Data": [VariableXTData("Data")]
+    }
+
     GetWaddlePopulation = {
         "Handler": "gw",
         "Data": [VariableXTData("Waddles")]
