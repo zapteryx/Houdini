@@ -210,12 +210,12 @@ class Commands(object):
     @Command("background", CommandArgument("ItemId", int))
     @Command("bg", CommandArgument("ItemId", int))
     def handleUpdatePhotoCommand(self, player, arguments):
-        reactor.callFromThread(handleSendUpdatePhotoColour, player, arguments)
+        reactor.callFromThread(handleSendUpdatePlayerPhoto, player, arguments)
 
     @Command("flag", CommandArgument("ItemId", int))
     @Command("pin", CommandArgument("ItemId", int))
     def handleUpdateFlagCommand(self, player, arguments):
-        reactor.callFromThread(handleSendUpdateFlagColour, player, arguments)
+        reactor.callFromThread(handleSendUpdatePlayerFlag, player, arguments)
 
     # Do not edit below this line.
     def processCommand(self, messageDetails):
