@@ -47,7 +47,7 @@ def handleJoinWorld(self, data):
     self.server.players[self.user.ID] = self
     self.user.LoginKey = ""
 
-    if not self.user.Moderator:
+    if self.user.Moderator == 0:
         for item in self.inventory:
             if item in self.server.availableClothing["Unlockable"]:
                 awards = self.session.query(RedemptionAward).filter(and_(RedemptionAward.Award == item, RedemptionAward.AwardType == "Clothing")).all()

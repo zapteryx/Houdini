@@ -7,12 +7,12 @@ from Houdini.Data.Warnings import Warnings
 
 @Handlers.Handle(XT.BanPlayer)
 def handleBanPlayer(self, data):
-    if self.user.Moderator:
+    if self.user.Moderator != 0:
         moderatorBan(self, data.PlayerId, comment=data.Message)
 
 @Handlers.Handle(XT.MutePlayer)
 def handleMutePlayer(self, data):
-    if self.user.Moderator:
+    if self.user.Moderator != 0:
         if data.PlayerId in self.server.players:
             target = self.server.players[data.PlayerId]
             if not target.user.Moderator:
@@ -20,7 +20,7 @@ def handleMutePlayer(self, data):
 
 @Handlers.Handle(XT.KickPlayer)
 def handleKickPlayer(self, data):
-    if self.user.Moderator:
+    if self.user.Moderator != 0:
         moderatorKick(self, data.PlayerId)
 
 def cheatBan(self, targetPlayer, banDuration=72, comment=""):
@@ -95,7 +95,7 @@ def languageBan(self, targetPlayer, banDuration=24, comment="Bad language"):
 def moderatorKick(self, targetPlayer):
     if targetPlayer in self.server.players:
         target = self.server.players[targetPlayer]
-        if not target.user.Moderator:
+        if target.user.Moderator == 0:
             target.sendXt("moderatormessage", "3", targetPlayer)
             target.transport.loseConnection()
 
@@ -103,7 +103,7 @@ def moderatorBan(self, targetPlayer, banDuration=24, comment=""):
     target = self.session.query(Penguin).\
         filter_by(ID=targetPlayer).first()
 
-    if not target.Moderator:
+    if target.Moderator == 0:
         numberOfBans = self.session.query(Ban).\
             filter(Ban.PenguinID == targetPlayer).count()
 

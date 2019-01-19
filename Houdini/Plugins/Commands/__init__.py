@@ -69,12 +69,12 @@ class Commands(object):
 
     @Command("kick", VariableCommandArgument("Nickname"))
     def handleKickCommand(self, player, arguments):
-        if player.user.Moderator:
+        if player.user.Moderator != 0:
             playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
                                               arguments.Nickname, Penguin.ID)
 
             if playerId is not None and playerId in self.server.players:
-                if not self.server.players[playerId].user.Moderator:
+                if self.server.players[playerId].user.Moderator == 0:
                     reactor.callFromThread(moderatorKick, player, playerId)
 
                     self.logger.info("%s has kicked %s" % (player.user.Nickname, arguments.Nickname))
@@ -84,7 +84,7 @@ class Commands(object):
              TokenizedArgument("Duration", int),
              TokenizedArgument("Reason", str))
     def handleBanCommand(self, player, arguments):
-        if player.user.Moderator:
+        if player.user.Moderator != 0:
             self.logger.info("%s is attempting to ban %s." % (player.user.Nickname, arguments.Nickname))
 
             playerId = blockingCallFromThread(reactor, self.getPlayer, player.session,
@@ -100,7 +100,7 @@ class Commands(object):
     @Command("jr", CommandArgument("RoomId", int))
     def handleJoinRoomCommand(self, player, arguments):
         if arguments.RoomId in self.server.rooms:
-            if player.user.Moderator == 1:
+            if player.user.Moderator != 0:
                 player.x = 0
                 player.y = 0
                 player.frame = 1
@@ -112,7 +112,7 @@ class Commands(object):
     @Command("ac", CommandArgument("Coins", int))
     def handleCoinsCommand(self, player, arguments):
         self.logger.debug("%s is trying to add %d coins" % (player.user.Nickname, arguments.Coins))
-        if player.user.Moderator == 1:
+        if player.user.Moderator != 0:
             newAmount = max(min(self.coinLimit, player.user.Coins + arguments.Coins), 1)
 
             reactor.callFromThread(player.sendCoins, newAmount)

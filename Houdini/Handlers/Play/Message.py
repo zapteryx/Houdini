@@ -11,7 +11,7 @@ def handleSendMessage(self, data):
 
     if self.muted:
         for roomPlayer in self.room.players:
-            if roomPlayer.user.Moderator:
+            if roomPlayer.user.Moderator != 0:
                 roomPlayer.sendXt("mm", data.Message, self.user.ID)
         return
 
