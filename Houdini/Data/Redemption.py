@@ -34,7 +34,7 @@ class RedemptionCode(Base):
 
     ID = Column(Integer, primary_key=True, unique=True)
     Code = Column(String(16), nullable=False, unique=True, server_default=text("''"))
-    Type = Column(Enum(u'DS', u'BLANKET', u'CARD', u'GOLDEN', u'CAMPAIGN', u'CATALOG'), nullable=False,
+    Type = Column(Enum(u'DS', u'BLANKET', u'CARD', u'GOLDEN', u'CAMPAIGN', u'CATALOG', u'INNOCENT'), nullable=False,
                   server_default=text("'BLANKET'"))
     Coins = Column(Integer, nullable=False, server_default=text("0"))
     SingleUse = Column(SmallInteger, nullable=False, server_default=text("1"))

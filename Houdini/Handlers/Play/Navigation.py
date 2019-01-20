@@ -61,6 +61,9 @@ def handleJoinWorld(self, data):
                     self.logger.info("Unlockable item {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
                     return cheatBan(self, self.user.ID, 72, "Unlockable item {} permed".format(str(item)))
 
+            elif item in self.server.availableClothing["Innocent"]:
+                # TODO: Support checking if a player obtained Innocent items legitimately
+                break
             elif self.server.items.isBait(item):
                 if not self.server.items.isItemEPF(item):
                     # TODO: Support checking if a player obtained EPF items legitimately
@@ -80,6 +83,9 @@ def handleJoinWorld(self, data):
                     self.logger.info("Unlockable furniture {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
                     return cheatBan(self, self.user.ID, 72, "Unlockable furniture {} permed".format(str(item)))
 
+            elif item in self.server.availableFurniture["Innocent"]:
+                # TODO: Support checking if a player obtained Innocent items legitimately
+                break
             elif self.server.furniture.isBait(item):
                 self.logger.info("Bait furniture {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
                 return cheatBan(self, self.user.ID, 72, "Bait furniture {} permed".format(str(item)))
@@ -97,6 +103,9 @@ def handleJoinWorld(self, data):
                     self.logger.info("Unlockable igloo {} detected in inventory of user {} when no code entered".format(str(item), str(self.user.ID)))
                     return cheatBan(self, self.user.ID, 72, "Unlockable igloo {} permed".format(str(item)))
 
+            elif item in self.server.availableIgloos["Innocent"]:
+                # TODO: Support checking if a player obtained Innocent items legitimately
+                break
             elif self.server.igloos.isBait(item):
                 self.logger.info("Bait igloo {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
                 return cheatBan(self, self.user.ID, 72, "Bait furniture {} permed".format(str(item)))

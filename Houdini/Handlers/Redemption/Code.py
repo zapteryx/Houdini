@@ -1,4 +1,5 @@
 from datetime import datetime
+import random
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Redemption import RedemptionCode, RedemptionAward, PenguinRedemption
@@ -44,6 +45,51 @@ def handleSendCode(self, data):
         self.user.TBValidation = True
 
         return self.sendXt("rsc", "treasurebook", 1, ",".join(map(str, ownedIds)), numRedeemed)
+
+    if code.Type == "INNOCENT":
+        innocentRedeemed = []
+
+        for id in self.server.availableClothing["Innocent"]:
+            if id in self.inventory:
+                innocentRedeemed.append(id)
+        for id in self.server.availableFurniture["Innocent"]:
+            if id in self.furniture:
+                innocentRedeemed.append(id)
+
+        innocentFurniture = ["f" + str(item) for item in self.server.availableFurniture["Innocent"]]
+        innocentClothing = [str(item) for item in self.server.availableClothing["Innocent"]]
+        innocentItems = innocentClothing + innocentFurniture
+        awards = []
+
+        while len(awards) < 3:
+            if len(innocentRedeemed) >= len(innocentItems):
+                # If a player has all 25 items and redeems more codes, give them more furniture
+                choice = random.choice(innocentFurniture)
+                if choice not in awards:
+                    self.addFurniture(int(choice[1:]), sendXt=False)
+                    awards.append(choice)
+            else:
+                choice = random.choice(innocentItems)
+                if choice in innocentClothing:
+                    if int(choice) not in innocentRedeemed and choice not in awards:
+                        self.addItem(int(choice), sendXt=False)
+                        awards.append(choice)
+                elif choice in innocentFurniture:
+                    if int(choice[1:]) not in innocentRedeemed and choice not in awards:
+                        self.addFurniture(int(choice[1:]), sendXt=False)
+                        awards.append(choice)
+
+        redeemed = len(innocentRedeemed) + 3
+        if redeemed == len(innocentItems):
+            redeemed += 1
+            finalReward = self.server.availableIgloos["Innocent"][0]
+            self.addIgloo(finalReward, sendXt=False)
+            awards.append("g"+str(finalReward))
+
+        self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
+        self.session.commit()
+
+        return self.sendXt("rsc", "INNOCENT", ",".join(map(str, awards)), redeemed, len(innocentItems))
 
     awards = self.session.query(RedemptionAward).filter_by(CodeID=code.ID).all()
     items = []
