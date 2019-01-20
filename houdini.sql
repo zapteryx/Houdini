@@ -253,10 +253,10 @@ CREATE TABLE `puffle_quest` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `redemption_award` (
-  `CodeID` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Unique code ID',
-  `AwardID` int(10) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Unique award ID per code',
-  `AwardType` enum('Clothing','Furniture','Igloo','Location','Floor','Puffle','Puffle Item','Card') NOT NULL DEFAULT 'Item' COMMENT 'Award type',
-  `Award` mediumint(6) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Award item ID'
+  `CodeID` int(10) UNSIGNED NOT NULL COMMENT 'Unique code ID',
+  `AwardID` tinyint(3) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Unique award ID per code',
+  `AwardType` enum('Clothing','Furniture','Igloo','Location','Floor','Puffle','Puffle Item','Card') NOT NULL DEFAULT 'Clothing' COMMENT 'Award type',
+  `Award` mediumint(8) UNSIGNED NOT NULL COMMENT 'Award item ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Redemption code awards';
 
 CREATE TABLE `redemption_book` (
@@ -270,11 +270,12 @@ CREATE TABLE `redemption_book` (
 
 CREATE TABLE `redemption_code` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique code ID',
-  `Code` varchar(16) NOT NULL DEFAULT '' COMMENT 'Remption code',
+  `Code` varchar(16) NOT NULL DEFAULT '' COMMENT 'Redemption code',
   `Type` enum('DS','BLANKET','CARD','GOLDEN','CAMPAIGN','CATALOG') NOT NULL DEFAULT 'BLANKET' COMMENT 'Code type',
   `Coins` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Code coins amount',
   `SingleUse` tinyint(1) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'Whether the code can be used more than once',
-  `Expires` datetime DEFAULT NULL COMMENT 'Expiry date'
+  `Expires` datetime DEFAULT NULL COMMENT 'Expiry date',
+  `Comment` varchar(255) NOT NULL DEFAULT '' COMMENT 'Notes about the code'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Redemption codes';
 
 CREATE TABLE `stamp` (
@@ -285,12 +286,12 @@ CREATE TABLE `stamp` (
 
 CREATE TABLE `timer` (
   `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Penguin ID',
-  `TimerActive` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Is the timer currently enabled?',
+  `TimerActive` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Is the timer currently enabled?',
   `PlayHourStart` time NOT NULL DEFAULT '00:00:00' COMMENT 'Allowed hours of play - start, stored in UTC',
   `PlayHourEnd` time NOT NULL DEFAULT '23:59:59' COMMENT 'Allowed hours of play - end, stored in UTC',
-  `UTCOffset` tinyint(2) NOT NULL DEFAULT 0 COMMENT 'Offset of the allowed hours from UTC for error messages in local times',
-  `TotalDailyTime` smallint(4) NOT NULL DEFAULT 0 COMMENT 'Total minutes allowed per day',
-  `MinutesToday` smallint(4) NOT NULL DEFAULT 0 COMMENT 'Minutes played today'
+  `UTCOffset` tinyint(2) NOT NULL DEFAULT '0' COMMENT 'Offset of the allowed hours from UTC for error messages in local times',
+  `TotalDailyTime` smallint(4) NOT NULL DEFAULT '0' COMMENT 'Total minutes allowed per day',
+  `MinutesToday` smallint(4) NOT NULL DEFAULT '0' COMMENT 'Minutes played today'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Parental timers';
 
 CREATE TABLE `warning` (
@@ -395,7 +396,7 @@ ALTER TABLE `redemption_book`
 
 ALTER TABLE `redemption_code`
   ADD PRIMARY KEY (`ID`),
-  ADD UNIQUE KEY `remption_code_ID_uindex` (`ID`);
+  ADD UNIQUE KEY `redemption_code_ID_uindex` (`ID`);
 
 ALTER TABLE `stamp`
   ADD PRIMARY KEY (`PenguinID`,`Stamp`);
@@ -496,7 +497,7 @@ ALTER TABLE `puffle`
   ADD CONSTRAINT `puffle_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `redemption_award`
-  ADD CONSTRAINT `redemption_award_remption_code_ID_fk` FOREIGN KEY (`CodeID`) REFERENCES `redemption_code` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `redemption_award_redemption_code_ID_fk` FOREIGN KEY (`CodeID`) REFERENCES `redemption_code` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `stamp`
   ADD CONSTRAINT `stamp_penguin_ID_fk` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
