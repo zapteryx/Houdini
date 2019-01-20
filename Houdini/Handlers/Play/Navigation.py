@@ -62,8 +62,10 @@ def handleJoinWorld(self, data):
                     return cheatBan(self, self.user.ID, 72, "Unlockable item {} permed".format(str(item)))
 
             elif self.server.items.isBait(item):
-                self.logger.info("Bait item {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
-                return cheatBan(self, self.user.ID, 72, "Bait item {} permed".format(str(item)))
+                if not self.server.items.isItemEPF(item):
+                    # TODO: Support checking if a player obtained EPF items legitimately
+                    self.logger.info("Bait item {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
+                    return cheatBan(self, self.user.ID, 72, "Bait item {} permed".format(str(item)))
 
         for item in self.furniture:
             if item in self.server.availableFurniture["Unlockable"]:
