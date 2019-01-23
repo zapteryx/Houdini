@@ -7,6 +7,7 @@ from Houdini.Data.Redemption import RedemptionAward, RedemptionCode, PenguinRede
 def runAntiCheat(self):
     if self.user.Moderator == 0:
         self.antiCheatInnocentItems = False
+        self.antiCheatEPFItems = False
         if antiCheatItems(self) is not None:
             return True
         if antiCheatFurniture(self) is not None:
@@ -15,6 +16,9 @@ def runAntiCheat(self):
             return True
         if self.antiCheatInnocentItems:
             if antiCheatInnocent(self) is not None:
+                return True
+        if self.antiCheatEPFItems:
+            if antiCheatEPF(self) is not None:
                 return True
         if antiCheatLocations(self) is not None:
             return True
@@ -41,9 +45,10 @@ def antiCheatItems(self):
 
             elif item in self.server.availableClothing["Innocent"]:
                 self.antiCheatInnocentItems = True
+            elif item in self.server.availableClothing["EliteGear"]:
+                self.antiCheatEPFItems = True
             elif self.server.items.isBait(item):
                 if not self.server.items.isItemEPF(item):
-                    # TODO: Support checking if a player obtained EPF items legitimately
                     self.logger.info("Bait item {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
                     cheatBan(self, self.user.ID, 72, "Bait item {} permed".format(str(item)))
                     return True
@@ -183,3 +188,17 @@ def antiCheatInnocent(self):
                 self.logger.info("Innocent items detected in inventory of user {} without sufficient codes".format(str(self.user.ID)))
                 cheatBan(self, self.user.ID, 72, "Innocent items permed")
                 return True
+
+def antiCheatEPF(self):
+    if self.user.Moderator == 0:
+        totalCost = 0
+        for item in self.server.availableClothing["EliteGear"]:
+            if item in self.inventory:
+                itemCost = self.server.items.getCost(item)
+                totalCost += itemCost
+
+        totalMedals = self.user.CareerMedals
+        if totalMedals < totalCost:
+            self.logger.info("Elite gear detected in inventory of user {} without sufficient medals".format(str(self.user.ID)))
+            cheatBan(self, self.user.ID, 72, "Elite gear permed")
+            return True

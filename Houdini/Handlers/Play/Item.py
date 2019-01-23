@@ -25,7 +25,7 @@ def handleBuyInventory(self, data):
     if self.server.serverName == "Redemption":
         return self.transport.loseConnection()
     else:
-        if data.ItemId in self.server.availableClothing["EPF"]:
+        if data.ItemId in self.server.availableClothing["EliteGear"]:
             return self.sendError(402)
         elif data.ItemId not in self.server.availableClothing["Standard"] and \
                 data.ItemId not in self.server.availableClothing["Mascot"]:
