@@ -10,6 +10,7 @@ from Houdini.Handlers.Play.Igloo import handleBuyFurniture, handleUpdateFloor, h
 from Houdini.Handlers.Play.Pet import handleAddPuffleCareItem
 from Houdini.Handlers.Play.Moderation import moderatorBan, moderatorKick
 from Houdini.Handlers.Play.Setting import handleSendUpdatePlayerColour, handleSendUpdatePlayerHead, handleSendUpdatePlayerFace, handleSendUpdatePlayerNeck, handleSendUpdatePlayerBody, handleSendUpdatePlayerHand, handleSendUpdatePlayerFeet, handleSendUpdatePlayerFlag, handleSendUpdatePlayerPhoto
+from Houdini.Handlers.Play.PlayerTransformation import handlePlayerTransformation
 
 commandCollection = {}
 
@@ -216,6 +217,12 @@ class Commands(object):
     @Command("pin", CommandArgument("ItemId", int))
     def handleUpdateFlagCommand(self, player, arguments):
         reactor.callFromThread(handleSendUpdatePlayerFlag, player, arguments)
+
+    @Command("transform", CommandArgument("TransformationId", int))
+    @Command("spts", CommandArgument("TransformationId", int))
+    @Command("up", CommandArgument("TransformationId", int))
+    def handleTransformCommand(self, player, arguments):
+        reactor.callFromThread(handlePlayerTransformation, player, arguments)
 
     # Do not edit below this line.
     def processCommand(self, messageDetails):

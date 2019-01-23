@@ -128,6 +128,7 @@ class HoudiniFactory(Factory):
             self.availableFlooring = self.config["AvailableItems"]["Flooring"]
             self.availableLocations = self.config["AvailableItems"]["Locations"]
             self.availableCareItems = self.config["AvailableItems"]["CareItems"]
+            self.availableTransformations = self.config["AvailableItems"]["Transformations"]
 
             self.openIgloos = {}
 

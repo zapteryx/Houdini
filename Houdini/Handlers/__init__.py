@@ -151,6 +151,11 @@ class XT:
         "Data": [XTData("ItemId", int)]
     }
 
+    PlayerTransformation = {
+        "Handler": "pt#spts",
+        "Data": [XTData("TransformationId", int)]
+    }
+
     Message = {
         "Handler": "m#sm",
         "Data": [XTData("Id", int), XTData("Message", str)]
