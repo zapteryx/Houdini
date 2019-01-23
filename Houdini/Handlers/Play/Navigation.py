@@ -46,7 +46,8 @@ def handleJoinWorld(self, data):
     self.user.LoginKey = ""
 
     if self.user.Moderator == 0:
-        runAntiCheat(self)
+        if runAntiCheat(self) is True:
+            return
 
     timer = self.session.query(Timer).filter(Timer.PenguinID == self.user.ID).first()
 
