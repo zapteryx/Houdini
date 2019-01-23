@@ -2,16 +2,20 @@ from sqlalchemy import and_
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Handlers.Play.Moderation import cheatBan
-from Houdini.Data.Redemption import RedemptionAward, PenguinRedemption
+from Houdini.Data.Redemption import RedemptionAward, RedemptionCode, PenguinRedemption
 
 def runAntiCheat(self):
     if self.user.Moderator == 0:
+        self.antiCheatInnocentItems = False
         if antiCheatItems(self) is not None:
             return True
         if antiCheatFurniture(self) is not None:
             return True
         if antiCheatIgloos(self) is not None:
             return True
+        if self.antiCheatInnocentItems:
+            if antiCheatInnocent(self) is not None:
+                return True
         if antiCheatLocations(self) is not None:
             return True
         if antiCheatFloors(self) is not None:
@@ -36,8 +40,7 @@ def antiCheatItems(self):
                     return True
 
             elif item in self.server.availableClothing["Innocent"]:
-                # TODO: Support checking if a player obtained Innocent items legitimately
-                continue
+                self.antiCheatInnocentItems = True
             elif self.server.items.isBait(item):
                 if not self.server.items.isItemEPF(item):
                     # TODO: Support checking if a player obtained EPF items legitimately
@@ -62,8 +65,7 @@ def antiCheatFurniture(self):
                     return True
 
             elif item in self.server.availableFurniture["Innocent"]:
-                # TODO: Support checking if a player obtained Innocent items legitimately
-                continue
+                self.antiCheatInnocentItems = True
             elif self.server.furniture.isBait(item):
                 self.logger.info("Bait furniture {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
                 cheatBan(self, self.user.ID, 72, "Bait furniture {} permed".format(str(item)))
@@ -86,8 +88,7 @@ def antiCheatIgloos(self):
                     return True
 
             elif item in self.server.availableIgloos["Innocent"]:
-                # TODO: Support checking if a player obtained Innocent items legitimately
-                continue
+                self.antiCheatInnocentItems = True
             elif self.server.igloos.isBait(item):
                 self.logger.info("Bait igloo {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
                 cheatBan(self, self.user.ID, 72, "Bait furniture {} permed".format(str(item)))
@@ -154,4 +155,31 @@ def antiCheatCareItems(self):
             elif self.server.careItems.isBait(item):
                 self.logger.info("Bait care item {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
                 cheatBan(self, self.user.ID, 72, "Bait care item {} permed".format(str(item)))
+                return True
+
+def antiCheatInnocent(self):
+    if self.user.Moderator == 0:
+        innocentRedeemed = self.session.query(PenguinRedemption.CodeID) \
+                .join(RedemptionCode, RedemptionCode.ID == PenguinRedemption.CodeID) \
+                .filter(RedemptionCode.Type=="INNOCENT") \
+                .filter(PenguinRedemption.PenguinID == self.user.ID).all()
+
+        if len(innocentRedeemed) < 8:
+            if self.server.availableIgloos["Innocent"][0] in self.iglooInventory:
+                self.logger.info("Innocent bonus igloo {} detected in inventory of user {} without sufficient codes".format(str(item), str(self.user.ID)))
+                cheatBan(self, self.user.ID, 72, "Innocent bonus igloo {} permed".format(str(item)))
+                return True
+
+            innocentClothing = 0
+            innocentFurniture = 0
+            for item in self.server.availableClothing["Innocent"]:
+                if item in self.inventory:
+                    innocentClothing += 1
+            for item in self.server.availableFurniture["Innocent"]:
+                if item in self.furniture:
+                    innocentFurniture += 1
+            innocentItems = (innocentClothing + innocentFurniture)
+            if (float(innocentItems) / len(innocentRedeemed)) > 3:
+                self.logger.info("Innocent items detected in inventory of user {} without sufficient codes".format(str(self.user.ID)))
+                cheatBan(self, self.user.ID, 72, "Innocent items permed")
                 return True
