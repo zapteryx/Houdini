@@ -6,6 +6,7 @@ from Houdini.Data.Redemption import RedemptionAward, RedemptionCode, PenguinRede
 
 def runAntiCheat(self):
     if self.user.Moderator == 0:
+        self.antiCheatTreasureBookItems = False
         self.antiCheatInnocentItems = False
         self.antiCheatEPFItems = False
         if antiCheatItems(self) is not None:
@@ -14,6 +15,9 @@ def runAntiCheat(self):
             return True
         if antiCheatIgloos(self) is not None:
             return True
+        if self.antiCheatTreasureBookItems:
+            if antiCheatTreasureBook(self) is not None:
+                return True
         if self.antiCheatInnocentItems:
             if antiCheatInnocent(self) is not None:
                 return True
@@ -62,6 +66,8 @@ def antiCheatItems(self):
                     self.logger.info("Fire ninja item {} detected in inventory of user {} without sufficient rank".format(str(item), str(self.user.ID)))
                     cheatBan(self, self.user.ID, 72, "Fire ninja item {} permed".format(str(item)))
                     return True
+            elif item in self.server.availableClothing["TreasureBook"]:
+                self.antiCheatTreasureBookItems = True
             elif item in self.server.availableClothing["Innocent"]:
                 self.antiCheatInnocentItems = True
             elif item in self.server.availableClothing["EliteGear"]:
@@ -180,6 +186,25 @@ def antiCheatCareItems(self):
                 self.logger.info("Bait care item {} detected in inventory of user {}".format(str(item), str(self.user.ID)))
                 cheatBan(self, self.user.ID, 72, "Bait care item {} permed".format(str(item)))
                 return True
+
+def antiCheatTreasureBook(self):
+    if self.user.Moderator == 0:
+        self.logger.debug("tb check start")
+        tbItems = 0
+        for item in self.server.availableClothing["TreasureBook"]:
+            if item in self.inventory:
+                tbItems += 1
+
+        tbRedeemed = self.session.query(PenguinRedemption.CodeID) \
+            .join(RedemptionCode, RedemptionCode.ID == PenguinRedemption.CodeID) \
+            .filter(RedemptionCode.Type=="CATALOG") \
+            .filter(PenguinRedemption.PenguinID == self.user.ID).all()
+
+        if len(tbRedeemed) < tbItems:
+            self.logger.info("Treasure Book items detected in inventory of user {} without sufficient codes".format(str(self.user.ID)))
+            cheatBan(self, self.user.ID, 72, "Treasure book item permed")
+            return True
+        self.logger.debug("tb check end")
 
 def antiCheatInnocent(self):
     if self.user.Moderator == 0:
