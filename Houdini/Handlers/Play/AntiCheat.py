@@ -189,7 +189,6 @@ def antiCheatCareItems(self):
 
 def antiCheatTreasureBook(self):
     if self.user.Moderator == 0:
-        self.logger.debug("tb check start")
         tbItems = 0
         for item in self.server.availableClothing["TreasureBook"]:
             if item in self.inventory:
@@ -204,7 +203,6 @@ def antiCheatTreasureBook(self):
             self.logger.info("Treasure Book items detected in inventory of user {} without sufficient codes".format(str(self.user.ID)))
             cheatBan(self, self.user.ID, 72, "Treasure book item permed")
             return True
-        self.logger.debug("tb check end")
 
 def antiCheatInnocent(self):
     if self.user.Moderator == 0:

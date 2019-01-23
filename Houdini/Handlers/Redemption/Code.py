@@ -224,7 +224,7 @@ def handleRedeemSendPuffle(self, data):
     if not 16 > len(data.Name) >= 3:
         self.sendXt("rsp", 0)
 
-    if len(self.puffles) >= 75:
+    if len(self.puffles) >= 75 and self.user.Moderator == 0:
         return self.sendError(440)
 
     data.TypeId = data.ID

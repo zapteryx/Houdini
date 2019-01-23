@@ -118,23 +118,25 @@ def handleSendAdoptPuffle(self, data):
     if self.user.Coins < puffleCost:
         return self.sendError(401)
 
-    if len(self.puffles) >= 75:
+    if len(self.puffles) >= 75 and self.user.Moderator == 0:
         return self.sendError(440)
 
     if data.TypeId == 10:
         questsDone = sum(1 for taskId in self.puffleQuests if
                          self.puffleQuests[taskId].Completed is not None)
 
-        if questsDone < 4:
+        if questsDone < 4 and self.user.Moderator == 0:
             return self.transport.loseConnection()
 
-        self.user.RainbowAdoptability = 0
+        if self.user.Moderator == 0:
+            self.user.RainbowAdoptability = 0
 
     if data.TypeId == 11:
         if self.user.Nuggets < 15 or not self.canDigGold:
             return self.transport.loseConnection()
 
-        self.user.Nuggets = 0
+        if self.user.Moderator == 0:
+            self.user.Nuggets -= 15
         self.canDigGold = False
 
     self.user.Coins -= puffleCost

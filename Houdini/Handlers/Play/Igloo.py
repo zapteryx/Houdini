@@ -183,7 +183,12 @@ def handleGetIglooLikeBy(self, data):
 
 @Handlers.Handle(XT.IsPlayerIglooOpen)
 def handleIsPlayerIglooOpen(self, data):
-    self.sendXt("pio", 1 if data.Id in self.server.openIgloos else 0)
+    if self.user.Moderator != 0:
+        open = 1
+    else:
+        open = 1 if data.Id in self.server.openIgloos else 0
+
+    self.sendXt("pio", open)
 
 @Handlers.Handle(XT.AddIglooLayout)
 def handleAddIglooLayout(self, data):
