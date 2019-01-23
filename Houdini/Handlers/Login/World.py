@@ -35,6 +35,14 @@ def handleLogin(self, data):
     user.Member = membership.Status
     user.MembershipDays = membership.CumulativeDays
 
+    if user.Moderator == 0:
+        user.maxCoins = 1000000
+    else:
+        user.maxCoins = 10000000
+
+    if user.Coins > user.maxCoins:
+        user.Coins = user.maxCoins
+
     if user.Member == 0:
         user.MembershipLeft = None
     else:

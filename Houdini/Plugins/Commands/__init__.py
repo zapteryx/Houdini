@@ -50,8 +50,6 @@ class Commands(object):
     commandPrefix = "!"
     tokenizedDelimiter = " / "
 
-    coinLimit = 1000000
-
     commands = {}
 
     def __init__(self, server):
@@ -114,7 +112,7 @@ class Commands(object):
     def handleCoinsCommand(self, player, arguments):
         self.logger.debug("%s is trying to add %d coins" % (player.user.Nickname, arguments.Coins))
         if player.user.Moderator != 0:
-            newAmount = max(min(self.coinLimit, player.user.Coins + arguments.Coins), 1)
+            newAmount = (player.user.Coins + arguments.Coins)
 
             reactor.callFromThread(player.sendCoins, newAmount)
         else:

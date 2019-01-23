@@ -11,8 +11,6 @@ from Houdini.Handlers.Games.SledRace import SledRace
 from Houdini.Handlers.Games.CardJitsu import CardMat
 from Houdini.Handlers.Games.CardFire import FireMat
 
-maxCoins = 1000000
-
 def determineCoinsEarned(gameId, gameScore):
     defaultScoreGames = (904, 905, 906, 912, 916, 917, 918, 919, 950, 952)
 
@@ -64,12 +62,12 @@ def handleSendGameOver(self, data):
 
             coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
 
-            self.user.Coins = max(0, min(self.user.Coins + coinsEarned, maxCoins))
+            self.user.Coins = max(0, min(self.user.Coins + coinsEarned, self.user.maxCoins))
             self.sendXt("zo", self.user.Coins, collectedStampsString, totalStamps, totalStampsGame, totalGameStamps)
         else:
             coinsEarned = determineCoinsEarned(self.room.Id, data.Score)
 
-            self.user.Coins = max(0, min(self.user.Coins + coinsEarned, maxCoins))
+            self.user.Coins = max(0, min(self.user.Coins + coinsEarned, self.user.maxCoins))
             self.sendXt("zo", self.user.Coins, "", 0, 0, 0)
 
 @Handlers.Handle(XT.MovePuck)
