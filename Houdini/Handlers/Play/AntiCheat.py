@@ -43,6 +43,25 @@ def antiCheatItems(self):
                     cheatBan(self, self.user.ID, 72, "Unlockable item {} permed".format(str(item)))
                     return True
 
+            elif item in self.server.availableClothing["Ninja"]["CardJitsu"]:
+                ninjaItems = self.server.availableClothing["Ninja"]["CardJitsu"]
+                ninjaRank = self.user.NinjaRank
+                rankNeeded = ninjaItems.index(item) + 1
+
+                if ninjaRank < rankNeeded:
+                    self.logger.info("Ninja item {} detected in inventory of user {} without sufficient rank".format(str(item), str(self.user.ID)))
+                    cheatBan(self, self.user.ID, 72, "Ninja item {} permed".format(str(item)))
+                    return True
+
+            elif item in self.server.availableClothing["Ninja"]["CardFire"]:
+                fireItems = self.server.availableClothing["Ninja"]["CardFire"]
+                fireRank = self.user.FireNinjaRank
+                rankNeeded = fireItems.index(item) + 1
+
+                if fireRank < rankNeeded:
+                    self.logger.info("Fire ninja item {} detected in inventory of user {} without sufficient rank".format(str(item), str(self.user.ID)))
+                    cheatBan(self, self.user.ID, 72, "Fire ninja item {} permed".format(str(item)))
+                    return True
             elif item in self.server.availableClothing["Innocent"]:
                 self.antiCheatInnocentItems = True
             elif item in self.server.availableClothing["EliteGear"]:

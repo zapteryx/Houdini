@@ -423,7 +423,7 @@ def chooseCard(self, cardIndex):
                     opponent.penguin.user.FireNinjaProgress += progressPoints
 
                     if opponent.penguin.user.FireNinjaProgress >= 100:
-                        awardItems = [6025, 4120, 2013, 1086]
+                        awardItems = self.server.availableClothing["Ninja"]["CardFire"]
                         rankStamps = {2: 256, 4: 262}
                         opponent.penguin.user.FireNinjaRank += 1
 

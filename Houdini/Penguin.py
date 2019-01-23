@@ -149,7 +149,7 @@ class Penguin(Spheniscidae):
             self.cards.append(self.server.cards[cardId])
 
     def ninjaRankUp(self, levels=1):
-        rankAwards = [4025, 4026, 4027, 4028, 4029, 4030, 4031, 4032, 4033, 104]
+        rankAwards = self.server.availableClothing["Ninja"]["CardJitsu"]
         beltPostcards = {1: 177, 5: 178, 9: 179}
         beltStamps = {1: 230, 5: 232, 9: 234, 10: 236}
         for i in xrange(levels):
