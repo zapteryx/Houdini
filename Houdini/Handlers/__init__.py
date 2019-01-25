@@ -531,6 +531,11 @@ class XT:
         "Data": [XTData("PlayerId", int)]
     }
 
+    ReportPlayer = {
+        "Handler": "m#r",
+        "Data": [VariableXTData("Report")]
+    }
+
     GetTablePopulation = {
         "Handler": "a#gt",
         "Data": [VariableXTData("Tables")]

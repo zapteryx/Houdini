@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin
 from Houdini.Data.Ban import Ban
+from Houdini.Data.PlayerReport import PlayerReport
 from Houdini.Data.Warnings import Warnings
 
 @Handlers.Handle(XT.BanPlayer)
@@ -22,6 +23,22 @@ def handleMutePlayer(self, data):
 def handleKickPlayer(self, data):
     if self.user.Moderator != 0:
         moderatorKick(self, data.PlayerId)
+
+@Handlers.Handle(XT.ReportPlayer)
+@Handlers.Throttle(5)
+def handleReportPlayer(self, data):
+    reportee = data.Report[0]
+    if len(data.Report) > 1:
+        reason = data.Report[1]
+    else:
+        reason = None
+    timestamp = datetime.now()
+    serverId = self.server.server["Id"]
+
+    report = PlayerReport(PenguinID=reportee, ReporterID=self.user.ID, Reason=reason,
+                Timestamp=timestamp, ServerID=serverId, RoomID=self.room.Id)
+    self.session.add(report)
+    self.session.commit()
 
 def cheatBan(self, targetPlayer, banDuration=72, comment=""):
     if targetPlayer in self.server.players:

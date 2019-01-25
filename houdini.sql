@@ -154,6 +154,15 @@ CREATE TABLE `name_approval` (
   `ru` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Penguin name approvals';
 
+CREATE TABLE `player_report` (
+  `PenguinID` int(10) UNSIGNED NOT NULL COMMENT 'Penguin ID',
+  `ReporterID` int(10) UNSIGNED NOT NULL COMMENT 'Reporter ID',
+  `Reason` tinyint(1) UNSIGNED DEFAULT NULL COMMENT 'Reason #',
+  `Timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Datetime of report',
+  `ServerID` smallint(5) UNSIGNED NOT NULL COMMENT 'Server ID',
+  `RoomID` smallint(5) UNSIGNED NOT NULL COMMENT 'Room ID'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Player reports';
+
 CREATE TABLE `penguin` (
   `ID` int(10) UNSIGNED NOT NULL COMMENT 'Unique penguin ID',
   `Username` varchar(12) NOT NULL COMMENT 'Penguin login name',
@@ -372,6 +381,10 @@ ALTER TABLE `penguin`
   ADD UNIQUE KEY `Username` (`Username`),
   ADD KEY `Email` (`Email`);
 
+ALTER TABLE `player_report`
+  ADD PRIMARY KEY (`PenguinID`,`ReporterID`,`Timestamp`),
+  ADD KEY `player_report_ibfk_2` (`ReporterID`);
+
 ALTER TABLE `penguin_redemption`
   ADD PRIMARY KEY (`PenguinID`,`CodeID`),
   ADD KEY `penguin_redemption_redemption_code_ID_fk` (`CodeID`);
@@ -484,6 +497,10 @@ ALTER TABLE `membership`
 
 ALTER TABLE `name_approval`
   ADD CONSTRAINT `name_approval_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `player_report`
+  ADD CONSTRAINT `player_report_ibfk_1` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `player_report_ibfk_2` FOREIGN KEY (`ReporterID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `penguin_redemption`
   ADD CONSTRAINT `penguin_redemption_penguin_ID_fk` FOREIGN KEY (`PenguinID`) REFERENCES `penguin` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
