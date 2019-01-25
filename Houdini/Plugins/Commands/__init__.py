@@ -10,6 +10,7 @@ from Houdini.Handlers.Play.Igloo import handleBuyFurniture, handleUpdateFloor, h
 from Houdini.Handlers.Play.Pet import handleAddPuffleCareItem
 from Houdini.Handlers.Play.Moderation import moderatorBan, moderatorKick
 from Houdini.Handlers.Play.Setting import handleSendUpdatePlayerColour, handleSendUpdatePlayerHead, handleSendUpdatePlayerFace, handleSendUpdatePlayerNeck, handleSendUpdatePlayerBody, handleSendUpdatePlayerHand, handleSendUpdatePlayerFeet, handleSendUpdatePlayerFlag, handleSendUpdatePlayerPhoto
+from Houdini.Handlers.Play.Message import handleSendMessage
 from Houdini.Handlers.Play.PlayerTransformation import handlePlayerTransformation
 
 commandCollection = {}
@@ -57,6 +58,7 @@ class Commands(object):
 
         self.server = server
 
+        Handlers.Message -= handleSendMessage
         Handlers.Message += self.handleMessage
 
     @staticmethod
@@ -280,8 +282,10 @@ class Commands(object):
         if data.Message.startswith(self.commandPrefix):
             commandMessage = data.Message[1:]
 
-            deferToThread(self.processCommand, [player, commandMessage])\
+            return deferToThread(self.processCommand, [player, commandMessage])\
                 .addErrback(self.handleCommandError)
+        else:
+            handleSendMessage(player, data)
 
     def ready(self):
         self.logger.info("Commands plugin has been loaded!")

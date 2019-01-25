@@ -72,6 +72,9 @@ class ChatFilter(object):
         return False
 
     def handleSendMessage(self, player, data):
+        if "Commands" in self.server.plugins:
+            if data.Message.startswith(self.server.plugins["Commands"].commandPrefix):
+                return
         if self.isNaughty(data.Message):
             self.logger.info("[ChatFilter] Warning %s for trying to say '%s'" % (player.user.Username, data.Message))
             return languageBan(self, player.user.ID)
