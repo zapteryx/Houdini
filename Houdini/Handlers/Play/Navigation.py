@@ -9,6 +9,7 @@ from Houdini.Data.Penguin import Penguin, BuddyList
 from Houdini.Data.Timer import Timer
 from Houdini.Handlers.Play.Timer import updateEggTimer, checkHours
 from Houdini.Handlers.Play.AntiCheat import runAntiCheat
+from Houdini.Handlers.Play.Pet import handleSendPuffleWalk
 
 RoomFieldKeywords = {
     "Id": None,
@@ -66,6 +67,11 @@ def handleJoinWorld(self, data):
     else:
         timeLeft = 1440
 
+    self.inBackyard = False
+    if self.user.Moderator == 2 and self.walkingPuffle:
+        data.PuffleId = self.walkingPuffle.ID
+        handleSendPuffleWalk(self, data)
+
     self.sendXt("activefeatures")
 
     self.sendXt("js", self.user.AgentStatus, 0, self.user.Moderator, self.user.BookModified)
@@ -83,8 +89,6 @@ def handleJoinWorld(self, data):
 
     self.sendXt("gps", self.user.ID, getStampsString(self, self.user.ID))
 
-    self.inBackyard = False
-
     if self.user.ID in self.server.mascots:
         for playerId in self.server.players.keys():
             player = self.server.players[playerId]
@@ -92,7 +96,7 @@ def handleJoinWorld(self, data):
                 player.sendXt("cron", self.user.ID)
     else:
         for buddyId, buddyNickname in self.buddies.items():
-            if buddyId in self.server.players:
+            if buddyId in self.server.players and self.user.Moderator != 2:
                 self.server.players[buddyId].sendXt("bon", self.user.ID)
         for characterId in self.characterBuddies:
             if characterId in self.server.players:

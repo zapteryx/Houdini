@@ -13,7 +13,7 @@ def handlePlayerTransformation(self, data):
         self.transformationTimer.cancel()
 
     if data.TransformationId == 0:
-        return self.room.sendXt("spts", self.user.ID, 0)
+        handleRevertPlayerTransformation(self, data)
 
     membersOnly = self.server.availableTransformations[data.TransformationId][0]
     duration = self.server.availableTransformations[data.TransformationId][1]
@@ -31,10 +31,16 @@ def handlePlayerTransformation(self, data):
         data.PuffleId = self.walkingPuffle.ID 
         handleSendPuffleWalk(self, data)
 
-    self.room.sendXt("spts", self.user.ID, data.TransformationId)
+    if self.user.Moderator != 2:
+        self.room.sendXt("spts", self.user.ID, data.TransformationId)
+    else:
+        self.sendXt("spts", self.user.ID, data.TransformationId)
 
 def handleRevertPlayerTransformation(self, data):
-    return self.room.sendXt("spts", self.user.ID, 0)
+    if self.user.Moderator != 2:
+        return self.room.sendXt("spts", self.user.ID, 0)
+    else:
+        return self.sendXt("spts", self.user.ID, 0)
 
 def handleDisconnection(self):
     if self.server.server["World"]:

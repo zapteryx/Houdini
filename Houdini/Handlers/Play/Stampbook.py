@@ -35,9 +35,9 @@ def getStampsString(self, penguinId):
 
 def giveMascotStamp(self):
     for roomPlayer in self.room.players:
-        if roomPlayer.user.MascotStamp:
+        if roomPlayer.user.MascotStamp and self.user.Moderator != 2:
             self.addStamp(roomPlayer.user.MascotStamp, True)
-    if self.user.MascotStamp:
+    if self.user.MascotStamp and self.user.Moderator != 2:
         for roomPlayer in self.room.players:
             roomPlayer.addStamp(self.user.MascotStamp, True)
 

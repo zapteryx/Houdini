@@ -72,14 +72,14 @@ def handleSendGameOver(self, data):
 
 @Handlers.Handle(XT.MovePuck)
 def handleMovePuck(self, data):
-    if self.room.Id == 802: # Or disconnect if it isn't the ice rink :shrug:
+    if self.room.Id == 802 and self.user.Moderator != 2: # Or disconnect if it isn't the ice rink :shrug:
         self.server.rinkPuck = (data.X, data.Y)
 
         self.room.sendXt("zm", self.user.ID, data.X, data.Y, data.SpeedX, data.SpeedY)
 
 @Handlers.Handle(XT.GetGame)
 def handleGetGame(self, data):
-    if self.room.Id == 802:
+    if self.room.Id == 802 and self.user.Moderator != 2:
         puckX, puckY = self.server.rinkPuck if hasattr(self.server, "rinkPuck") else (0, 0)
         self.sendXt("gz", puckX, puckY)
 

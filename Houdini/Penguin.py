@@ -225,7 +225,7 @@ class Penguin(Spheniscidae):
                         player.sendXt("crof", self.user.ID)
             else:
                 for buddyId in self.buddies.keys():
-                    if buddyId in self.server.players:
+                    if buddyId in self.server.players and self.user.Moderator != 2:
                         self.server.players[buddyId].sendXt("bof", self.user.ID)
 
             loginUnix = time.mktime(self.login.Date.timetuple())

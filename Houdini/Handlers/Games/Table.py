@@ -10,22 +10,24 @@ class Table(object):
         self.penguins = []
 
     def add(self, penguin):
-        self.penguins.append(penguin)
+        if penguin.user.Moderator != 2:
+            self.penguins.append(penguin)
 
-        seatId = len(self.penguins) - 1
+            seatId = len(self.penguins) - 1
 
-        penguin.sendXt("jt", self.id, seatId + 1)
-        self.room.sendXt("ut", self.id, len(self.penguins))
-        penguin.table = self
+            penguin.sendXt("jt", self.id, seatId + 1)
+            self.room.sendXt("ut", self.id, len(self.penguins))
+            penguin.table = self
 
-        return seatId
+            return seatId
 
     def remove(self, penguin):
-        self.penguins.remove(penguin)
+        if penguin.user.Moderator != 2:
+            self.penguins.remove(penguin)
 
-        penguin.sendXt("lt")
-        self.room.sendXt("ut", self.id, len(self.penguins))
-        penguin.table = None
+            penguin.sendXt("lt")
+            self.room.sendXt("ut", self.id, len(self.penguins))
+            penguin.table = None
 
     def reset(self):
         for penguin in self.penguins:

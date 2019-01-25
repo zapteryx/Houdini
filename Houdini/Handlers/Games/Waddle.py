@@ -11,23 +11,25 @@ class Waddle(object):
         self.penguins = [None] * seats
 
     def add(self, penguin):
-        seatId = self.penguins.index(None)
-        self.penguins[seatId] = penguin
-        penguin.sendXt("jw", seatId)
-        self.room.sendXt("uw", self.id, seatId, penguin.user.Nickname)
+        if penguin.user.Moderator != 2:
+            seatId = self.penguins.index(None)
+            self.penguins[seatId] = penguin
+            penguin.sendXt("jw", seatId)
+            self.room.sendXt("uw", self.id, seatId, penguin.user.Nickname)
 
-        penguin.waddle = self
+            penguin.waddle = self
 
-        if self.penguins.count(None) == 0:
-            self.game(list(self.penguins), self.seats)
-            self.reset()
+            if self.penguins.count(None) == 0:
+                self.game(list(self.penguins), self.seats)
+                self.reset()
 
     def remove(self, penguin):
-        seatId = self.getSeatId(penguin)
-        self.penguins[seatId] = None
-        self.room.sendXt("uw", self.id, seatId)
+        if penguin.user.Moderator != 2:
+            seatId = self.getSeatId(penguin)
+            self.penguins[seatId] = None
+            self.room.sendXt("uw", self.id, seatId)
 
-        penguin.waddle = None
+            penguin.waddle = None
 
     def reset(self):
         for seatId, penguin in enumerate(self.penguins):

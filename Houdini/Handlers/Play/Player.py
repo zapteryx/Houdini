@@ -63,50 +63,59 @@ def handleSendHeartbeat(self, data):
 @Handlers.Handle(XT.ThrowBall)
 @Handlers.Throttle()
 def handlePlayerThrowBall(self, data):
-    self.room.sendXt("sb", self.user.ID, data.X, data.Y)
+    if self.user.Moderator != 2:
+        self.room.sendXt("sb", self.user.ID, data.X, data.Y)
 
 @Handlers.Handle(XT.PlayerMove)
 def handleSendPlayerMove(self, data):
-    self.x = data.X
-    self.y = data.Y
+    if self.user.Moderator != 2:
+        self.x = data.X
+        self.y = data.Y
 
-    self.room.sendXt("sp", self.user.ID, data.X, data.Y)
+        self.room.sendXt("sp", self.user.ID, data.X, data.Y)
 
 @Handlers.Handle(XT.PlayerAction)
 @Handlers.Throttle()
 def handleUpdatePlayerAction(self, data):
-    self.room.sendXt("sa", self.user.ID, data.Id)
+    if self.user.Moderator != 2:
+        self.room.sendXt("sa", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendEmote)
 @Handlers.Throttle()
 def handleSendEmote(self, data):
-    self.room.sendXt("se", self.user.ID, data.Id)
+    if self.user.Moderator != 2:
+        self.room.sendXt("se", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.PlayerFrame)
 @Handlers.Throttle()
 def handleSendPlayerFrame(self, data):
-    self.frame = data.Id
-    self.room.sendXt("sf", self.user.ID, data.Id)
+    if self.user.Moderator != 2:
+        self.frame = data.Id
+        self.room.sendXt("sf", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendJoke)
 @Handlers.Throttle()
 def handleSendJoke(self, data):
-    self.room.sendXt("sj", self.user.ID, data.Id)
+    if self.user.Moderator != 2:
+        self.room.sendXt("sj", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendSafe)
 @Handlers.Throttle()
 def handleSafeMessage(self, data):
-    self.room.sendXt("ss", self.user.ID, data.Id)
+    if self.user.Moderator != 2:
+        self.room.sendXt("ss", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendTourGuide)
 @Handlers.Throttle()
 def handleSendTourGuide(self, data):
-    self.room.sendXt("sg", self.user.ID, data.Id)
+    if self.user.Moderator != 2:
+        self.room.sendXt("sg", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendLineMessage)
 @Handlers.Throttle()
 def handleSendLineMessage(self, data):
-    self.room.sendXt("sl", self.user.ID, data.Id)
+    if self.user.Moderator != 2:
+        self.room.sendXt("sl", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.SendMascotMessage)
 @Handlers.Throttle()

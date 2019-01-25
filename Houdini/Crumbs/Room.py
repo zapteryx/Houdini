@@ -27,7 +27,7 @@ class Room(SchemaObject):
             player.sendXt(*data)
 
     def generateRoomString(self):
-        roomString = "%".join([player.getPlayerString() for player in self.players])
+        roomString = "%".join([player.getPlayerString() for player in self.players if player.user.Moderator != 2])
 
         return roomString
 
@@ -45,8 +45,12 @@ class Room(SchemaObject):
         if self.Id > 1000:
             player.sendXt("jp", self.InternalId, self.Id, roomType)
 
-        player.sendXt("jr", self.Id, self.generateRoomString())
-        self.sendXt("ap", player.getPlayerString())
+        if player.user.Moderator == 2:
+            player.sendXt("jr", self.Id, (self.generateRoomString() + player.getPlayerString()))
+            player.sendXt("ap", player.getPlayerString())
+        else:
+            player.sendXt("jr", self.Id, self.generateRoomString())
+            self.sendXt("ap", player.getPlayerString())
 
         giveMascotStamp(player)
 
@@ -60,8 +64,8 @@ class Room(SchemaObject):
         player.server.danceFloor.remove(player)
 
         self.players.remove(player)
-
-        self.sendXt("rp", player.user.ID)
+        if player.user.Moderator != 2:
+            self.sendXt("rp", player.user.ID)
 
 
 class RoomSchema(Schema):

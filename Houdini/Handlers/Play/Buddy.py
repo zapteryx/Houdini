@@ -30,7 +30,7 @@ def handleGetBuddies(self, data):
 
     if len(self.buddies) > 0:
         for buddyId, buddyNickname in self.buddies.items():
-            status = "online" if buddyId in self.server.players else "offline"
+            status = "online" if buddyId in self.server.players and self.server.players[buddyId].user.Moderator != 2 else "offline"
             playerBuddies.append("{}|{}|{}|{}".format(buddyId, buddyId, buddyNickname, status))
 
         self.sendXt("gb", *playerBuddies)

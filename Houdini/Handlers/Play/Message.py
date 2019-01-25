@@ -15,4 +15,5 @@ def handleSendMessage(self, data):
                 roomPlayer.sendXt("mm", data.Message, self.user.ID)
         return
 
-    self.room.sendXt("sm", self.user.ID, data.Message)
+    if self.user.Moderator != 2:
+        self.room.sendXt("sm", self.user.ID, data.Message)
