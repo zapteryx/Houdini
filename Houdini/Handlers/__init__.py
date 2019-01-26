@@ -526,6 +526,11 @@ class XT:
         "Data": [XTData("PlayerId", int)]
     }
 
+    WarnPlayer = {
+        "Handler": "o#moderatormessage",
+        "Data": [XTData("Type", int), XTData("PlayerId", int)]
+    }
+
     KickPlayer = {
         "Handler": "o#k",
         "Data": [XTData("PlayerId", int)]

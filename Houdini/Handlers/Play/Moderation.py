@@ -27,6 +27,15 @@ def handleMutePlayer(self, data):
             target = self.server.players[data.PlayerId]
             if target.user.Moderator == 0:
                 target.muted = True
+                target.sendXt("moderatormessage", 2)
+
+@Handlers.Handle(XT.WarnPlayer)
+def handleWarnPlayer(self, data):
+    if self.user.Moderator != 0:
+        if data.PlayerId in self.server.players:
+            target = self.server.players[data.PlayerId]
+            if target.user.Moderator == 0:
+                target.sendXt("moderatormessage", data.Type)
 
 @Handlers.Handle(XT.KickPlayer)
 def handleKickPlayer(self, data):
