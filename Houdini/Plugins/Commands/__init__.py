@@ -8,7 +8,7 @@ from Houdini.Data.Penguin import Penguin
 from Houdini.Handlers.Play.Item import handleBuyInventory
 from Houdini.Handlers.Play.Igloo import handleBuyFurniture, handleUpdateFloor, handleUpdateIglooType, handleBuyIglooLocation
 from Houdini.Handlers.Play.Pet import handleAddPuffleCareItem
-from Houdini.Handlers.Play.Moderation import moderatorBan, moderatorKick
+from Houdini.Handlers.Play.Moderation import bullyingBan, moderatorKick
 from Houdini.Handlers.Play.Setting import handleSendUpdatePlayerColour, handleSendUpdatePlayerHead, handleSendUpdatePlayerFace, handleSendUpdatePlayerNeck, handleSendUpdatePlayerBody, handleSendUpdatePlayerHand, handleSendUpdatePlayerFeet, handleSendUpdatePlayerFlag, handleSendUpdatePlayerPhoto
 from Houdini.Handlers.Play.Message import handleSendMessage
 from Houdini.Handlers.Play.PlayerTransformation import handlePlayerTransformation
@@ -92,7 +92,7 @@ class Commands(object):
                                               arguments.Nickname, Penguin.ID)
 
             if playerId is not None:
-                reactor.callFromThread(moderatorBan, player, playerId,
+                reactor.callFromThread(bullyingBan, player, playerId,
                                        arguments.Duration, arguments.Reason)
 
                 self.logger.info("%s has banned %s for %s hours using the !BAN command." %

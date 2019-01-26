@@ -9,7 +9,16 @@ from Houdini.Data.Warnings import Warnings
 @Handlers.Handle(XT.BanPlayer)
 def handleBanPlayer(self, data):
     if self.user.Moderator != 0:
-        moderatorBan(self, data.PlayerId, comment=data.Message)
+        targetPlayer = data.PlayerId
+        data.Comment = None if data.Comment == " " else data.Comment
+        if data.Reason == 4:
+            return cheatBan(self, targetPlayer, data.Duration, data.Comment, self.user.ID)
+        if data.Reason == 8:
+            return languageBan(self, targetPlayer, data.Duration, data.Comment, self.user.ID)
+        if data.Reason == 6:
+            return bullyingBan(self, targetPlayer, data.Duration, data.Comment, self.user.ID)
+        if data.Reason == 7:
+            return personalInfoBan(self, targetPlayer, data.Duration, data.Comment, self.user.ID)
 
 @Handlers.Handle(XT.MutePlayer)
 def handleMutePlayer(self, data):
@@ -23,6 +32,19 @@ def handleMutePlayer(self, data):
 def handleKickPlayer(self, data):
     if self.user.Moderator != 0:
         moderatorKick(self, data.PlayerId)
+
+@Handlers.Handle(XT.InitBan)
+def handleInitBan(self, data):
+    if self.user.Moderator != 0:
+        targetPlayer = data.PlayerId
+        if targetPlayer in self.server.players:
+            target = self.server.players[targetPlayer]
+
+            if target.user.Moderator == 0:
+                numberOfBans = self.session.query(Ban).\
+                    filter(Ban.PenguinID == targetPlayer).count()
+
+                self.sendXt("initban", targetPlayer, 0, numberOfBans, data.Phrase, target.user.Nickname)
 
 @Handlers.Handle(XT.ReportPlayer)
 @Handlers.Throttle(5)
@@ -40,17 +62,17 @@ def handleReportPlayer(self, data):
     self.session.add(report)
     self.session.commit()
 
-def cheatBan(self, targetPlayer, banDuration=72, comment=""):
+def cheatBan(self, targetPlayer, banDuration=72, comment=None, moderatorId=None):
     if targetPlayer in self.server.players:
         target = self.server.players[targetPlayer]
         if target.user.Moderator == 0:
             numberOfCheatingBans = self.session.query(Ban).\
-                filter(Ban.PenguinID == targetPlayer).filter(Ban.Reason == 1).count()
+                filter(Ban.PenguinID == targetPlayer).filter(Ban.Reason == 4).count()
 
             numberOfBans = self.session.query(Ban).\
                 filter(Ban.PenguinID == targetPlayer).count()
 
-            if numberOfCheatingBans >= 1 or numberOfBans >= 3:
+            if numberOfCheatingBans >= 1 or numberOfBans >= 3 or banDuration == 0:
                 banDuration = 0
                 target.user.Permaban = True
 
@@ -58,7 +80,7 @@ def cheatBan(self, targetPlayer, banDuration=72, comment=""):
             dateExpires = dateIssued + timedelta(hours=banDuration)
 
             ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
-                    ModeratorID=None, Reason=1, Comment=comment)
+                    ModeratorID=moderatorId, Reason=4, Comment=comment)
             self.session.add(ban)
 
             target.sendXt("ban", "611", targetPlayer, banDuration)
@@ -77,22 +99,22 @@ def languageWarn(self, targetPlayer):
             target.session.add(warn)
             target.session.commit()
 
-            target.sendXt("moderatormessage", "2", targetPlayer)
+            target.sendXt("moderatormessage", 2)
 
-def languageBan(self, targetPlayer, banDuration=24, comment="Bad language"):
+def languageBan(self, targetPlayer, banDuration=24, comment=None, moderatorId=None):
     if targetPlayer in self.server.players:
         target = self.server.players[targetPlayer]
         if target.user.Moderator == 0:
             numberOfActiveLanguageWarns = target.session.query(Warnings).\
                 filter(Warnings.PenguinID == targetPlayer).filter(Warnings.Type == 1).filter(Warnings.Expires >= datetime.now()).count()
 
-            if numberOfActiveLanguageWarns == 0:
+            if numberOfActiveLanguageWarns == 0 and moderatorId is None:
                 return languageWarn(self, targetPlayer)
 
             numberOfBans = target.session.query(Ban).\
                 filter(Ban.PenguinID == targetPlayer).count()
 
-            if numberOfBans >= 3:
+            if numberOfBans >= 3 or banDuration == 0:
                 banDuration = 0
                 target.user.Permaban = True
 
@@ -100,38 +122,57 @@ def languageBan(self, targetPlayer, banDuration=24, comment="Bad language"):
             dateExpires = dateIssued + timedelta(hours=banDuration)
 
             ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
-                      ModeratorID=None, Reason=3, Comment=comment)
+                      ModeratorID=moderatorId, Reason=1, Comment=comment)
             target.session.add(ban)
 
             target.sendXt("ban", "610", None, banDuration, targetPlayer)
+            target.transport.loseConnection()
+
+def personalInfoBan(self, targetPlayer, banDuration=24, comment=None, moderatorId=None):
+    if targetPlayer in self.server.players:
+        target = self.server.players[targetPlayer]
+        if target.user.Moderator == 0:
+            numberOfBans = target.session.query(Ban).\
+                filter(Ban.PenguinID == targetPlayer).count()
+
+            if numberOfBans >= 3 or banDuration == 0:
+                banDuration = 0
+                target.user.Permaban = True
+
+            dateIssued = datetime.now()
+            dateExpires = dateIssued + timedelta(hours=banDuration)
+
+            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                      ModeratorID=moderatorId, Reason=3, Comment=comment)
+            target.session.add(ban)
+
+            target.sendXt("ban", "612", 7, banDuration, targetPlayer)
+            target.transport.loseConnection()
+
+def bullyingBan(self, targetPlayer, banDuration=24, comment=None, moderatorId=None):
+    if targetPlayer in self.server.players:
+        target = self.server.players[targetPlayer]
+        if target.user.Moderator == 0:
+            numberOfBans = target.session.query(Ban).\
+                filter(Ban.PenguinID == targetPlayer).count()
+
+            if numberOfBans >= 3 or banDuration == 0:
+                banDuration = 0
+                target.user.Permaban = True
+
+            dateIssued = datetime.now()
+            dateExpires = dateIssued + timedelta(hours=banDuration)
+
+            ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
+                      ModeratorID=moderatorId, Reason=2, Comment=comment)
+            target.session.add(ban)
+
+            target.sendXt("ban", "612", 6, banDuration, targetPlayer)
             target.transport.loseConnection()
 
 def moderatorKick(self, targetPlayer):
     if targetPlayer in self.server.players:
         target = self.server.players[targetPlayer]
         if target.user.Moderator == 0:
-            target.sendXt("moderatormessage", "3", targetPlayer)
+            target.sendXt("moderatormessage", 3)
             target.transport.loseConnection()
-
-def moderatorBan(self, targetPlayer, banDuration=24, comment=""):
-    target = self.session.query(Penguin).\
-        filter_by(ID=targetPlayer).first()
-
-    if target.Moderator == 0:
-        numberOfBans = self.session.query(Ban).\
-            filter(Ban.PenguinID == targetPlayer).count()
-
-        dateIssued = datetime.now()
-        dateExpires = dateIssued + timedelta(hours=banDuration)
-
-        if numberOfBans >= 3 or banDuration == 0:
-            target.Permaban = True
-            banDuration = 0
-
-        ban = Ban(PenguinID=targetPlayer, Issued=dateIssued, Expires=dateExpires,
-                  ModeratorID=self.user.ID, Reason=2, Comment=comment)
-        self.session.add(ban)
-
-        if targetPlayer in self.server.players:
-            self.server.players[targetPlayer].sendXt("ban", "612", None, banDuration, targetPlayer)
-            self.server.players[targetPlayer].transport.loseConnection()

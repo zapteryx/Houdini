@@ -517,8 +517,8 @@ class XT:
     }
 
     BanPlayer = {
-        "Handler": "o#b",
-        "Data": [XTData("PlayerId", int), XTData("Message", str)]
+        "Handler": "o#ban",
+        "Data": [XTData("PlayerId", int), XTData("Type", int), XTData("Reason", int), XTData("Duration", int), XTData("Phrase", str), XTData("Comment", str)]
     }
 
     MutePlayer = {
@@ -534,6 +534,11 @@ class XT:
     ReportPlayer = {
         "Handler": "m#r",
         "Data": [VariableXTData("Report")]
+    }
+
+    InitBan = {
+        "Handler": "o#initban",
+        "Data": [XTData("PlayerId", int), XTData("Phrase", str)]
     }
 
     GetTablePopulation = {
