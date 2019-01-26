@@ -176,3 +176,9 @@ def moderatorKick(self, targetPlayer):
         if target.user.Moderator == 0:
             target.sendXt("moderatormessage", 3)
             target.transport.loseConnection()
+
+def iglooCleared(self, targetPlayer):
+    if targetPlayer in self.server.players:
+        target = self.server.players[targetPlayer]
+        if target.user.Moderator == 0:
+            target.sendXt("moderatormessage", 1)
