@@ -120,7 +120,7 @@ def handleSendLineMessage(self, data):
 @Handlers.Handle(XT.SendMascotMessage)
 @Handlers.Throttle()
 def handleSendMascotMessage(self, data):
-    if self.user.MascotStamp:
+    if self.user.Moderator == 3:
         self.room.sendXt("sma", self.user.ID, data.Id)
 
 @Handlers.Handle(XT.GetLatestRevision)
