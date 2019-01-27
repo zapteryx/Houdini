@@ -20,7 +20,7 @@ from Houdini.Crumbs import retrieveItemCollection, retrieveRoomCollection, \
     retrieveFurnitureCollection, retrieveFloorCollection, retrieveIglooCollection, \
     retrievePinCollection, retrieveStampsCollection, retrieveCardCollection, \
     retrieveDanceCollection, retrieveLocationCollection, retrieveCareItemCollection, \
-    retrieveMascotCollection
+    retrieveMascotCollection, retrievePuffleCollection
 from Houdini.Events import Events
 from Houdini.Events.HandlerFileEvent import HandlerFileEventHandler
 from Houdini.Events.PluginFileEvent import PluginFileEventHandler
@@ -121,6 +121,7 @@ class HoudiniFactory(Factory):
             self.locations = retrieveLocationCollection()
             self.careItems = retrieveCareItemCollection()
             self.mascots = retrieveMascotCollection()
+            self.puffles = retrievePuffleCollection()
 
             self.availableClothing = self.config["AvailableItems"]["Clothing"]
             self.availableFurniture = self.config["AvailableItems"]["Furniture"]

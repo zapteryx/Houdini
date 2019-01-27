@@ -1,6 +1,9 @@
 from marshmallow import Schema, fields, post_load
 from Houdini.Crumbs import SchemaObject, SchemaObjectCollection
 
+class Puffle(SchemaObject):
+    pass
+
 class CareItem(SchemaObject):
     pass
 
@@ -16,6 +19,15 @@ class CareItemEffectSchema(Schema):
     @post_load
     def make_effect(self, data):
         return CareItemEffect(**data)
+
+class PuffleSchema(Schema):
+    Id = fields.Integer(load_from="puffle_id")
+    ParentId = fields.Integer(load_from="parent_puffle_id")
+    Member = fields.Boolean(load_from="is_member_only")
+
+    @post_load
+    def make_item(self, data):
+        return Puffle(**data)
 
 class CareItemSchema(Schema):
     Id = fields.Integer(load_from="puffle_item_id")
@@ -56,3 +68,11 @@ class CareItemCollection(SchemaObjectCollection):
 
     def getItem(self, careItemId):
         return self.schemaObjects[careItemId]
+
+class PuffleCollection(SchemaObjectCollection):
+
+    def getPuffle(self, puffleId):
+        return self.schemaObjects[puffleId]
+
+    def getParentId(self, puffleId):
+        return self.schemaObjects[puffleId].ParentId

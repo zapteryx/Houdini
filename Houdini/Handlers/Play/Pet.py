@@ -62,9 +62,9 @@ def handleGetMyPlayerPuffles(self, data):
     self.sendXt("pgu", *playerPuffles)
 
 def handleAddInitialCareItems(self, data):
-    playerPuffles = [puffle.Type for puffle in self.puffles.values()]
+    playerPuffles = [puffle.Type for puffle in self.puffles.values() if puffle.Subtype == 0]
 
-    if not data.SubtypeId:
+    if not data.SubtypeId or data.SubtypeId == 0:
         if data.TypeId == 0 and data.TypeId not in playerPuffles:
             self.addCareItem(27, 1, sendXt=False)
         elif data.TypeId == 1 and data.TypeId not in playerPuffles:

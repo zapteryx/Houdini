@@ -218,8 +218,16 @@ def handleRedeemSendPuffle(self, data):
     if data.Name is None or data.ID is None:
         return self.transport.loseConnection()
 
-    if data.ID not in range(0,10):
+    if data.ID not in self.server.puffles:
         return self.transport.loseConnection()
+
+    typeId = self.server.puffles.getParentId(data.ID)
+    if typeId == data.ID:
+        data.TypeId = data.ID
+        data.SubtypeId = 0
+    else:
+        data.TypeId = typeId
+        data.SubtypeId = data.ID
 
     if not 16 > len(data.Name) >= 3:
         self.sendXt("rsp", 0)
@@ -227,12 +235,10 @@ def handleRedeemSendPuffle(self, data):
     if len(self.puffles) >= 75 and self.user.Moderator == 0:
         return self.sendError(440)
 
-    data.TypeId = data.ID
-    data.SubtypeId = None
     handleAddInitialCareItems(self, data)
 
-    puffle = Puffle(PenguinID=self.user.ID, Name=data.Name, Type=data.ID,
-                    Subtype=0)
+    puffle = Puffle(PenguinID=self.user.ID, Name=data.Name, Type=data.TypeId,
+                    Subtype=data.SubtypeId)
     self.session.add(puffle)
 
     self.receiveSystemPostcard(111, data.Name)
