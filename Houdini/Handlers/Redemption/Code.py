@@ -86,7 +86,8 @@ def handleSendCode(self, data):
             self.addIgloo(finalReward, sendXt=False)
             awards.append("g"+str(finalReward))
 
-        self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
+        if code.SingleUse != -1:
+            self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
         self.session.commit()
 
         return self.sendXt("rsc", "INNOCENT", ",".join(map(str, awards)), redeemed, len(innocentItems))
@@ -130,7 +131,8 @@ def handleSendCode(self, data):
                 self.addCareItem(award.Award, sendXt=False)
                 items.append("pi" + str(award.Award))
 
-    self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
+    if code.SingleUse != -1:
+        self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
 
     self.user.Coins += code.Coins
     coins = "" if code.Coins == 0 else code.Coins
@@ -165,7 +167,8 @@ def handleSendGoldenChoice(self, data):
         self.sendXt("rsgc", ",".join(map(str, cardIds[:4])) + "|" + ",".join(map(str, cardIds[-2:])))
     self.addCards(*cardIds)
 
-    self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
+    if code.SingleUse != -1:
+        self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
 
 @Handlers.Handle(XT.SendCart)
 @Handlers.Throttle(2)
@@ -202,7 +205,8 @@ def handleSendCart(self, data):
 
     coins += code.Coins
 
-    self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
+    if code.SingleUse != -1:
+        self.session.add(PenguinRedemption(PenguinID=self.user.ID, CodeID=code.ID))
     self.session.commit()
 
     coins = "" if coins == 0 else coins
