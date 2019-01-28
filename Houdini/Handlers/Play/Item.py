@@ -69,6 +69,8 @@ def getPinString(self, penguinId):
     else:
         pinsArray = [getString(itemId) for itemId, in self.session.query(Inventory.ItemID)
             .filter_by(PenguinID=penguinId) if itemId in self.server.pins]
+
+    pinsArray.sort(key=lambda x: x.split("|")[1])
     return "%".join(pinsArray)
 
 
