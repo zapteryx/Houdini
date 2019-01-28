@@ -65,10 +65,10 @@ def getPinString(self, penguinId):
 
     if penguinId in self.server.players:
         pinsArray = [getString(itemId) for itemId in self.server.players[penguinId].inventory
-                     if self.server.items.isItemPin(itemId)]
+                     if itemId in self.server.pins]
     else:
         pinsArray = [getString(itemId) for itemId, in self.session.query(Inventory.ItemID)
-            .filter_by(PenguinID=penguinId) if self.server.items.isItemPin(itemId)]
+            .filter_by(PenguinID=penguinId) if itemId in self.server.pins]
     return "%".join(pinsArray)
 
 
