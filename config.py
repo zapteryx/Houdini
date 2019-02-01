@@ -7,6 +7,10 @@ config = {
 		"Name": "Houdini",
 		"Driver": "PyMySQL" if sys.platform == "win32" else "MySQLdb"
 	},
+	"Redis": {
+		"Address": "127.0.0.1",
+		"Port": 6379
+	},
 	"Servers": {
 		"Login": {
 			"Address": "127.0.0.1",
