@@ -46,6 +46,8 @@ class HoudiniFactory(Factory):
 
         self.serverName = kwargs["server"]
         self.server = self.config["Servers"][self.serverName]
+        if "Id" in self.server:
+            self.serverId = self.server["Id"]
 
         # Set up logging
         generalLogDirectory = os.path.dirname(self.server["Logging"]["General"])

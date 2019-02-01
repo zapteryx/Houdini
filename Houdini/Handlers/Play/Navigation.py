@@ -97,7 +97,7 @@ def handleJoinWorld(self, data):
     else:
         for buddyId, buddyNickname in self.buddies.items():
             if buddyId in self.server.players and self.user.Moderator != 2:
-                self.server.players[buddyId].sendXt("bon", self.user.ID)
+                self.server.players[buddyId].sendXt("bon", self.user.ID, self.user.ID, self.server.serverId, 100)
         for characterId in self.characterBuddies:
             if characterId in self.server.players:
                 self.sendXt("cron", characterId)
