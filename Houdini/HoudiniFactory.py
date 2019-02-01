@@ -86,7 +86,8 @@ class HoudiniFactory(Factory):
         self.sessionValidator = task.LoopingCall(self.validateSession)
         self.sessionValidator.start(timeoutInSeconds - 5)
 
-        self.redis = redis.StrictRedis()
+        self.redis = redis.StrictRedis(host=self.config["Redis"]["Address"],
+                                       port=self.config["Redis"]["Port"])
         self.redis.delete("%s.players" % self.serverName)
         self.redis.delete("%s.population" % self.serverName)
 
