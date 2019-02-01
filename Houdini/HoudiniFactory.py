@@ -76,7 +76,8 @@ class HoudiniFactory(Factory):
         self.databaseEngine = wrap_engine(reactor, create_engine(engineString, pool_recycle=3600, pool_pre_ping=True,
                                                                  pool_size=50, max_overflow=20))
 
-        self.redis = redis.StrictRedis()
+        self.redis = redis.StrictRedis(host=self.config["Redis"]["Address"],
+                                       port=self.config["Redis"]["Port"])
         self.redis.delete("%s.players" % self.serverName)
         self.redis.delete("%s.population" % self.serverName)
 
