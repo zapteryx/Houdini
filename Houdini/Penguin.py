@@ -218,24 +218,24 @@ class Penguin(Spheniscidae):
         if hasattr(self, "room") and self.room is not None:
             self.room.remove(self)
 
-            if self.user.ID in self.server.mascots:
-                for playerId in self.server.players.keys():
-                    player = self.server.players[playerId]
-                    if self.user.ID in player.characterBuddies:
-                        player.sendXt("crof", self.user.ID)
-            else:
-                for buddyId in self.buddies.keys():
-                    if buddyId in self.server.players and self.user.Moderator != 2:
-                        self.server.players[buddyId].sendXt("bof", self.user.ID)
+        if self.user.ID in self.server.mascots:
+            for playerId in self.server.players.keys():
+                player = self.server.players[playerId]
+                if self.user.ID in player.characterBuddies:
+                    player.sendXt("crof", self.user.ID)
+        else:
+            for buddyId in self.buddies.keys():
+                if buddyId in self.server.players and self.user.Moderator != 2:
+                    self.server.players[buddyId].sendXt("bof", self.user.ID)
 
-            loginUnix = time.mktime(self.login.Date.timetuple())
-            minutesPlayed = int(time.time() - loginUnix) / 60
-            self.user.MinutesPlayed += minutesPlayed
-            self.user.OnlineStatus = None
-            self.session.add(self.login)
+        loginUnix = time.mktime(self.login.Date.timetuple())
+        minutesPlayed = int(time.time() - loginUnix) / 60
+        self.user.MinutesPlayed += minutesPlayed
+        self.user.OnlineStatus = None
+        self.session.add(self.login)
 
-            self.server.redis.srem("%s.players" % self.server.serverName, self.user.ID)
-            self.server.redis.decr("%s.population" % self.server.serverName)
+        self.server.redis.srem("%s.players" % self.server.serverName, self.user.ID)
+        self.server.redis.decr("%s.population" % self.server.serverName)
 
         super(Penguin, self).connectionLost(reason)
         # After the data has been committed; to ensure that the data was saved.
