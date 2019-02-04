@@ -1,5 +1,5 @@
 from Houdini.Handlers import Handlers, XML
-from Houdini.Data.Penguin import Penguin, BuddyList, NameApproval
+from Houdini.Data.Penguin import Penguin, NameApproval
 from Houdini.Data.Ban import Ban
 from Houdini.Data.Login import Login
 from Houdini.Data.Membership import Membership
@@ -120,6 +120,7 @@ def handleLogin(self, data):
     self.user = user
     self.user.LoginKey = loginKey
     self.user.ConfirmationHash = Crypto.hash(os.urandom(24))
+    friendsKey = Crypto.hash(os.urandom(24))
 
     self.session.commit()
 
@@ -164,7 +165,6 @@ def handleLogin(self, data):
                 self.session.add(postcard)
                 self.session.commit()
 
-    buddyWorlds = []
     worldPopulations = []
 
     serversConfig = self.server.config["Servers"]
@@ -182,17 +182,6 @@ def handleLogin(self, data):
 
             worldPopulations.append("%s,%s" % (serversConfig[serverName]["Id"], serverPopulation))
 
-            if not len(serverPlayers) > 0:
-                self.logger.debug("Skipping buddy iteration for %s " % serverName)
-                continue
-
-            buddies = self.session.query(BuddyList.BuddyID).filter(BuddyList.PenguinID == self.user.ID) \
-                        .filter(or_(BuddyList.Type == 1,BuddyList.Type == 2))
-            for buddyId, in buddies:
-                if str(buddyId) in serverPlayers:
-                    buddyWorlds.append(serversConfig[serverName]["Id"])
-                    break
-
     rawLoginData = "|".join([str(user.ID), str(user.ID), user.Username,
                              user.LoginKey, str(), languageApproved, languageRejected])
 
@@ -205,6 +194,6 @@ def handleLogin(self, data):
             return self.sendXt("loginMustActivate", 0, user.ConfirmationHash, rawLoginData, "email@address.org")
         else:
             remaining = "{}|0|0".format(hoursLeft)
-            return self.sendXt("l", rawLoginData, user.ConfirmationHash, "friendsKey", "|".join(worldPopulations), "email@address.org", remaining)
+            return self.sendXt("l", rawLoginData, user.ConfirmationHash, friendsKey, "|".join(worldPopulations), "email@address.org", remaining)
     else:
-        self.sendXt("l", rawLoginData, user.ConfirmationHash, "friendsKey", "|".join(worldPopulations), "email@address.org")
+        self.sendXt("l", rawLoginData, user.ConfirmationHash, friendsKey, "|".join(worldPopulations), "email@address.org")
