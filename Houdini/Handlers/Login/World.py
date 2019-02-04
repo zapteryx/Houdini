@@ -85,6 +85,7 @@ def handleLogin(self, data):
 
     self.session.add(user)
     self.user = user
+    self.user.OnlineStatus = self.server.serverId
 
     ipAddr = self.transport.getPeer().host
 

@@ -170,6 +170,7 @@ CREATE TABLE `penguin` (
   `Password` char(255) NOT NULL COMMENT 'Password hash',
   `LoginKey` char(255) DEFAULT '',
   `ConfirmationHash` char(255) DEFAULT NULL,
+  `OnlineStatus` smallint(5) UNSIGNED NULL DEFAULT NULL COMMENT 'Which server the user is currently on',
   `Email` varchar(255) NOT NULL COMMENT 'User email address',
   `RegistrationDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `Active` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Email activated',

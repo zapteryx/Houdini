@@ -231,6 +231,7 @@ class Penguin(Spheniscidae):
             loginUnix = time.mktime(self.login.Date.timetuple())
             minutesPlayed = int(time.time() - loginUnix) / 60
             self.user.MinutesPlayed += minutesPlayed
+            self.user.OnlineStatus = None
             self.session.add(self.login)
 
             self.server.redis.srem("%s.players" % self.server.serverName, self.user.ID)

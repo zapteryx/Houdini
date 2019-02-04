@@ -15,6 +15,7 @@ class Penguin(Base):
     Password = Column(String(255), nullable=False)
     LoginKey = Column(String(255), server_default=text("''"))
     ConfirmationHash = Column(String(255), server_default=text("''"))
+    OnlineStatus = Column(SmallInteger, server_default=text("''"))
     Email = Column(String(255), nullable=False, index=True)
     RegistrationDate = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     Active = Column(SmallInteger, nullable=False, server_default=text("0"))
