@@ -5,7 +5,7 @@ from Houdini.Handlers.Play.Moderation import cheatBan
 from Houdini.Data.Redemption import RedemptionAward, RedemptionCode, PenguinRedemption
 
 def runAntiCheat(self):
-    if self.user.Moderator == 0:
+    if self.user.Moderator == 0 and self.server.antiCheatEnabled:
         self.antiCheatTreasureBookItems = False
         self.antiCheatInnocentItems = False
         self.antiCheatEPFItems = False

@@ -101,6 +101,8 @@ class HoudiniFactory(Factory):
         self.handlers = {}
 
         if self.server["World"]:
+            self.antiCheatEnabled = self.server["AntiCheat"]
+
             self.protocol = Penguin
 
             cache_regions.update({

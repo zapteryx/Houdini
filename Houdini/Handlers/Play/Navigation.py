@@ -46,7 +46,7 @@ def handleJoinWorld(self, data):
     self.server.players[self.user.ID] = self
     self.user.LoginKey = ""
 
-    if self.user.Moderator == 0:
+    if self.user.Moderator == 0 and self.server.antiCheatEnabled:
         if runAntiCheat(self) is True:
             return
 
