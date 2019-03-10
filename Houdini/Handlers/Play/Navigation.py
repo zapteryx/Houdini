@@ -1,4 +1,5 @@
-import time, random
+from datetime import datetime
+import time, random, pytz
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Crumbs.Room import Room
@@ -78,7 +79,9 @@ def handleJoinWorld(self, data):
 
     currentTime = int(time.time())
     penguinStandardTime = currentTime * 1000
-    serverTimeOffset = 8
+    PST = pytz.timezone('America/Vancouver') # Kelowna time
+    dt = datetime.fromtimestamp(currentTime, PST)
+    serverTimeOffset = abs(int(dt.strftime('%z')) / 100)
 
     self.sendXt("lp", self.getPlayerString(), self.user.Coins, self.user.SafeChat, timeLeft,
                 penguinStandardTime, self.age, 0, self.user.MinutesPlayed, self.user.MembershipLeft, serverTimeOffset, 1, 0, 211843)
