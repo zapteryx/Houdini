@@ -30,7 +30,7 @@ def handleLogin(self, data):
     user = self.session.query(Penguin).filter_by(ID=playerId).first()
     membership = self.session.query(Membership).filter_by(PenguinID=playerId).first()
 
-    user.Approval = 1 if languageApproved == "1" else 0
+    user.Approval = languageApproved
 
     user.Member = membership.Status
     user.MembershipDays = membership.CumulativeDays

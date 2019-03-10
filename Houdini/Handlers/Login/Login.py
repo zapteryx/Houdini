@@ -125,25 +125,23 @@ def handleLogin(self, data):
     self.session.commit()
 
     nameApproval = self.session.query(NameApproval).filter(NameApproval.PenguinID == user.ID).first()
-    if nameApproval.en == 1:
-        self.user.Approval = 1
-        languageApproved = "1"
-        languageRejected = "0"
-    elif nameApproval.en == 0:
-        self.user.Approval = 0
-        languageApproved = "0"
-        languageRejected = "0"
-    elif nameApproval.en == -1:
-        self.user.Approval = 0
-        languageApproved = "0"
-        languageRejected = "1"
+
+    langs = [nameApproval.ru, nameApproval.de, nameApproval.es, nameApproval.fr, nameApproval.pt, nameApproval.en]
+    approval = [0 if i < 0 else i for i in langs]
+    rejection = [1 if i < 0 else 0 for i in langs]
+
+    languageApprovedBits = "{}{}0{}{}{}{}".format(*approval)
+    languageRejectedBits = "{}{}0{}{}{}{}".format(*rejection)
+    languageApprovedBitmask = int(languageApprovedBits, 2)
+    languageRejectedBitmask = int(languageRejectedBits, 2)
+
+    self.user.Approval = languageApprovedBitmask
 
     membership = self.session.query(Membership).filter_by(PenguinID=user.ID).first()
     if membership.Status == 1:
         membershipEnd = datetime.strptime(str(membership.End), "%Y-%m-%d %H:%M:%S")
         membershipLeft = membershipEnd - datetime.utcnow()
         if membershipLeft.days < 0:
-            self.logger.debug("none left")
             membership.Status = 0
             membership.CurrentPlan = 0
             membership.Start = None
@@ -183,7 +181,7 @@ def handleLogin(self, data):
             worldPopulations.append("%s,%s" % (serversConfig[serverName]["Id"], serverPopulation))
 
     rawLoginData = "|".join([str(user.ID), str(user.ID), user.Username,
-                             user.LoginKey, str(), languageApproved, languageRejected])
+                             user.LoginKey, str(), str(languageApprovedBitmask), str(languageRejectedBitmask)])
 
     if user.Active == 0:
         regDate = datetime.strptime(str(user.RegistrationDate), "%Y-%m-%d %H:%M:%S")

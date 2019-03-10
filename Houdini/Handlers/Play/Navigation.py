@@ -39,11 +39,6 @@ def handleJoinWorld(self, data):
         self.user.LoginKey = ""
         return self.sendErrorAndDisconnect(101)
 
-    if not self.user.Approval:
-        # Set the player's nickname to their ID if their name isn't approved
-        # This prevents even the player from seeing their own name underneath their ID in-game
-        self.user.Nickname = "P" + str(self.user.ID)
-
     self.server.players[self.user.ID] = self
     self.user.LoginKey = ""
 

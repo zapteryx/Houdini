@@ -21,12 +21,17 @@ def getPlayerString(self, penguinId):
         playerTuple = self.session.query(Penguin.ID, Penguin.Nickname, Penguin.Color, Penguin.Head,
                                          Penguin.Face, Penguin.Neck, Penguin.Body, Penguin.Hand, Penguin.Feet, Penguin.Flag,
                                          Penguin.Photo).filter_by(ID=penguinId).first()
-        approvalTuple = self.session.query(NameApproval.en).filter_by(PenguinID=penguinId).first()
+        nameApproval = self.session.query(NameApproval).filter_by(PenguinID=penguinId).first()
         membershipTuple = self.session.query(Membership.Status, Membership.CumulativeDays).filter_by(PenguinID=penguinId).first()
+
         playerData = "{0}|{1}|nameApproval|{2}|{3}|{4}|{5}|{6}|{7}|{8}|{9}|{10}||||membership|memberDays"
         playerData = playerData.format(*playerTuple)
-        nameApproval = "1" if approvalTuple[0] == 1 else "0"
-        playerData = playerData.replace("nameApproval", nameApproval)
+
+        langs = [nameApproval.ru, nameApproval.de, nameApproval.es, nameApproval.fr, nameApproval.pt, nameApproval.en]
+        approval = [0 if i < 0 else i for i in langs]
+        languageApprovedBitmask = int("{}{}0{}{}{}{}".format(*approval), 2)
+
+        playerData = playerData.replace("nameApproval", str(languageApprovedBitmask))
         playerData = playerData.replace("membership", str(membershipTuple[0]))
         playerData = playerData.replace("memberDays", str(membershipTuple[1]))
 
