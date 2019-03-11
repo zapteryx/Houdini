@@ -8,7 +8,7 @@ from Houdini.Data import retryableTransaction
 @Handlers.Handle(XT.StartMailEngine)
 @Handlers.Throttle(-1)
 def handleStartMailEngine(self, data):
-    if self.user.ID >= 500:
+    if self.user.Moderator != 3:
         lastPaycheck = self.user.LastPaycheck.date()
         if lastPaycheck == 0:
             lastPaycheck = datetime.date.today()
@@ -23,12 +23,20 @@ def handleStartMailEngine(self, data):
                 postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
                                     Details="", SendDate=sendDate, Type=172)
                 self.session.add(postcard)
-                self.user.Coins += 250
+                coins = self.user.Coins + 250
+                if coins > self.user.maxCoins:
+                    self.user.Coins = self.user.maxCoins
+                else:
+                    self.user.Coins = coins
             if self.user.AgentStatus:
                 postcard = Postcard(RecipientID=self.user.ID, SenderID=None,
                                     Details="", SendDate=sendDate, Type=184)
                 self.session.add(postcard)
-                self.user.Coins += 350
+                coins = self.user.Coins + 350
+                if coins > self.user.maxCoins:
+                    self.user.Coins = self.user.maxCoins
+                else:
+                    self.user.Coins = coins
         self.user.LastPaycheck = lastPaycheck
 
     totalMail = self.session.query(Postcard). \
