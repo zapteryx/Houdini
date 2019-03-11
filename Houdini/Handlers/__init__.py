@@ -663,7 +663,7 @@ class XT:
     }
 
     GetCards = {
-        "Handler": "ni#gcd",
+        "Handler": "cd#gcd",
         "Data": []
     }
 

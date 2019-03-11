@@ -29,5 +29,5 @@ def handleGetNinjaLevel(self, data):
 
 @Handlers.Handle(XT.GetCards)
 def handleGetCards(self, data):
-    deckString = "|".join(["{},{}".format(cardId, cardQuantity) for cardId, cardQuantity in self.deck.iteritems()])
+    deckString = "|".join(["{},{},0".format(cardId, cardQuantity) for cardId, cardQuantity in self.deck.iteritems()])
     self.sendXt("gcd", deckString)
