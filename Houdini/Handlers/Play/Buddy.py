@@ -2,7 +2,7 @@ from sqlalchemy import and_, or_
 
 from Houdini.Handlers import Handlers, XT
 from Houdini.Data.Penguin import Penguin, BuddyList
-from Houdini.Handlers.Play.Player import getPlayerInfo
+from Houdini.Handlers.Play.Player import getPlayerInfo, getPlayerSafeName
 from Houdini.Handlers.Play.Moderation import cheatBan
 from Houdini.Handlers.Play.Igloo import getActiveIgloo
 
@@ -20,6 +20,7 @@ def handleGetPendingRequests(self, data):
 
     if len(self.requests):
         for buddyId, buddyNickname in self.requests.items():
+            buddyNickname = getPlayerSafeName(self, buddyId)
             pendingRequests.append("{}|{}".format(buddyId, buddyNickname))
 
         self.sendXt("pr", *pendingRequests)
@@ -30,6 +31,7 @@ def handleGetBuddies(self, data):
 
     if len(self.buddies) > 0:
         for buddyId, buddyNickname in self.buddies.items():
+            buddyNickname = getPlayerSafeName(self, buddyId)
             status = "online" if buddyId in self.server.players and self.server.players[buddyId].user.Moderator != 2 else "offline"
             playerBuddies.append("{}|{}|{}|{}".format(buddyId, buddyId, buddyNickname, status))
 
@@ -90,8 +92,8 @@ def handleBuddyRequest(self, data):
         if wantedBuddyId in self.server.players:
             player = self.server.players[wantedBuddyId]
             if player.user.Active:
-                player.requests[self.user.ID] = self.user.Nickname
-                player.sendXt("pr", "{}|{}".format(self.user.ID, self.user.Nickname))
+                player.requests[self.user.ID] = self.user.SafeName
+                player.sendXt("pr", "{}|{}".format(self.user.ID, self.user.SafeName))
 
 @Handlers.Handle(XT.CharacterRequest)
 def handleCharacterRequest(self, data):
@@ -142,7 +144,7 @@ def handleBuddyAccept(self, data):
         self.session.add(accept)
 
     del self.requests[data.Id]
-    data.Nickname = getPlayerInfo(self, data.Id).split("|")[0]
+    data.Nickname = getPlayerSafeName(self, data.Id)
     self.buddies[data.Id] = data.Nickname
 
     self.session.query(BuddyList).filter(and_(BuddyList.PenguinID == self.user.ID,BuddyList.BuddyID == data.Id,BuddyList.Type == 0)).update({"Type": 1})
@@ -156,8 +158,8 @@ def handleBuddyAccept(self, data):
 
     if data.Id in self.server.players:
         player = self.server.players[data.Id]
-        player.sendXt("ba", "{}|{}|{}|online".format(self.user.ID, self.user.ID, self.user.Nickname))
-        player.buddies[self.user.ID] = self.user.Nickname
+        player.sendXt("ba", "{}|{}|{}|online".format(self.user.ID, self.user.ID, self.user.SafeName))
+        player.buddies[self.user.ID] = self.user.SafeName
         handleRefreshPlayerFriendInfo(player, data)
 
 @Handlers.Handle(XT.BuddyReject)

@@ -28,8 +28,8 @@ class MatchMaking(object):
             matchSize = max(2, maxPlayers if matchCount == 0 else matchCount)
 
             for matchedPenguins in izip(*[iter(penguins)] * matchSize):
-                nicknames = "%".join([penguin.user.Nickname + "|" + str(penguin.user.Color) if maxPlayers > 2
-                                      else penguin.user.Nickname for penguin in matchedPenguins])
+                nicknames = "%".join([penguin.user.SafeName + "|" + str(penguin.user.Color) if maxPlayers > 2
+                                      else penguin.user.SafeName for penguin in matchedPenguins])
 
                 for penguin in matchedPenguins:
                     penguin.tick -= 1
@@ -67,7 +67,7 @@ class MatchMaking(object):
 def handleJoinMatchMaking(self, data):
     if self.room.Id in MatchMakers:
         self.server.matchMaker.add(self)
-        self.sendXt("jmm", self.user.Nickname)
+        self.sendXt("jmm", self.user.SafeName)
 
 @Handlers.Handle(XT.LeaveMatchMaking)
 def handleLeaveMatchMaking(self, data):
@@ -78,7 +78,7 @@ def handleJoinSensei(self, data):
     if self.room.Id in MatchMakers:
         cardGame, senseiGame, maxPlayers, sortBy, delay = MatchMakers[self.room.Id]
         if maxPlayers > 2:
-            self.sendXt("scard", 0, 0, 1, 0, self.user.Nickname + "|" + str(self.user.Color))
+            self.sendXt("scard", 0, 0, 1, 0, self.user.SafeName + "|" + str(self.user.Color))
             reactor.callLater(delay, senseiGame, self)
         else:
             senseiGame(self)

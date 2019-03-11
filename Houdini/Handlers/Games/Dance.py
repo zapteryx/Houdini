@@ -54,7 +54,7 @@ class DanceFloor(object):
     def getString(self):
         string = []
         for penguin in self.penguins:
-            string.append("|".join(["-1", penguin.user.Nickname, self.scores[penguin]]))
+            string.append("|".join(["-1", penguin.user.SafeName, self.scores[penguin]]))
         return ",".join(string)
 
     def getTimeToNextSong(self):

@@ -18,8 +18,8 @@ class SledRace(object):
 
         penguins = []
         for penguin in self.penguins:
-            penguins.append("|".join([penguin.user.Nickname, str(penguin.user.Color),
-                                      str(penguin.user.Hand), penguin.user.Nickname]))
+            penguins.append("|".join([penguin.user.SafeName, str(penguin.user.Color),
+                                      str(penguin.user.Hand), penguin.user.SafeName]))
         self.sendXt("uz", self.seats, "%".join(penguins))
 
     def sendXt(self, *data):
@@ -31,8 +31,8 @@ class SledRace(object):
 def handleJoinGame(self, data):
     penguins = []
     for penguin in self.waddle.penguins:
-        penguins.append("|".join([penguin.user.Nickname, str(penguin.user.Color),
-                                  str(penguin.user.Hand), penguin.user.Nickname]))
+        penguins.append("|".join([penguin.user.SafeName, str(penguin.user.Color),
+                                  str(penguin.user.Hand), penguin.user.SafeName]))
     self.sendXt("uz", self.waddle.seats, "%".join(penguins))
 
 @Handlers.Handle(XT.SendMove)

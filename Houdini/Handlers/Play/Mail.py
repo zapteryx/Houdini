@@ -1,5 +1,6 @@
 import time, random, datetime
 from Houdini.Handlers import Handlers, XT
+from Houdini.Handlers.Play.Player import getPlayerSafeName
 from Houdini.Data.Postcard import Postcard
 from Houdini.Data.Penguin import Penguin, IgnoreList
 from Houdini.Data import retryableTransaction
@@ -43,12 +44,13 @@ def handleStartMailEngine(self, data):
 @Handlers.Throttle(-1)
 @retryableTransaction()
 def handleGetMail(self, data):
-    mailbox = self.session.query(Postcard, Penguin.Nickname) \
+    mailbox = self.session.query(Postcard, Penguin.ID) \
         .join(Penguin, Penguin.ID == Postcard.SenderID, isouter=True) \
         .filter(Postcard.RecipientID == self.user.ID)\
         .order_by(Postcard.SendDate.desc())
     postcardArray = []
-    for postcard, penguinName in mailbox:
+    for postcard, penguinID in mailbox:
+        penguinName = getPlayerSafeName(self, penguinID)
         penguinName, senderId = ("sys", 0) if postcard.SenderID is None else (penguinName, postcard.SenderID)
         unixSendDate = int(time.mktime(postcard.SendDate.timetuple()))
         postcardArray.append("|".join([penguinName, str(senderId),
@@ -90,7 +92,7 @@ def handleSendMail(self, data):
     self.sendXt("ms", self.user.Coins, 1)
     if data.RecipientId in self.server.players:
         recipientObject = self.server.players[data.RecipientId]
-        recipientObject.sendXt("mr", self.user.Nickname, self.user.ID, data.PostcardId,
+        recipientObject.sendXt("mr", self.user.SafeName, self.user.ID, data.PostcardId,
                                "", currentTimestamp, postcard.ID)
     self.logger.info("%d sent %d a postcard (%d).", self.user.ID, data.RecipientId,
                      data.PostcardId)

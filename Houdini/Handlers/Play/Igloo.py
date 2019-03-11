@@ -370,7 +370,7 @@ def handleUpdateIglooSlotSummary(self, data):
                         self.user.ID in self.server.openIgloos:
                     del self.server.openIgloos[self.user.ID]
                 else:
-                    self.server.openIgloos[self.user.ID] = self.user.Nickname
+                    self.server.openIgloos[self.user.ID] = self.user.SafeName
 
             Invalidate(getAllIglooLayouts, 'houdini', 'igloo_layouts', self.user.ID)
 

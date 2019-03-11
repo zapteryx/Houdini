@@ -153,7 +153,7 @@ class CardJitsu(object):
         penguin.waddle = None
 
         for player in self.penguins:
-            player.sendXt("cz", penguin.user.Nickname)
+            player.sendXt("cz", penguin.user.SafeName)
         self.reset()
 
     def reset(self):
@@ -242,14 +242,14 @@ def sendStampsEarned(penguin, stampGroupId):
 def handleGetGame(self, data):
     seatId = self.waddle.getSeatId(self)
     self.sendXt("gz", self.waddle.seats, len(self.waddle.penguins))
-    self.sendXt("jz", seatId, self.user.Nickname, self.user.Color, self.user.NinjaRank)
+    self.sendXt("jz", seatId, self.user.SafeName, self.user.Color, self.user.NinjaRank)
 
 @Handlers.Handle(XT.UpdateGame)
 @WaddleHandler(CardJitsu, CardMat)
 def handleUpdateGame(self, data):
     players = []
     for seatId, player in enumerate(self.waddle.penguins):
-        players.append("|".join(map(str, [seatId, player.user.Nickname, player.user.Color, player.user.NinjaRank])))
+        players.append("|".join(map(str, [seatId, player.user.SafeName, player.user.Color, player.user.NinjaRank])))
 
     self.sendXt("uz", "%".join(players))
     self.sendXt("sz")
@@ -258,12 +258,12 @@ def handleUpdateGame(self, data):
 @WaddleHandler(CardSensei)
 def handleGetGame(self, data):
     self.sendXt("gz", 2, 2)
-    self.sendXt("jz", 1, self.user.Nickname, self.user.Color, self.user.NinjaRank)
+    self.sendXt("jz", 1, self.user.SafeName, self.user.Color, self.user.NinjaRank)
 
 @Handlers.Handle(XT.UpdateGame)
 @WaddleHandler(CardSensei)
 def handleUpdateGame(self, data):
-    players = ["0|Sensei|14|10", "|".join(map(str, [1, self.user.Nickname, self.user.Color, self.user.NinjaRank]))]
+    players = ["0|Sensei|14|10", "|".join(map(str, [1, self.user.SafeName, self.user.Color, self.user.NinjaRank]))]
     self.sendXt("uz", "%".join(players))
     self.sendXt("sz")
 

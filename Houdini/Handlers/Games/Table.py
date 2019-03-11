@@ -45,11 +45,11 @@ class Table(object):
             return str()
         elif len(self.penguins) == 1:
             playerOne, = self.penguins
-            return "%".join([playerOne.user.Nickname, str(), self.game.getString()])
+            return "%".join([playerOne.user.SafeName, str(), self.game.getString()])
         playerOne, playerTwo = self.penguins[:2]
         if len(self.penguins) == 2:
-            return "%".join([playerOne.user.Nickname, playerTwo.user.Nickname, self.game.getString()])
-        return "%".join([playerOne.user.Nickname, playerTwo.user.Nickname, self.game.getString(), "1"])
+            return "%".join([playerOne.user.SafeName, playerTwo.user.SafeName, self.game.getString()])
+        return "%".join([playerOne.user.SafeName, playerTwo.user.SafeName, self.game.getString(), "1"])
 
     def sendXt(self, *data):
         for penguin in self.penguins:
@@ -70,7 +70,7 @@ def leaveTable(self):
         isPlayer = seatId < 2
         gameReady = len(self.table.penguins) > 1
         if isPlayer and gameReady:
-            self.table.sendXt("cz", self.user.Nickname)
+            self.table.sendXt("cz", self.user.SafeName)
             self.table.reset()
         else:
             self.table.remove(self)
@@ -94,7 +94,7 @@ def handleJoinTable(self, data):
             table.add(self)
     except KeyError:
         self.logger.warn("{} tried to join a table which doesn't exist."
-                         .format(self.user.Nickname))
+                         .format(self.user.Username))
 
 @Handlers.Handle(XT.LeaveTable)
 def handleLeaveTable(self, data):

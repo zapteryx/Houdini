@@ -184,7 +184,7 @@ class Penguin(Spheniscidae):
     def getPlayerString(self):
         playerArray = [
             self.user.ID,
-            self.user.Nickname,
+            self.user.SafeName,
             self.user.Approval,
             self.user.Color,
             self.user.Head,

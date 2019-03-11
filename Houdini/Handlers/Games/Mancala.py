@@ -74,7 +74,7 @@ def handleJoinGame(self, data):
     if not gameFull:
         seatId = self.table.getSeatId(self)
         self.sendXt("jz", seatId)
-        self.table.sendXt("uz", seatId, self.user.Nickname)
+        self.table.sendXt("uz", seatId, self.user.SafeName)
 
         if len(self.table.penguins) == 2:
             self.table.sendXt("sz", 0)

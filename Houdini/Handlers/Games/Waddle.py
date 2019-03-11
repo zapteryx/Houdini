@@ -15,7 +15,7 @@ class Waddle(object):
             seatId = self.penguins.index(None)
             self.penguins[seatId] = penguin
             penguin.sendXt("jw", seatId)
-            self.room.sendXt("uw", self.id, seatId, penguin.user.Nickname)
+            self.room.sendXt("uw", self.id, seatId, penguin.user.SafeName)
 
             penguin.waddle = self
 
@@ -59,7 +59,7 @@ def handleGetWaddlePopulation(self, data):
         waddles = []
         for waddleId in data.Waddles:
             waddle = self.room.waddles[int(waddleId)]
-            penguinNames = ",".join((penguin.user.Nickname if penguin else str() for penguin in waddle.penguins))
+            penguinNames = ",".join((penguin.user.SafeName if penguin else str() for penguin in waddle.penguins))
             waddles.append(waddleId + "|" + penguinNames)
         self.sendXt("gw", "%".join(waddles))
     except KeyError:

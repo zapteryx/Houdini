@@ -53,7 +53,7 @@ def handleInitBan(self, data):
                 numberOfBans = self.session.query(Ban).\
                     filter(Ban.PenguinID == targetPlayer).count()
 
-                self.sendXt("initban", targetPlayer, 0, numberOfBans, data.Phrase, target.user.Nickname)
+                self.sendXt("initban", targetPlayer, 0, numberOfBans, data.Phrase, target.user.SafeName)
 
 @Handlers.Handle(XT.ReportPlayer)
 @Handlers.Throttle(5)

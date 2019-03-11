@@ -203,7 +203,7 @@ def handleGetGame(self, data):
     self.sendXt("gz", self.waddle.seats, len(self.waddle.penguins))
     self.sendXt("jz", mySeatId)
 
-    nicknames = ",".join([player.user.Nickname for player in self.waddle.penguins])
+    nicknames = ",".join([player.user.SafeName for player in self.waddle.penguins])
     colors = ",".join([str(player.user.Color) for player in self.waddle.penguins])
     energy = ",".join([str(opponent.energy) for opponent in self.waddle.opponents])
     boardIds = ",".join(map(str, self.waddle.boardIds))

@@ -6,7 +6,7 @@ from Houdini.Crumbs.Room import Room
 from Houdini.Handlers.Play.Buddy import handleRefreshPlayerFriendInfo
 from Houdini.Handlers.Play.Pet import handleGetMyPlayerPuffles
 from Houdini.Handlers.Play.Stampbook import getStampsString
-from Houdini.Data.Penguin import Penguin, BuddyList
+from Houdini.Data.Penguin import Penguin, BuddyList, NameApproval
 from Houdini.Data.Timer import Timer
 from Houdini.Handlers.Play.Timer import updateEggTimer, checkHours
 from Houdini.Handlers.Play.AntiCheat import runAntiCheat
@@ -38,6 +38,19 @@ def handleJoinWorld(self, data):
     if data.LoginKey != self.user.LoginKey:
         self.user.LoginKey = ""
         return self.sendErrorAndDisconnect(101)
+
+    self.user.CurrentLanguage = data.Language
+    nameApproval = self.session.query(NameApproval).filter(getattr(NameApproval, self.user.CurrentLanguage) == 1).filter(NameApproval.PenguinID == self.user.ID).first()
+
+    if nameApproval:
+        nickname = self.session.query(Penguin.Nickname).filter_by(ID=self.user.ID).first()
+        self.user.SafeName = nickname[0]
+    else:
+        self.user.SafeName = "P" + str(self.user.ID)
+
+    # Open the igloo now that we know what the Safe Name is
+    if self.igloo is not None and self.igloo.Locked == 0 and self.user.ID not in self.server.openIgloos:
+        self.server.openIgloos[self.user.ID] = self.user.SafeName
 
     self.server.players[self.user.ID] = self
     self.user.LoginKey = ""
