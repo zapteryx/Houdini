@@ -55,7 +55,10 @@ class Room(SchemaObject):
         giveMascotStamp(player)
 
     def refresh(self, player):
-        player.sendXt("grs", self.Id, self.generateRoomString())
+        if player.user.Moderator == 2:
+            player.sendXt("grs", self.Id, (self.generateRoomString() + player.getPlayerString()))
+        else:
+            player.sendXt("grs", self.Id, self.generateRoomString())
 
     def remove(self, player):
         leaveTable(player)
