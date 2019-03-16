@@ -627,6 +627,11 @@ class XT:
         "Data": [VariableXTData("Null")]
     }
 
+    GameComplete = {
+        "Handler": "zc",
+        "Data": [XTData("Medals", int)]
+    }
+
     LeaveGame = {
         "Handler": "lz",
         "Data": [VariableXTData("Null")]
